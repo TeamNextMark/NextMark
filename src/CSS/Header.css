@@ -1,0 +1,109 @@
+p {
+  padding: 0;
+  margin: 0;
+}
+
+.header {
+  height: 64px;
+  background: linear-gradient(90deg, #25488f, #345fa8);  
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  position: sticky;
+  top: 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  justify-content: space-between;
+  font-family: Verdana;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.appName {
+  font-size: 32px;
+}
+
+.courseName {
+  color: lightgray;
+  font-size: 20px;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.userWrapper {
+  position: relative;
+}
+
+.user {
+  background: transparent;
+  border: transparent;
+  color: #ffffff;
+
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.user:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+.userDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+
+  width: 160px;
+  background: #ffffff;
+  color: #111827;
+
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+
+  overflow: hidden;
+  z-index: 2000;
+}
+
+.dropdownItem {
+  width: 100%;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  text-align: left;
+
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dropdownItem:hover {
+  background: #f3f4f6;
+}
+
+.logout {
+  background: #25488f;
+  border: transparent;
+  color: #ffffff;
+
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.logout:hover {
+  background: rgba(255,255,255,0.15);
+}
+
+
+
+
