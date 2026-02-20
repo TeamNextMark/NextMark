@@ -19,8 +19,14 @@ p {
 
 .headerLeft {
   display: flex;
-  flex-direction: column;
   line-height: 1.1;
+}
+
+.textBlock {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 5px;
 }
 
 .appName {
@@ -104,6 +110,10 @@ p {
   background: rgba(255,255,255,0.15);
 }
 
+.headerLogo {
+  width: 48px;
+  height: 64px;
+}
 
 
 
