@@ -17,6 +17,7 @@ class Base(DeclarativeBase):
 
 # create tables from models on import (development convenience)
 # in production you may prefer Alembic migrations instead
+import backend.models  # noqa: F401
 
 Base.metadata.create_all(bind=engine)
 

@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
 import uuid
 
 from sqlalchemy import (
@@ -10,12 +9,13 @@ from sqlalchemy import (
     Date,
     ForeignKey,
     JSON,
+    Numeric,
     TIMESTAMP,
     func,
 )
 from sqlalchemy.orm import relationship
 
-from database.session import Base
+from backend.database.session import Base
 
 
 # helper UUID default
@@ -121,7 +121,6 @@ class Submission(Base):
     grading_result = relationship("GradingResult", back_populates="submission", uselist=False)
     flags = relationship("Flag", back_populates="submission")
     feedbacks = relationship("Feedback", back_populates="submission")
-    notifications = relationship("Notification", back_populates="submission")
     logs = relationship("SystemLog", back_populates="submission")
 
 
@@ -130,7 +129,7 @@ class GradingResult(Base):
 
     id: str = Column("result_id", String, primary_key=True, default=gen_uuid)
     submission_id: str = Column("submission_id", String, ForeignKey("submission.submission_id"), nullable=False, unique=True)
-    total_points_earned: float = Column("total_points_earned", String, nullable=False)
+    total_points_earned: float = Column("total_points_earned", Numeric(10, 2), nullable=False)
     rubric_scores: dict = Column("rubric_scores", JSON, nullable=False)
     faculty_reviewed: bool = Column("faculty_reviewed", Boolean, nullable=False, default=False)
 
@@ -186,7 +185,6 @@ class Notification(Base):
     created_at = Column("created_at", TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
 
     user = relationship("UsersAccount", back_populates="notifications")
-    submission = relationship("Submission", back_populates="notifications")
     flag = relationship("Flag", back_populates="notifications")
 
 
