@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from auth.hashing import hash_password, verify_password
-from auth.tokens import create_access_token
-from users.schemas import UserCreate, UserLogin, Token
+from backend.auth.hashing import hash_password, verify_password
+from backend.auth.tokens import create_access_token
+from backend.users.schemas import UserCreate, UserLogin, Token
 
 # These will be provided once the database and users modules are implemented
-from database.session import get_db  # dependency that yields a DB session
-from users.crud import get_user_by_email, create_user  # CRUD helpers
+from backend.database.session import get_db  # dependency that yields a DB session
+from backend.users.crud import get_user_by_email, create_user  # CRUD helpers
 
 router = APIRouter(tags=["auth"])
 

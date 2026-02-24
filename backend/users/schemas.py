@@ -18,3 +18,13 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     sub: str | None = None
+
+
+class User(BaseModel):
+    id: str
+    email: EmailStr
+    position: str
+    ferpa_consent: bool
+
+    class Config:
+        orm_mode = True
