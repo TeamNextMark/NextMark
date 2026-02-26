@@ -2,42 +2,62 @@ import "../CSS/Login.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const API_BASE =
+  import.meta?.env?.VITE_API_URL || "http://localhost:5173";
 
-function Login() {
-  const [user, setUser] = useState("");
+function Login({ setUser }) {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const getRoleFromUsername = (name) => {
-    const u = name.trim().toLowerCase();
-
-    if (u === "admin" || u.startsWith("admin:")) return "admin";
-    if (u === "instructor" || u === "prof" || u.startsWith("instructor:")) return "instructor";
-    if (u === "ta" || u.startsWith("ta:")) return "ta";
-    if (u === "student" || u.startsWith("student:")) return "student";
-
-    return "student";
-  };
-
-  const cleanName = (name) => {
-    return name.replace(/^(admin|instructor|ta|student)\s*:/i, "").trim();
-  };
-
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
-    const username = user.trim();
-    if (!username) {
-      alert("Please enter a username");
+    const cleanEmail = email.trim();
+    if (!cleanEmail || !password) {
+      alert("Please enter your email and password.");
       return;
     }
 
-    const role = getRoleFromUsername(username);
-    const displayName = cleanName(username) || "Test User";
+    try {
+      setLoading(true);
 
-    navigate("/home", {
-      state: { user: { name: displayName, role } },
-    });
+      const res = await fetch(`${API_BASE}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: cleanEmail, password }),
+      });
+
+      if (!res.ok) {
+        let detail = "Login failed.";
+        try {
+          const err = await res.json();
+          detail = err?.detail || err?.message || detail;
+        } catch {
+        }
+        throw new Error(detail);
+      }
+
+      const data = await res.json();
+
+      if (!data?.access_token) {
+        throw new Error("No access token returned from server.");
+      }
+
+      localStorage.setItem("accessToken", data.access_token);
+      localStorage.setItem("tokenType", data.token_type || "bearer");
+
+      const userObj = { email: cleanEmail };
+      localStorage.setItem("user", JSON.stringify(userObj));
+      setUser?.(userObj);
+
+      navigate("/home", { replace: true });
+    } catch (err) {
+      alert(err?.message || "Login failed.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -47,22 +67,24 @@ function Login() {
 
         <input
           className="inputBar"
-          type="text"
-          placeholder="Username"
-          value={user}
-          onChange={(e) => setUser(e.target.value)}
+          type="email"
+          placeholder="Email"
+          value={email}
+          autoComplete="username"
+          onChange={(e) => setEmail(e.target.value)}
         />
 
         <input
           className="inputBar"
           type="password"
-          placeholder="Password (ignored for testing)"
+          placeholder="Password"
           value={password}
+          autoComplete="current-password"
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button className="loginButton" type="submit">
-          Login
+        <button className="loginButton" type="submit" disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
         </button>
       </form>
     </div>

@@ -1,25 +1,67 @@
-import { useState } from 'react'
-import { Routes, Route } from 'react-router-dom'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './CSS/App.css'
-import Home from './Pages/homeShell.jsx'
-import AppLayout from './Layouts/AppLayout.jsx'
-import Login from './Pages/login.jsx'
+import { Routes, Route } from "react-router-dom";
+import { useState } from "react";
 
-function App() {
-  const [count, setCount] = useState(0)
+import Header from "./Components/Header";
+import ProtectedRoute from "./Components/protectedRoute";
+
+import Login from "./Pages/Login";
+import AdminHome from "./Pages/adminHome";
+import InstructorHome from "./Pages/instructorHome";
+import TAHome from "./Pages/taHome";
+import StudentHome from "./Pages/studentHome";
+
+export default function App() {
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem("user");
+    return saved ? JSON.parse(saved) : null;
+  });
 
   return (
-    <main className='maincontent'>
-      <Routes>
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<Login />}/>
-          <Route path="/home" element={<Home />}/>
-        </Route>
-      </Routes>
-    </main>
-  )
-}
+    <>
+      <Header user={user} setUser={setUser} />
 
-export default App
+      <Routes>
+        <Route path="/" element={<Login setUser={setUser} />} />
+
+        <Route
+          path="/home/admin"
+          element={
+            <ProtectedRoute user={user} allowedRoles={["admin"]}>
+              <AdminHome user={user} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/home/instructor"
+          element={
+            <ProtectedRoute user={user} allowedRoles={["instructor"]}>
+              <InstructorHome user={user} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/home/ta"
+          element={
+            <ProtectedRoute user={user} allowedRoles={["ta"]}>
+              <TAHome user={user} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/home/student"
+          element={
+            <ProtectedRoute
+              user={user}
+              allowedRoles={["student", "ta", "instructor", "admin"]}
+            >
+              <StudentHome user={user} />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </>
+  );
+}
