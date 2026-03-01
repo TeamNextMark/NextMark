@@ -1,9 +1,11 @@
 CREATE TABLE users_account (
     id_users TEXT PRIMARY KEY,
-    position_users TEXT NOT NULL CHECK (position_users IN ('student', 'faculty', 'admin', 'ta')),
+    position_users TEXT[] NOT NULL,
     email_users TEXT NOT NULL UNIQUE,
     encryptedpassword_users TEXT NOT NULL,
-    ferpa_consent BOOLEAN NOT NULL DEFAULT FALSE
+    ferpa_consent BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT position_users_valid
+	check (position_users <@ ARRAY['student', 'faculty', 'admin', 'ta'])
 );
 
 CREATE TABLE course (
