@@ -1,0 +1,38 @@
+# =============================================================================
+# Local environment/secrets (tracked: .env.example only)
+# =============================================================================
+.env
+.env.*
+!.env.example
+
+# =============================================================================
+# Local docker/compose overrides for machine-specific testing
+# Core compose.yaml is tracked; only local overrides are ignored
+# =============================================================================
+compose.local.yaml
+compose.dev-lowmem.yaml
+
+# =============================================================================
+# Local helper docs/scripts for this machine only
+# Core runner/ and scripts/ dirs ARE tracked; only specific helpers below are ignored
+# =============================================================================
+LOW_MEMORY.md
+scripts/up-lowmem.ps1
+scripts/down-lowmem.ps1
+scripts/resolve-image-digests.ps1
+
+# =============================================================================
+# OS/editor noise
+# =============================================================================
+.DS_Store
+Thumbs.db
+.vscode/
+*.swp
+*.swo
+*~
+
+# Python artifacts (if running backend locally without containers)
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
