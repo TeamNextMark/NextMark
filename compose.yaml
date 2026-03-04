@@ -47,7 +47,6 @@ services:
       OLLAMA_BASE_URL: http://ollama:11434
       LLM_MODEL: qwen3:4b
     volumes:
-      - ./backend:/app/backend
       - submissions-data:/var/lib/nextmark/submissions
     networks:
       - nextmark-net
@@ -63,6 +62,8 @@ services:
         RUNNER_BASE_IMAGE: ${RUNNER_BASE_IMAGE:-python:3.11-slim}
     container_name: nextmark-runner
     restart: unless-stopped
+    mem_limit: 512m
+    cpus: "1.0"
     environment:
       DATABASE_URL: ${DATABASE_URL}
       RUNNER_POLL_INTERVAL_SECONDS: 5

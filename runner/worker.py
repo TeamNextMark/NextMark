@@ -130,17 +130,19 @@ def _run_in_sandbox(job: SandboxJob) -> SandboxExecutionResult:
         container.kill()
         exit_code = 124
 
-    raw_logs = container.logs(stdout=True, stderr=True)
+    stdout_raw, stderr_raw = container.logs(stdout=True, stderr=True, demux=True)
     duration_ms = int((time.monotonic() - started_at) * 1000)
 
-    stdout_text = raw_logs.decode("utf-8", errors="replace")
-    stderr_text = ""
+    stdout_text = (stdout_raw or b"").decode("utf-8", errors="replace")
+    stderr_text = (stderr_raw or b"").decode("utf-8", errors="replace")
 
     try:
         container.remove(force=True)
-    except Exception:
-        pass
+    except Exception as exc:
+        print(f"[runner] warning: failed to remove container: {exc}")
 
+    if len(stdout_text) > 50000:
+        print(f"[runner] warning: stdout truncated at 50000 chars for submission={job.submission_id}")
     return SandboxExecutionResult(
         submission_id=job.submission_id,
         exit_code=exit_code,
