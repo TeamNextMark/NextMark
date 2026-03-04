@@ -15,6 +15,11 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 class Base(DeclarativeBase):
     pass
 
+# create tables from models on import (development convenience)
+# in production you may prefer Alembic migrations instead
+
+Base.metadata.create_all(bind=engine)
+
 
 def get_db():
     db = SessionLocal()

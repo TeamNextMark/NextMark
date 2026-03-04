@@ -1,0 +1,15 @@
+from .models import (
+    UsersAccount,
+    Course,
+    RubricTemplate,
+    AssignmentRubric,
+    Assignment,
+    TestCase,
+    Submission,
+    GradingResult,
+    Flag,
+    Feedback,
+    Notification,
+    SystemLog,
+    AuditHistory,
+)
