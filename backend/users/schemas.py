@@ -40,4 +40,4 @@ class User(BaseModel):
     ferpa_consent: bool
 
     class Config:
-        orm_mode = True
+        from_attributes = True
