@@ -53,6 +53,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      ollama:
+        condition: service_started
 
   runner:
     build:
@@ -115,8 +117,8 @@ services:
       - ./frontend/build:/usr/share/nginx/html:ro
     networks:
       - nextmark-net
-    #depends_on:
-    #  - backend
+    depends_on:
+      - backend
 
 networks:
   nextmark-net:
