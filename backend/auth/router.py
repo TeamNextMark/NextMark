@@ -24,7 +24,7 @@ def signup(payload: UserCreate, db: Session = Depends(get_db)):
         user=AuthUserResponse(
             id=str(user.id),
             email=user.email,
-            roles=[user.position],
+            roles=user.position,
         ),
     )
 
@@ -44,6 +44,6 @@ def login(payload: UserLogin, db: Session = Depends(get_db)):
         user=AuthUserResponse(
             id=str(user.id),
             email=user.email,
-            roles=[user.position],
+            roles=user.position,
         ),
     )
