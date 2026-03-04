@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
 import uuid
 
 from sqlalchemy import (
@@ -9,10 +8,12 @@ from sqlalchemy import (
     Boolean,
     Date,
     ForeignKey,
-    JSON,
+    ARRAY,
+    Numeric,
     TIMESTAMP,
     func,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
 from database.session import Base
@@ -27,7 +28,7 @@ class UsersAccount(Base):
     __tablename__ = "users_account"
 
     id: str = Column("id_users", String, primary_key=True, default=gen_uuid)
-    position: str = Column("position_users", String, nullable=False, default="student")
+    position: list[str] = Column("position_users", ARRAY(String), nullable=False, default=["student"])
     email: str = Column("email_users", String, nullable=False, unique=True)
     hashed_password: str = Column(
         "encryptedpassword_users", String, nullable=False
@@ -61,7 +62,7 @@ class RubricTemplate(Base):
 
     id: str = Column("template_id", String, primary_key=True, default=gen_uuid)
     version: int = Column("version", Integer, nullable=False)
-    line_items: dict = Column("line_items", JSON, nullable=False)
+    line_items: dict = Column("line_items", JSONB, nullable=False)
     total_points: int = Column("total_points", Integer, nullable=False)
 
     assignment_rubrics = relationship("AssignmentRubric", back_populates="template")
@@ -114,14 +115,13 @@ class Submission(Base):
     assignment_id: str = Column("assignment_id", String, ForeignKey("assignment.assignment_id"), nullable=False)
     student_id: str = Column("student_id", String, ForeignKey("users_account.id_users"), nullable=False)
     submitted_at = Column("submitted_at", TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
-    encrypted_file_paths: dict = Column("encrypted_file_paths", JSON, nullable=False)
+    encrypted_file_paths: dict = Column("encrypted_file_paths", JSONB, nullable=False)
 
     assignment = relationship("Assignment", back_populates="submissions")
     student = relationship("UsersAccount", back_populates="submissions")
     grading_result = relationship("GradingResult", back_populates="submission", uselist=False)
     flags = relationship("Flag", back_populates="submission")
     feedbacks = relationship("Feedback", back_populates="submission")
-    notifications = relationship("Notification", back_populates="submission")
     logs = relationship("SystemLog", back_populates="submission")
 
 
@@ -130,8 +130,8 @@ class GradingResult(Base):
 
     id: str = Column("result_id", String, primary_key=True, default=gen_uuid)
     submission_id: str = Column("submission_id", String, ForeignKey("submission.submission_id"), nullable=False, unique=True)
-    total_points_earned: float = Column("total_points_earned", String, nullable=False)
-    rubric_scores: dict = Column("rubric_scores", JSON, nullable=False)
+    total_points_earned: float = Column("total_points_earned", Numeric(10, 2), nullable=False)
+    rubric_scores: dict = Column("rubric_scores", JSONB, nullable=False)
     faculty_reviewed: bool = Column("faculty_reviewed", Boolean, nullable=False, default=False)
 
     submission = relationship("Submission", back_populates="grading_result")
@@ -186,7 +186,6 @@ class Notification(Base):
     created_at = Column("created_at", TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
 
     user = relationship("UsersAccount", back_populates="notifications")
-    submission = relationship("Submission", back_populates="notifications")
     flag = relationship("Flag", back_populates="notifications")
 
 
@@ -198,7 +197,7 @@ class SystemLog(Base):
     user_id: str | None = Column("id_users", String, ForeignKey("users_account.id_users"), nullable=True)
     test_case_id: str | None = Column("test_case_id", String, ForeignKey("test_case.test_case_id"), nullable=True)
     log_type: str = Column("log_type", String, nullable=False)
-    details: dict = Column("details", JSON, nullable=False)
+    details: dict = Column("details", JSONB, nullable=False)
     timestamp = Column("timestamp", TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
 
     submission = relationship("Submission", back_populates="logs")
@@ -213,7 +212,7 @@ class AuditHistory(Base):
     actor_id: str = Column("actor_id", String, ForeignKey("users_account.id_users"), nullable=False)
     entity_type: str = Column("entity_type", String, nullable=False)
     entity_id: str = Column("entity_id", String, nullable=False)
-    state_snapshot: dict = Column("state_snapshot", JSON, nullable=False)
+    state_snapshot: dict = Column("state_snapshot", JSONB, nullable=False)
     timestamp = Column("timestamp", TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
 
     actor = relationship("UsersAccount", back_populates="audit_histories")
