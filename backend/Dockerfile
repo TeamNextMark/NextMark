@@ -1,4 +1,5 @@
-FROM python:3.11-slim
+ARG BACKEND_BASE_IMAGE=python:3.11-slim
+FROM ${BACKEND_BASE_IMAGE}
 
 WORKDIR /app
 

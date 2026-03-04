@@ -17,6 +17,9 @@ class Base(DeclarativeBase):
 
 # create tables from models on import (development convenience)
 # in production you may prefer Alembic migrations instead
+# NOTE: PostgreSQL is required. SQLite (the fallback default) does not support
+# ARRAY column types and will raise an error on create_all when models are loaded.
+import backend.models  # noqa: F401
 
 Base.metadata.create_all(bind=engine)
 
