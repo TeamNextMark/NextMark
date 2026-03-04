@@ -12,7 +12,9 @@ def get_user(db: Session, user_id: str) -> UsersAccount | None:
     return db.query(UsersAccount).get(user_id)
 
 
-def create_user(db: Session, *, email: str, hashed_password: str, position: str = "student") -> UsersAccount:
+def create_user(db: Session, *, email: str, hashed_password: str, position: list[str] | None = None) -> UsersAccount:
+    if position is None:
+        position = ["student"]
     user = UsersAccount(
         id=str(uuid.uuid4()),
         email=email,
