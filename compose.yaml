@@ -46,6 +46,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       OLLAMA_BASE_URL: http://ollama:11434
       LLM_MODEL: qwen3:4b
+      SECRET_KEY: ${SECRET_KEY}
     volumes:
       - submissions-data:/var/lib/nextmark/submissions
     networks:
