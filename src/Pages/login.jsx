@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const API_BASE =
-  import.meta?.env?.VITE_API_URL || "http://localhost:5173";
+  import.meta?.env?.VITE_API_URL || "/api";
 
 function Login({ setUser }) {
   const [email, setEmail] = useState("");
@@ -23,7 +23,7 @@ function Login({ setUser }) {
     try {
       setLoading(true);
 
-      const res = await fetch(`${API_BASE}/login`, {
+      const res = await fetch(`${API_BASE}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: cleanEmail, password }),
