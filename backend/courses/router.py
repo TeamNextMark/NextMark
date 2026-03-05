@@ -4,12 +4,13 @@ from sqlalchemy.orm import Session
 from backend.courses import schemas, crud
 from backend.database.session import get_db
 from backend.users.crud import get_user
+from backend.auth.tokens import get_current_user
 
 router = APIRouter(tags=["courses"], prefix="/courses")
 
 
 @router.post("/", response_model=schemas.Course, status_code=status.HTTP_201_CREATED)
-def create_course(payload: schemas.CourseCreate, db: Session = Depends(get_db)):
+def create_course(payload: schemas.CourseCreate, db: Session = Depends(get_db), _: dict = Depends(get_current_user)):
     # ensure faculty exists
     faculty = get_user(db, payload.faculty_id)
     if not faculty:
@@ -23,12 +24,12 @@ def create_course(payload: schemas.CourseCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/", response_model=list[schemas.Course])
-def list_courses(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+def list_courses(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), _: dict = Depends(get_current_user)):
     return crud.list_courses(db, skip=skip, limit=limit)
 
 
 @router.get("/{course_id}", response_model=schemas.Course)
-def get_course(course_id: str, db: Session = Depends(get_db)):
+def get_course(course_id: str, db: Session = Depends(get_db), _: dict = Depends(get_current_user)):
     course = crud.get_course(db, course_id)
     if not course:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course not found")
