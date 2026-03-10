@@ -8,7 +8,7 @@ function Home () {
             <div className="coursesGrid">
                 <div className="courseCard">
                     <div className="courseImage">
-                        <img src="/images/course1.jpg" alt="Course 1" />
+                        <img src="../Images/course1.jpg" alt="Course 1" />
                     </div>
 
                     <div className="courseInfo">
@@ -18,7 +18,7 @@ function Home () {
         
                 <div className="courseCard">
                     <div className="courseImage">
-                        <img src="/images/course2.jpg" alt="Course 2" />
+                        <img src="../Images/course2.jpg" alt="Course 2" />
                     </div>
 
                     <div className="courseInfo">
@@ -28,7 +28,7 @@ function Home () {
 
                 <div className="courseCard">
                     <div className="courseImage">
-                        <img src="/images/course3.jpg" alt="Course 3" />
+                        <img src="../Images/course3.jpg" alt="Course 3" />
                     </div>
 
                     <div className="courseInfo">
@@ -38,7 +38,7 @@ function Home () {
 
                 <div className="courseCard">
                     <div className="courseImage">
-                        <img src="/images/course3.jpg" alt="Course 3" />
+                        <img src="../Images/course3.jpg" alt="Course 3" />
                     </div>
 
                     <div className="courseInfo">
@@ -48,7 +48,7 @@ function Home () {
 
                 <div className="courseCard">
                     <div className="courseImage">
-                        <img src="/images/course3.jpg" alt="Course 3" />
+                        <img src="../Images/course3.jpg" alt="Course 3" />
                     </div>
 
                     <div className="courseInfo">

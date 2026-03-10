@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../CSS/Header.css";
 import logo from "../Images/homeHeaderLogo.png";
+import arrow from "../Images/downArrow.png"
 
 function Header({ user, setUser }) {
   const [open, setOpen] = useState(false);
@@ -43,6 +44,15 @@ function Header({ user, setUser }) {
   const canGoTA = user?.roles?.includes("ta");
   const canGoStudent = user?.roles?.includes("student");
 
+  let subtitle;
+
+    if (location.pathname.startsWith("/home" || "/admin")) {
+      subtitle = "Arkansas Tech University"
+    }
+    else {
+      subtitle = "Course Name"
+    }
+
   return (
     <header className="header">
       <div
@@ -53,7 +63,7 @@ function Header({ user, setUser }) {
 
         <div className="textBlock">
           <p className="appName">NextMark</p>
-          <p className="courseName">Arkansas Tech University</p>
+          <p className="courseName">{subtitle}</p>
         </div>
       </div>
 
@@ -67,7 +77,7 @@ function Header({ user, setUser }) {
               aria-expanded={open}
               type="button"
             >
-              {user.name} ▾
+              {user.name} <span className={`ddDirection ${isOpen ? "open" : ""}`}><img className="arrow" src={arrow}/></span>
             </button>
 
             {open && (

@@ -115,5 +115,20 @@ p {
   height: 64px;
 }
 
+.arrow {
+    height: 15px;
+    width: auto;
+}
+
+.ddDirection {
+    display: inline-block;
+    margin-left: 6px;
+    transition: transform 0.3s ease;
+}
+
+.ddDirection.open {
+    transform: rotate(180deg);
+}
+
 
 
