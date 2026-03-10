@@ -2,8 +2,7 @@ import "../CSS/Login.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const API_BASE =
-  import.meta?.env?.VITE_API_URL || "/api";
+const API_BASE = import.meta?.env?.VITE_API_URL || "/api";
 
 function Login({ setUser }) {
   const [email, setEmail] = useState("");
@@ -34,8 +33,7 @@ function Login({ setUser }) {
         try {
           const err = await res.json();
           detail = err?.detail || err?.message || detail;
-        } catch {
-        }
+        } catch {}
         throw new Error(detail);
       }
 
@@ -48,11 +46,25 @@ function Login({ setUser }) {
       localStorage.setItem("accessToken", data.access_token);
       localStorage.setItem("tokenType", data.token_type || "bearer");
 
-      const userObj = { email: cleanEmail };
+      const backendRole = data.role || "student";
+
+      const userObj = {
+        email: cleanEmail,
+        roles: [backendRole],
+      };
+
       localStorage.setItem("user", JSON.stringify(userObj));
       setUser?.(userObj);
 
-      navigate("/home", { replace: true });
+      if (backendRole === "admin") {
+        navigate("/home/admin", { replace: true });
+      } else if (backendRole === "faculty") {
+        navigate("/home/faculty", { replace: true });
+      } else if (backendRole === "ta") {
+        navigate("/home/ta", { replace: true });
+      } else {
+        navigate("/home/student", { replace: true });
+      }
     } catch (err) {
       alert(err?.message || "Login failed.");
     } finally {
