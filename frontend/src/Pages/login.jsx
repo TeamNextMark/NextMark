@@ -78,7 +78,7 @@ function Login({ setUser }) {
 
       if (appRole === "admin") {
         navigate("/home/admin", { replace: true });
-      } else if (appRole === "instructor") {
+      } else if (appRole === "faculty") {
         navigate("/home/instructor", { replace: true });
       } else if (appRole === "ta") {
         navigate("/home/ta", { replace: true });
