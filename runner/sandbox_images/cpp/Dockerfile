@@ -5,4 +5,4 @@ RUN useradd -m sandbox
 WORKDIR /workspace
 USER sandbox
 
-CMD ["bash", "-lc", "g++ -std=c++20 -O2 -o app main.cpp && ./app"]
+CMD ["bash", "-lc", "g++ -std=c++20 -O2 -o /sandbox/app main.cpp && /sandbox/app"]
