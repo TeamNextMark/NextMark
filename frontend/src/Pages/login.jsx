@@ -47,14 +47,7 @@ function Login({ setUser }) {
       localStorage.setItem("accessToken", data.access_token);
       localStorage.setItem("tokenType", data.token_type || "bearer");
 
-      const rawRoles =
-        data?.user?.roles ||
-        data?.roles ||
-        data?.position_users ||
-        data?.position ||
-        data?.role ||
-        [];
-
+      const rawRoles = data?.user?.roles || [];
       const firstRole = Array.isArray(rawRoles) ? rawRoles[0] : rawRoles;
 
       let appRole = "student";

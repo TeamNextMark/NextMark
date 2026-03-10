@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
 
 import Header from "./Components/Header";
@@ -14,6 +14,17 @@ import InstructorCourse from "./Pages/instructorCourse";
 import StudentAssignment from "./Pages/studentAssigment";
 import InstructorAssignment from "./Pages/instructorAssigment";
 
+function HomeRedirect({ user }) {
+  if (!user) return <Navigate to="/" replace />;
+
+  const roles = user.roles || [];
+
+  if (roles.includes("admin")) return <Navigate to="/home/admin" replace />;
+  if (roles.includes("instructor")) return <Navigate to="/home/instructor" replace />;
+  if (roles.includes("ta")) return <Navigate to="/home/ta" replace />;
+  return <Navigate to="/home/student" replace />;
+}
+
 export default function App() {
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem("user");
@@ -26,6 +37,7 @@ export default function App() {
 
       <Routes>
         <Route path="/" element={<Login setUser={setUser} />} />
+        <Route path="/home" element={<HomeRedirect user={user} />} />
 
         <Route
           path="/home/admin"
@@ -39,7 +51,7 @@ export default function App() {
         <Route
           path="/home/instructor"
           element={
-            <ProtectedRoute user={user} allowedRoles={["faculty"]}>
+            <ProtectedRoute user={user} allowedRoles={["instructor"]}>
               <InstructorHome user={user} />
             </ProtectedRoute>
           }
@@ -69,14 +81,13 @@ export default function App() {
             <ProtectedRoute user={user} allowedRoles={["student"]}>
               <StudentCourse user={user} />
             </ProtectedRoute>
-            
           }
         />
 
         <Route
           path="/instructor/courses"
           element={
-            <ProtectedRoute user={user} allowedRoles={["faculty"]}>
+            <ProtectedRoute user={user} allowedRoles={["instructor"]}>
               <InstructorCourse user={user} />
             </ProtectedRoute>
           }
@@ -85,17 +96,16 @@ export default function App() {
         <Route
           path="/student/course/assignment"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute user={user} allowedRoles={["student"]}>
               <StudentAssignment user={user} />
             </ProtectedRoute>
-            
           }
         />
 
         <Route
           path="/instructor/course/assignment"
           element={
-            <ProtectedRoute user={user} allowedRoles={["faculty"]}>
+            <ProtectedRoute user={user} allowedRoles={["instructor"]}>
               <InstructorAssignment user={user} />
             </ProtectedRoute>
           }
