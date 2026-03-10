@@ -19,28 +19,45 @@ def signup(payload: UserCreate, db: Session = Depends(get_db)):
     hashed = hash_password(payload.password)
     user = create_user(db, email=payload.email, hashed_password=hashed, position=payload.position)
     token = create_access_token({"sub": str(user.id)})
-    return LoginResponse(
-        access_token=token,
-        user=AuthUserResponse(
-            id=str(user.id),
-            email=user.email,
-            roles=user.position,
-        ),
-    )
+return LoginResponse(
+    access_token=token,
+    token_type="bearer",
+    user=AuthUserResponse(
+        id=str(user.id),
+        email=user.email,
+        roles=user.position,
+    ),
+)
 
 
 @router.post("/login", response_model=LoginResponse)
 def login(payload: UserLogin, db: Session = Depends(get_db)):
     user = get_user_by_email(db, payload.email)
-    if not user or not verify_password(payload.password, user.hashed_password):
+
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+    try:
+        password_ok = verify_password(payload.password, user.hashed_password)
+    except ValueError:
+        password_ok = False
+
+    if not password_ok:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
     token = create_access_token({"sub": str(user.id)})
+
     return LoginResponse(
         access_token=token,
+        token_type="bearer",
         user=AuthUserResponse(
             id=str(user.id),
             email=user.email,
