@@ -17,7 +17,7 @@ def signup(payload: UserCreate, db: Session = Depends(get_db)):
     if get_user_by_email(db, payload.email):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
     hashed = hash_password(payload.password)
-    user = create_user(db, email=payload.email, hashed_password=hashed)
+    user = create_user(db, email=payload.email, hashed_password=hashed, position=payload.position)
     token = create_access_token({"sub": str(user.id)})
     return LoginResponse(
         access_token=token,
