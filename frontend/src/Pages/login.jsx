@@ -38,6 +38,7 @@ function Login({ setUser }) {
       }
 
       const data = await res.json();
+      console.log("login response:", data);
 
       if (!data?.access_token) {
         throw new Error("No access token returned from server.");
@@ -46,21 +47,40 @@ function Login({ setUser }) {
       localStorage.setItem("accessToken", data.access_token);
       localStorage.setItem("tokenType", data.token_type || "bearer");
 
-      const backendRole = data.role || "student";
+      const rawRoles =
+        data.roles ||
+        data.position_users ||
+        data.position ||
+        data.role ||
+        [];
+
+      const firstRole = Array.isArray(rawRoles) ? rawRoles[0] : rawRoles;
+
+      let appRole = "student";
+
+      if (firstRole === "faculty") {
+        appRole = "instructor";
+      } else if (firstRole === "admin") {
+        appRole = "admin";
+      } else if (firstRole === "ta") {
+        appRole = "ta";
+      } else if (firstRole === "student") {
+        appRole = "student";
+      }
 
       const userObj = {
         email: cleanEmail,
-        roles: [backendRole],
+        roles: [appRole],
       };
 
       localStorage.setItem("user", JSON.stringify(userObj));
       setUser?.(userObj);
 
-      if (backendRole === "admin") {
+      if (appRole === "admin") {
         navigate("/home/admin", { replace: true });
-      } else if (backendRole === "faculty") {
-        navigate("/home/faculty", { replace: true });
-      } else if (backendRole === "ta") {
+      } else if (appRole === "instructor") {
+        navigate("/home/instructor", { replace: true });
+      } else if (appRole === "ta") {
         navigate("/home/ta", { replace: true });
       } else {
         navigate("/home/student", { replace: true });
