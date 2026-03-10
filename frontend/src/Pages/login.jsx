@@ -48,10 +48,11 @@ function Login({ setUser }) {
       localStorage.setItem("tokenType", data.token_type || "bearer");
 
       const rawRoles =
-        data.roles ||
-        data.position_users ||
-        data.position ||
-        data.role ||
+        data?.user?.roles ||
+        data?.roles ||
+        data?.position_users ||
+        data?.position ||
+        data?.role ||
         [];
 
       const firstRole = Array.isArray(rawRoles) ? rawRoles[0] : rawRoles;
@@ -69,7 +70,7 @@ function Login({ setUser }) {
       }
 
       const userObj = {
-        email: cleanEmail,
+        email: data?.user?.email || cleanEmail,
         roles: [appRole],
       };
 
@@ -78,7 +79,7 @@ function Login({ setUser }) {
 
       if (appRole === "admin") {
         navigate("/home/admin", { replace: true });
-      } else if (appRole === "faculty") {
+      } else if (appRole === "instructor") {
         navigate("/home/instructor", { replace: true });
       } else if (appRole === "ta") {
         navigate("/home/ta", { replace: true });
