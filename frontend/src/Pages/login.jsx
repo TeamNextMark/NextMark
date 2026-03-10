@@ -14,6 +14,7 @@ function Login({ setUser }) {
     e.preventDefault();
 
     const cleanEmail = email.trim();
+
     if (!cleanEmail || !password) {
       alert("Please enter your email and password.");
       return;
