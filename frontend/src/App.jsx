@@ -87,7 +87,7 @@ export default function App() {
         <Route
           path="/instructor/courses"
           element={
-            <ProtectedRoute user={user} allowedRoles={["instructor"]}>
+            <ProtectedRoute user={user} allowedRoles={["faculty"]}>
               <InstructorCourse user={user} />
             </ProtectedRoute>
           }
