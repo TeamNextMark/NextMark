@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../CSS/Header.css";
 import logo from "../Images/homeHeaderLogo.png";
-import arrow from "../Images/downArrow.png"
+import arrow from "../Images/downArrow.png";
 
 function Header({ user, setUser }) {
   const [open, setOpen] = useState(false);
@@ -16,6 +16,7 @@ function Header({ user, setUser }) {
   function handleLogout() {
     localStorage.removeItem("user");
     localStorage.removeItem("accessToken");
+    localStorage.removeItem("tokenType");
     setUser(null);
     setOpen(false);
     navigate("/", { replace: true });
@@ -27,6 +28,7 @@ function Header({ user, setUser }) {
         setOpen(false);
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -46,12 +48,11 @@ function Header({ user, setUser }) {
 
   let subtitle;
 
-    if (location.pathname.startsWith("/home" || "/admin")) {
-      subtitle = "Arkansas Tech University"
-    }
-    else {
-      subtitle = "Course Name"
-    }
+  if (location.pathname.startsWith("/home") || location.pathname.startsWith("/admin")) {
+    subtitle = "Arkansas Tech University";
+  } else {
+    subtitle = "Course Name";
+  }
 
   return (
     <header className="header">
@@ -77,7 +78,10 @@ function Header({ user, setUser }) {
               aria-expanded={open}
               type="button"
             >
-              {user.name} <span className={`ddDirection ${isOpen ? "open" : ""}`}><img className="arrow" src={arrow}/></span>
+              {user.name || user.email}{" "}
+              <span className={`ddDirection ${open ? "open" : ""}`}>
+                <img className="arrow" src={arrow} alt="dropdown arrow" />
+              </span>
             </button>
 
             {open && (
