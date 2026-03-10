@@ -11,6 +11,7 @@ body {
 
 .pageTitle {
   border-bottom: 3px solid #25488f;
+  margin-bottom: 5px;
 }
 
 .coursesGrid {
@@ -28,6 +29,13 @@ body {
   background: #ffffff;
   border: 1px solid #e5e7eb;
   box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+
+  /* button reset */
+  padding: 0;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
 }
 
 .courseCard:hover {
