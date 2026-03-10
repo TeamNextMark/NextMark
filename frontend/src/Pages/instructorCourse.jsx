@@ -52,21 +52,21 @@ function InstructorCourse () {
                 <div className="assignGrid">
                     <button
                         className="assignCard"
-                        onClick={() => window.open("https://example.com/assignment1", "_blank")}
+                        onClick={() => window.open("https://instructor/course/assignment", "_blank")}
                     >
                         Assignment 1
                     </button>
 
                     <button
                         className="assignCard"
-                        onClick={() => window.open("https://example.com/assignment2", "_blank")}
+                        onClick={() => window.open("https://instructor/course/assignment", "_blank")}
                     >
                         Assignment 2
                     </button>
 
                     <button
                         className="assignCard"
-                        onClick={() => window.open("https://example.com/assignment3", "_blank")}
+                        onClick={() => window.open("https://instructor/course/assignment", "_blank")}
                     >
                         Assignment 3
                     </button>
