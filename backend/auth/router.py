@@ -19,15 +19,15 @@ def signup(payload: UserCreate, db: Session = Depends(get_db)):
     hashed = hash_password(payload.password)
     user = create_user(db, email=payload.email, hashed_password=hashed, position=payload.position)
     token = create_access_token({"sub": str(user.id)})
-return LoginResponse(
-    access_token=token,
-    token_type="bearer",
-    user=AuthUserResponse(
-        id=str(user.id),
-        email=user.email,
-        roles=user.position,
-    ),
-)
+    return LoginResponse(
+        access_token=token,
+        token_type="bearer",
+        user=AuthUserResponse(
+            id=str(user.id),
+            email=user.email,
+            roles=user.position,
+        ),
+    )
 
 
 @router.post("/login", response_model=LoginResponse)
