@@ -4,7 +4,7 @@ import { useState } from "react";
 import Header from "./Components/Header";
 import ProtectedRoute from "./Components/protectedRoute";
 
-import Login from "./Pages/Login";
+import Login from "./Pages/login";
 import AdminHome from "./Pages/adminHome";
 import InstructorHome from "./Pages/instructorHome";
 import TAHome from "./Pages/taHome";
