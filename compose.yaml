@@ -79,10 +79,11 @@ services:
       RUNNER_TIMEOUT_SECONDS: 10
       RUNNER_SANDBOX_TMPFS_SIZE: 64m
       RUNNER_APPARMOR_PROFILE: ${RUNNER_APPARMOR_PROFILE:-}
-      RUNNER_SECCOMP_PROFILE: ${RUNNER_SECCOMP_PROFILE:-}
+      RUNNER_SECCOMP_PROFILE: /runner/security/seccomp-nextmark.json
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - submissions-data:/var/lib/nextmark/submissions
+      - ./runner/security:/runner/security:ro
     networks:
       - nextmark-net
     depends_on:
