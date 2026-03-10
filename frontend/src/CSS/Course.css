@@ -1,0 +1,87 @@
+body {
+    padding: 0;
+    margin: 0;
+}
+
+.mainContent {
+    margin: 0px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    color: #25488f
+}
+
+.courseBanner {
+    background-color: rgb(227, 227, 227);
+    padding: 80px;
+}
+
+.textContent {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.courseTitle {
+    border: 2px solid transparent;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    padding-left: 10px;
+    box-shadow: 0px 0px 10px;
+}
+
+.descDD {
+    border-bottom: 2px solid;
+    margin-bottom: 5px;
+}
+
+.courseDesc {
+    border: transparent;
+    background: transparent;
+    font-size: 30px;
+    margin-bottom: 5px;
+    margin-top: 10px;
+}
+
+.arrow {
+    height: 15px;
+    width: auto;
+}
+
+.arrowDirection {
+    display: inline-block;
+    margin-left: 6px;
+    transition: transform 0.3s ease;
+}
+
+.arrowDirection.open {
+    transform: rotate(180deg);
+}
+
+.dropdown-menu {
+    background: rgb(227, 227, 227);
+    border: 2px solid transparent;
+    border-radius: 10px;
+    padding: 10px;
+    color: black;
+    margin-bottom: 10px;
+}
+
+.assignGrid {
+    margin-top: 10px;
+    flex-direction: row;
+}
+
+.assignCard {
+    border: 2px solid transparent;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 15px;
+    box-shadow: 0px 0px 10px;
+    width: 100%;
+    text-align: left;
+    color: #25488f;
+    font-size: 16px;
+
+}
+
+.assignCard:hover {
+    transform: translateY(-2px);
+}
