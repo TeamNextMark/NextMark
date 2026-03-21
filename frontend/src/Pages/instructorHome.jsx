@@ -1,11 +1,11 @@
+import "../CSS/Template.css"
 import "../CSS/Home.css";
 import { useNavigate } from "react-router-dom";
-//Difference to commit
 function Home() {
   const navigate = useNavigate();
 
   function goToCourses() {
-    navigate("/instructor/courses");
+    navigate("/faculty/courses");
   }
 
   return (

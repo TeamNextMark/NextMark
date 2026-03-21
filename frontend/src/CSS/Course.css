@@ -5,8 +5,6 @@ body {
 
 .mainContent {
     margin: 0px;
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
-    color: #25488f
 }
 
 .courseBanner {
@@ -60,8 +58,11 @@ body {
     border: 2px solid transparent;
     border-radius: 10px;
     padding: 10px;
-    color: black;
     margin-bottom: 10px;
+}
+
+.dropdown-menu p {
+    color: black;
 }
 
 .assignGrid {
@@ -77,7 +78,6 @@ body {
     box-shadow: 0px 0px 10px;
     width: 100%;
     text-align: left;
-    color: #25488f;
     font-size: 16px;
 
 }

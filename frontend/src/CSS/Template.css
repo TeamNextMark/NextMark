@@ -1,0 +1,25 @@
+@font-face {
+  font-family: 'Titling Gothic';
+  src: url('../assets/fonts/Titling-Gothic-Regular.ttf');
+}
+
+.mainContent h1, .mainContent h2, .mainContent h3, .mainContent h4, .mainContent h5, .mainContent h6, .mainContent p{
+    color: #115740;
+}
+
+body h1, h2, h3, h4, h5, h6 {
+    font-family: 'Titling Gothic';
+    letter-spacing: 1px;
+}
+
+.inputBar:focus {
+    border-color: #115740;
+}
+
+.loginButton {
+    background: #115740;
+}
+
+.loginButton:hover {
+  background: #39934D;
+}

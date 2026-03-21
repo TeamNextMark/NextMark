@@ -5,13 +5,13 @@ body {
 
 .mainContent {
   margin: 20px;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-  color: #25488f
 }
 
 .pageTitle {
-  border-bottom: 3px solid #25488f;
+  font-size: 50px;
+  border-bottom: 3px solid;
   margin-bottom: 5px;
+  padding-left: 2px;
 }
 
 .coursesGrid {
@@ -22,7 +22,6 @@ body {
 }
 
 .courseCard {
-  position: relative;
   height: 220px;
   border-radius: 16px;
   overflow: hidden;
@@ -36,6 +35,13 @@ body {
   text-align: left;
   cursor: pointer;
   appearance: none;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.courseCard h2 {
+  color: black;
 }
 
 .courseCard:hover {
@@ -46,6 +52,10 @@ body {
 
 .courseImage {
   height: 50%;
+  background-color: #d1d5db;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
 }
 
 .courseImage img {
@@ -57,26 +67,20 @@ body {
 }
 
 .courseInfo {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 50%;
+  flex: 1;
   padding: 16px;
-  color: #25488f;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  align-items: center;
 }
 
 
-.courseContent h2 {
+.courseInfo h2 {
   margin: 0;
-  font-size: 18px;
+  font-size: 32px;
   font-weight: 800;
 }
 
-.courseContent p {
+.courseInfo p {
   margin-top: 6px;
   color: #6b7280;
   font-size: 14px;

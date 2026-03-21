@@ -1,3 +1,4 @@
+import "../CSS/Template.css";
 import "../CSS/Login.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -8,6 +9,7 @@ function Login({ setUser }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
@@ -39,7 +41,6 @@ function Login({ setUser }) {
       }
 
       const data = await res.json();
-      console.log("login response:", data);
 
       if (!data?.access_token) {
         throw new Error("No access token returned from server.");
@@ -53,15 +54,10 @@ function Login({ setUser }) {
 
       let appRole = "student";
 
-      if (firstRole === "faculty") {
-        appRole = "instructor";
-      } else if (firstRole === "admin") {
-        appRole = "admin";
-      } else if (firstRole === "ta") {
-        appRole = "ta";
-      } else if (firstRole === "student") {
-        appRole = "student";
-      }
+      if (firstRole === "faculty") appRole = "faculty";
+      else if (firstRole === "admin") appRole = "admin";
+      else if (firstRole === "ta") appRole = "ta";
+      else if (firstRole === "student") appRole = "student";
 
       const userObj = {
         email: data?.user?.email || cleanEmail,
@@ -71,15 +67,11 @@ function Login({ setUser }) {
       localStorage.setItem("user", JSON.stringify(userObj));
       setUser?.(userObj);
 
-      if (appRole === "admin") {
-        navigate("/home/admin", { replace: true });
-      } else if (appRole === "instructor") {
-        navigate("/home/instructor", { replace: true });
-      } else if (appRole === "ta") {
-        navigate("/home/ta", { replace: true });
-      } else {
-        navigate("/home/student", { replace: true });
-      }
+      if (appRole === "admin") navigate("/home/admin", { replace: true });
+      else if (appRole === "faculty") navigate("/home/faculty", { replace: true });
+      else if (appRole === "ta") navigate("/home/ta", { replace: true });
+      else navigate("/home/student", { replace: true });
+
     } catch (err) {
       alert(err?.message || "Login failed.");
     } finally {

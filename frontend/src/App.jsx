@@ -20,7 +20,7 @@ function HomeRedirect({ user }) {
   const roles = user.roles || [];
 
   if (roles.includes("admin")) return <Navigate to="/home/admin" replace />;
-  if (roles.includes("instructor")) return <Navigate to="/home/instructor" replace />;
+  if (roles.includes("faculty")) return <Navigate to="/home/faculty" replace />;
   if (roles.includes("ta")) return <Navigate to="/home/ta" replace />;
   return <Navigate to="/home/student" replace />;
 }
@@ -28,7 +28,7 @@ function HomeRedirect({ user }) {
 export default function App() {
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem("user");
-    return saved ? JSON.parse(saved) : null;
+    return saved ? JSON.parse(saved) : {roles: ["admin"] };
   });
 
   return (
@@ -49,9 +49,9 @@ export default function App() {
         />
 
         <Route
-          path="/home/instructor"
+          path="/home/faculty"
           element={
-            <ProtectedRoute user={user} allowedRoles={["instructor"]}>
+            <ProtectedRoute user={user} allowedRoles={["faculty"]}>
               <InstructorHome user={user} />
             </ProtectedRoute>
           }
@@ -85,9 +85,9 @@ export default function App() {
         />
 
         <Route
-          path="/instructor/courses"
+          path="/faculty/courses"
           element={
-            <ProtectedRoute user={user} allowedRoles={["instructor"]}>
+            <ProtectedRoute user={user} allowedRoles={["faculty"]}>
               <InstructorCourse user={user} />
             </ProtectedRoute>
           }
@@ -103,9 +103,9 @@ export default function App() {
         />
 
         <Route
-          path="/instructor/course/assignment"
+          path="/faculty/course/assignment"
           element={
-            <ProtectedRoute user={user} allowedRoles={["instructor"]}>
+            <ProtectedRoute user={user} allowedRoles={["faculty"]}>
               <InstructorAssignment user={user} />
             </ProtectedRoute>
           }

@@ -14,68 +14,6 @@ body {
   background: #f3f4f6;
 }
 
-.review-topbar {
-  height: 62px;
-  background: #1f3f95;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 18px;
-}
-
-.review-topbar-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.review-logo-box {
-  width: 26px;
-  height: 26px;
-  border: 2px solid #dce6ff;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-}
-
-.review-brand {
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.review-course-line {
-  font-size: 12px;
-  opacity: 0.95;
-  margin-top: 2px;
-}
-
-.review-topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.review-prof-name {
-  font-size: 12px;
-}
-
-.review-logout-btn {
-  background: #2956d8;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 14px;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.review-logout-btn:hover {
-  background: #224cc6;
-}
-
 .review-body {
   display: grid;
   grid-template-columns: 240px 1fr;
@@ -137,7 +75,6 @@ body {
 .submission-list {
   display: flex;
   flex-direction: column;
-  gap: 0;
 }
 
 .submission-item {
@@ -229,11 +166,6 @@ body {
 .tag-gray {
   color: #4b5563;
   background: #eceff4;
-}
-
-.tag-green {
-  color: #0f7c39;
-  background: #ddf7e7;
 }
 
 .review-main {
@@ -552,19 +484,6 @@ body {
 }
 
 @media (max-width: 640px) {
-  .review-topbar {
-    height: auto;
-    padding: 12px;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .review-topbar-right {
-    width: 100%;
-    justify-content: space-between;
-  }
-
   .student-summary-panel {
     flex-direction: column;
     gap: 12px;

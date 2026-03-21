@@ -1,3 +1,8 @@
+@font-face {
+  font-family: 'Titling Gothic';
+  src: url('../assets/fonts/Titling-Gothic-Regular.ttf');
+}
+
 p {
   padding: 0;
   margin: 0;
@@ -5,7 +10,9 @@ p {
 
 .header {
   height: 64px;
-  background: linear-gradient(90deg, #25488f, #345fa8);  
+  background: linear-gradient(90deg, #115740, #FFCD00);  
+  font-family: 'Titling Gothic';
+  letter-spacing: 2px;
   color: #ffffff;
   display: flex;
   align-items: center;
@@ -14,7 +21,6 @@ p {
   top: 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   justify-content: space-between;
-  font-family: Verdana;
 }
 
 .headerLeft {
@@ -51,7 +57,7 @@ p {
 .user {
   background: transparent;
   border: transparent;
-  color: #ffffff;
+  color: black;
 
   padding: 8px 12px;
   border-radius: 10px;
@@ -96,7 +102,7 @@ p {
 }
 
 .logout {
-  background: #25488f;
+  background: #115740;
   border: transparent;
   color: #ffffff;
 
@@ -107,7 +113,7 @@ p {
 }
 
 .logout:hover {
-  background: rgba(255,255,255,0.15);
+  background: #39934D;
 }
 
 .headerLogo {
