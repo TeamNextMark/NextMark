@@ -29,7 +29,6 @@ body {
   border: 1px solid #e5e7eb;
   box-shadow: 0 6px 14px rgba(0,0,0,0.08);
 
-  /* button reset */
   padding: 0;
   width: 100%;
   text-align: left;
@@ -78,9 +77,11 @@ body {
   margin: 0;
   font-size: 32px;
   font-weight: 800;
+  display: block;
 }
 
 .courseInfo p {
+  display: block;
   margin-top: 6px;
   color: #6b7280;
   font-size: 14px;
