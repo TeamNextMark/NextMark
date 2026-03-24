@@ -35,20 +35,20 @@ function Header({ user, setUser }) {
 
   const getHomeRoute = () => {
     if (!user?.roles) return "/";
-    if (user.roles.includes("instructor")) return "/home/instructor";
+    if (user.roles.includes("faculty")) return "/home/faculty";
     if (user.roles.includes("admin")) return "/home/admin";
     if (user.roles.includes("ta")) return "/home/ta";
     return "/home/student";
   };
 
   const canGoAdmin = user?.roles?.includes("admin");
-  const canGoInstructor = user?.roles?.includes("instructor");
+  const canGoInstructor = user?.roles?.includes("faculty");
   const canGoTA = user?.roles?.includes("ta");
   const canGoStudent = user?.roles?.includes("student");
 
   let subtitle;
 
-  if (location.pathname.startsWith("/home") || location.pathname.startsWith("/admin")) {
+  if (location.pathname.startsWith("/home") || location.pathname.startsWith("/admin") || location.pathname === "/") {
     subtitle = "Arkansas Tech University";
   } else {
     subtitle = "Course Name";
@@ -99,7 +99,7 @@ function Header({ user, setUser }) {
                 {canGoInstructor && (
                   <button
                     className="dropdownItem"
-                    onClick={() => navigate("/home/instructor")}
+                    onClick={() => navigate("/home/faculty")}
                     type="button"
                   >
                     Instructor Homepage

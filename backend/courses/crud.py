@@ -12,6 +12,15 @@ def list_courses(db: Session, *, skip: int = 0, limit: int = 100):
     return db.query(Course).offset(skip).limit(limit).all()
 
 
+def list_courses_for_faculty(db: Session, faculty_id: str):
+    return (
+        db.query(Course)
+        .filter(Course.faculty_id == faculty_id)
+        .order_by(Course.semester, Course.course_code)
+        .all()
+    )
+
+
 def create_course(db: Session, *, course_code: str, semester: str, faculty_id: str) -> Course:
     course = Course(
         id=str(uuid.uuid4()),
