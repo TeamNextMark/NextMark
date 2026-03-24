@@ -44,7 +44,7 @@ function InstructorCourse() {
           <div className="dropdown-menu">
             <p>
               {course
-                ? `${course.course_code} for ${course.semester}`
+                ? `${course.course_code} - ${course.id} for ${course.semester}`
                 : "No course selected."}
             </p>
           </div>
@@ -74,7 +74,7 @@ function InstructorCourse() {
 
       <div className="textContent">
         <div className="courseTitle">
-          <h1>{course.course_code}</h1>
+          <h1>{course.course_code} - {course.id}</h1>
           <p>{course.semester}</p>
         </div>
 
