@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 import uuid
 
-from backend.models import Course
+from backend.models import Course, CourseEnrollment
 
 
 def get_course(db: Session, course_id: str) -> Course | None:
@@ -20,10 +20,11 @@ def list_courses_for_faculty(db: Session, faculty_id: str):
         .all()
     )
 
+
 def list_courses_for_student(db: Session, student_id: str):
     return (
         db.query(Course)
-        .join(CourseEnrollment, CourseEnrollment.course_id == Course.course_id)
+        .join(CourseEnrollment, CourseEnrollment.course_id == Course.id)
         .filter(CourseEnrollment.student_id == student_id)
         .order_by(Course.semester, Course.course_code)
         .all()
