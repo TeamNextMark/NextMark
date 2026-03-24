@@ -1,99 +1,49 @@
-import "../CSS/Template.css";
-import "../CSS/Course.css";
-import { useState, useRef, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import logo from "../Images/downArrow.png";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+
+const API_BASE = import.meta?.env?.VITE_API_URL || "/api";
 
 function InstructorCourse() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const course = location.state?.course;
+  const { courseId } = useParams();
+  const [course, setCourse] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  function Dropdown() {
-    const [isOpen, setIsOpen] = useState(false);
-    const dropdownRef = useRef();
+  useEffect(() => {
+    async function fetchCourse() {
+      try {
+        const token = localStorage.getItem("accessToken");
 
-    useEffect(() => {
-      function handleClickOutside(event) {
-        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-          setIsOpen(false);
+        const response = await fetch(`${API_BASE}/course/${courseCode}${courseId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to load course");
         }
+
+        const data = await response.json();
+        setCourse(data);
+      } catch (err) {
+        setError(err.message || "Something went wrong");
+      } finally {
+        setLoading(false);
       }
+    }
 
-      document.addEventListener("mousedown", handleClickOutside);
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }, []);
+    fetchCourse();
+  }, [courseId]);
 
-    return (
-      <div ref={dropdownRef} style={{ position: "relative" }}>
-        <div className="descDD">
-          <button
-            className="courseDesc"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            Course Description{" "}
-            <span className={`arrowDirection ${isOpen ? "open" : ""}`}>
-              <img className="arrow" src={logo} alt="arrow" />
-            </span>
-          </button>
-        </div>
-
-        {isOpen && (
-          <div className="dropdown-menu">
-            <p>
-              {course
-                ? `${course.course_code} - ${course.id} for ${course.semester}`
-                : "No course selected."}
-            </p>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  function goToAssignment() {
-    navigate("/faculty/course/assignment", { state: { course } });
-  }
-
-  if (!course) {
-    return (
-      <div className="mainContent">
-        <h1>No course selected</h1>
-        <button onClick={() => navigate("/home/faculty")}>Back to Courses</button>
-      </div>
-    );
-  }
+  if (loading) return <p>Loading course...</p>;
+  if (error) return <p>{error}</p>;
+  if (!course) return <p>Course not found.</p>;
 
   return (
     <div className="mainContent">
-      <div className="courseBanner">
-        <img src="/images/course1.jpg" alt="Course Pic" />
-      </div>
-
-      <div className="textContent">
-        <div className="courseTitle">
-          <h1>{course.course_code} - {course.id}</h1>
-          <p>{course.semester}</p>
-        </div>
-
-        <Dropdown />
-
-        <div className="assignGrid">
-          <button className="assignCard" onClick={goToAssignment}>
-            Assignment 1
-          </button>
-
-          <button className="assignCard" onClick={goToAssignment}>
-            Assignment 2
-          </button>
-
-          <button className="assignCard" onClick={goToAssignment}>
-            Assignment 3
-          </button>
-        </div>
-      </div>
+      <h1>{course.course_code} - {course.id}</h1>
+      <p>{course.semester}</p>
     </div>
   );
 }

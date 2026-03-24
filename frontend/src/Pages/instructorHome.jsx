@@ -2,6 +2,7 @@ import "../CSS/Template.css";
 import "../CSS/Home.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
 const API_BASE = import.meta?.env?.VITE_API_URL || "/api";
 
@@ -10,6 +11,8 @@ function Home() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const { courseId } = useParams();
+  const { courseCode } = useParams();
 
   useEffect(() => {
     async function fetchCourses() {
@@ -39,7 +42,7 @@ function Home() {
   }, []);
 
   function goToCourses(course) {
-    navigate("/faculty/courses", { state: { course } });
+    navigate(`/faculty/course/${Course.course_code}${course.id}`);
   }
 
   return (

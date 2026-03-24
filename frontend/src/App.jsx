@@ -76,7 +76,7 @@ export default function App() {
         />
 
         <Route
-          path="/student/courses"
+          path="/student/course/:courseCode:courseId"
           element={
             <ProtectedRoute user={user} allowedRoles={["student"]}>
               <StudentCourse user={user} />
@@ -85,7 +85,7 @@ export default function App() {
         />
 
         <Route
-          path="/faculty/courses"
+          path="/faculty/course/:courseCode:courseId"
           element={
             <ProtectedRoute user={user} allowedRoles={["faculty"]}>
               <InstructorCourse user={user} />
