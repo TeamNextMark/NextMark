@@ -42,7 +42,8 @@ function Home() {
   }, []);
 
   function goToCourses(course) {
-    navigate(`/student/course/${course.course_code}${course.id}`);
+    const slug = `${course.course_code}${course.id}`;
+    navigate(`/student/course/${slug}`);
   }
 
   return (

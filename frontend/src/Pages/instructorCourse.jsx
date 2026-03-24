@@ -4,8 +4,7 @@ import { useParams } from "react-router-dom";
 const API_BASE = import.meta?.env?.VITE_API_URL || "/api";
 
 function InstructorCourse() {
-  const { courseId } = useParams();
-  const { courseCode } = useParams();
+  const { courseSlug } = useParams();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -15,7 +14,9 @@ function InstructorCourse() {
       try {
         const token = localStorage.getItem("accessToken");
 
-        const response = await fetch(`${API_BASE}/courses/${courseCode}${courseId}`, {
+        const courseId = courseSlug.replace(/^[a-zA-Z]+/, "");
+
+        const response = await fetch(`${API_BASE}/courses/${courseId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -35,7 +36,7 @@ function InstructorCourse() {
     }
 
     fetchCourse();
-  }, [courseId]);
+  }, [courseSlug]);
 
   if (loading) return <p>Loading course...</p>;
   if (error) return <p>{error}</p>;

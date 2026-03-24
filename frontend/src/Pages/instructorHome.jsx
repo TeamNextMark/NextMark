@@ -40,7 +40,8 @@ function Home() {
   }, []);
 
   function goToCourses(course) {
-    navigate(`/faculty/course/${course.course_code}${course.id}`);
+    const slug = `${course.course_code}${course.id}`;
+    navigate(`/faculty/course/${slug}`);
   }
 
   return (
