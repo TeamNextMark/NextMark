@@ -11,8 +11,6 @@ function Home() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const { courseId } = useParams();
-  const { courseCode } = useParams();
 
   useEffect(() => {
     async function fetchCourses() {
@@ -44,7 +42,7 @@ function Home() {
   }, []);
 
   function goToCourses(course) {
-    navigate(`/student/course/${Course.course_code}${course.id}`);
+    navigate(`/student/course/${course.course_code}${course.id}`);
   }
 
   return (

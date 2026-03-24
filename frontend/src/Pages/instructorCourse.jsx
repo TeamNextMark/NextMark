@@ -5,6 +5,7 @@ const API_BASE = import.meta?.env?.VITE_API_URL || "/api";
 
 function InstructorCourse() {
   const { courseId } = useParams();
+  const { courseCode } = useParams();
   const [course, setCourse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -14,7 +15,7 @@ function InstructorCourse() {
       try {
         const token = localStorage.getItem("accessToken");
 
-        const response = await fetch(`${API_BASE}/course/${courseCode}${courseId}`, {
+        const response = await fetch(`${API_BASE}/courses/${courseCode}${courseId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
