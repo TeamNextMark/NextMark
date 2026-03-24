@@ -171,3 +171,20 @@ CREATE TABLE audit_history (
         REFERENCES users_account(id_users)
 );
 
+CREATE TABLE course_enrollment (
+    enrollment_id SERIAL PRIMARY KEY,
+    course_id VARCHAR NOT NULL,
+    student_id VARCHAR NOT NULL,
+    enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_enrollment_course
+        FOREIGN KEY (course_id) REFERENCES course(course_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_enrollment_student
+        FOREIGN KEY (student_id) REFERENCES users_account(id_users)
+        ON DELETE CASCADE,
+
+    CONSTRAINT unique_student_course UNIQUE (course_id, student_id)
+);
+
