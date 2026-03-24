@@ -59,11 +59,11 @@ function Home() {
             onClick={() => goToCourses(course)}
           >
             <div className="courseImage">
-              <img src="/images/course1.jpg" alt={course.course_code} />
+              <img src="/images/course1.jpg" alt={`${course.course_code} (${course.course_id}) - ${course.semester}`}/>
             </div>
 
             <div className="courseInfo">
-              <h2>{course.course_code}</h2>
+              <h2>{course.course_code} - {course.course_id}</h2>
               <p>{course.semester}</p>
             </div>
           </button>
