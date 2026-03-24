@@ -30,13 +30,18 @@ class UsersAccount(Base):
     id: str = Column("id_users", String, primary_key=True, default=gen_uuid)
     position: list[str] = Column("position_users", ARRAY(String), nullable=False, default=["student"])
     email: str = Column("email_users", String, nullable=False, unique=True)
-    hashed_password: str = Column(
-        "encryptedpassword_users", String, nullable=False
-    )
+    hashed_password: str = Column("encryptedpassword_users", String, nullable=False)
     ferpa_consent: bool = Column("ferpa_consent", Boolean, nullable=False, default=False)
 
     # relationships
     courses = relationship("Course", back_populates="faculty", lazy="joined")
+    enrollments = relationship("CourseEnrollment", back_populates="student")
+    enrolled_courses = relationship(
+        "Course",
+        secondary="course_enrollment",
+        back_populates="students",
+        viewonly=True,
+    )
     submissions = relationship("Submission", back_populates="student", lazy="joined")
     flags_resolved = relationship("Flag", back_populates="resolved_by_user", lazy="joined")
     feedbacks = relationship("Feedback", back_populates="author", lazy="joined")
@@ -55,6 +60,40 @@ class Course(Base):
 
     faculty = relationship("UsersAccount", back_populates="courses")
     assignments = relationship("Assignment", back_populates="course")
+    enrollments = relationship("CourseEnrollment", back_populates="course")
+    students = relationship(
+        "UsersAccount",
+        secondary="course_enrollment",
+        back_populates="enrolled_courses",
+        viewonly=True,
+    )
+
+
+class CourseEnrollment(Base):
+    __tablename__ = "course_enrollment"
+
+    id: int = Column("enrollment_id", Integer, primary_key=True, index=True)
+    course_id: str = Column(
+        "course_id",
+        String,
+        ForeignKey("course.course_id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    student_id: str = Column(
+        "student_id",
+        String,
+        ForeignKey("users_account.id_users", ondelete="CASCADE"),
+        nullable=False,
+    )
+    enrolled_at = Column(
+        "enrolled_at",
+        TIMESTAMP(timezone=False),
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    course = relationship("Course", back_populates="enrollments")
+    student = relationship("UsersAccount", back_populates="enrollments")
 
 
 class RubricTemplate(Base):

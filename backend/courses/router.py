@@ -27,13 +27,21 @@ def list_courses(skip: int = 0, limit: int = 100, db: Session = Depends(get_db),
     return crud.list_courses(db, skip=skip, limit=limit)
 
 
-@router.get("/my-courses", response_model=list[schemas.Course])
+@router.get("/my-faculty-courses", response_model=list[schemas.Course])
 def list_my_courses(
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     faculty_id = current_user.get("sub")
     return crud.list_courses_for_faculty(db, faculty_id)
+
+@router.get("/my-student-courses", response_model=list[schemas.Course])
+def list_my_student_courses(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    student_id = current_user.get("sub")
+    return crud.list_courses_for_student(db, student_id)
 
 
 @router.get("/{course_id}", response_model=schemas.Course)

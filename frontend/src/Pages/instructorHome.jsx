@@ -16,7 +16,7 @@ function Home() {
       try {
         const token = localStorage.getItem("accessToken");
 
-        const response = await fetch(`${API_BASE}/courses/my-courses`, {
+        const response = await fetch(`${API_BASE}/courses/my-faculty-courses`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

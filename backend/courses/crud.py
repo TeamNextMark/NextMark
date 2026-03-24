@@ -20,6 +20,15 @@ def list_courses_for_faculty(db: Session, faculty_id: str):
         .all()
     )
 
+def list_courses_for_student(db: Session, student_id: str):
+    return (
+        db.query(Course)
+        .join(CourseEnrollment, CourseEnrollment.course_id == Course.course_id)
+        .filter(CourseEnrollment.student_id == student_id)
+        .order_by(Course.semester, Course.course_code)
+        .all()
+    )
+
 
 def create_course(db: Session, *, course_code: str, semester: str, faculty_id: str) -> Course:
     course = Course(
