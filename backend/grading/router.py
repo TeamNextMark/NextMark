@@ -42,7 +42,7 @@ async def grade_submission(
         async with httpx.AsyncClient(timeout=300.0) as client:
             resp = await client.post(
                 f"{OLLAMA_BASE_URL}/api/generate",
-                json={"model": LLM_MODEL, "prompt": prompt, "stream": False, "options": {"num_predict": 150}},
+                json={"model": LLM_MODEL, "prompt": prompt, "stream": False},
             )
             resp.raise_for_status()
     except Exception as exc:
