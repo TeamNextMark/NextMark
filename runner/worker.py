@@ -89,7 +89,7 @@ def _security_opts() -> list[str]:
     if APPARMOR_PROFILE:
         options.append(f"apparmor={APPARMOR_PROFILE}")
     if SECCOMP_PROFILE:
-        options.append(f"seccomp={SECCOMP_PROFILE}")
+        options.append(f"seccomp={Path(SECCOMP_PROFILE).read_text()}")
     return options
 
 
