@@ -48,6 +48,7 @@ class UsersAccount(Base):
     notifications = relationship("Notification", back_populates="user", lazy="joined")
     logs = relationship("SystemLog", back_populates="user", lazy="joined")
     audit_histories = relationship("AuditHistory", back_populates="actor", lazy="joined")
+    uploaded_assignment_files = relationship("AssignmentFile", back_populates="uploader")
 
 
 class Course(Base):
@@ -57,6 +58,8 @@ class Course(Base):
     faculty_id: str = Column("faculty_id", String, ForeignKey("users_account.id_users"), nullable=False)
     course_code: str = Column("course_code", String, nullable=False)
     semester: str = Column("semester", String, nullable=False)
+    course_name = Column(Text, nullable=False)
+    course_description = Column(Text, nullable=True)
 
     faculty = relationship("UsersAccount", back_populates="courses")
     assignments = relationship("Assignment", back_populates="course")
@@ -126,11 +129,29 @@ class Assignment(Base):
     rubric_version_id: str = Column("rubric_version_id", String, ForeignKey("assignment_rubric.rubric_version_id"), nullable=False)
     code_language: str = Column("code_language", String, nullable=False)
     due_date: Date = Column("due_date", Date, nullable=False)
+    assignment_name = Column(Text, nullable=False)
+    assignment_description = Column(Text, nullable=True)
+    max_files = Column(Integer, nullable=False, default=1)
+    max_score = Column(Integer, nullable=True)
+
 
     course = relationship("Course", back_populates="assignments")
     rubric = relationship("AssignmentRubric", back_populates="assignments")
     test_cases = relationship("TestCase", back_populates="assignment")
     submissions = relationship("Submission", back_populates="assignment")
+    assignment_files = relationship("AssignmentFile", back_populates="assignment", cascade="all, delete-orphan")
+
+class AssignmentFile(Base):
+    __tablename__ = "assignment_file"
+
+    assignment_file_id = Column(Text, primary_key=True)
+    assignment_id = Column(Text, ForeignKey("assignment.assignment_id", ondelete="CASCADE"), nullable=False)
+    file_name = Column(Text, nullable=False)
+    file_path = Column(Text, nullable=False)
+    uploaded_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
+
+    assignment = relationship("Assignment", back_populates="assignment_files")
+    uploader = relationship("UsersAccount")
 
 
 class TestCase(Base):
