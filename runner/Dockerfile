@@ -13,4 +13,4 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 COPY worker.py /app/worker.py
 COPY job_contract.py /app/job_contract.py
 
-CMD ["python", "/app/worker.py"]
+CMD ["python", "-u", "/app/worker.py"]
