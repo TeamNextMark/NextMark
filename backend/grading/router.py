@@ -28,6 +28,7 @@ async def grade_submission(
     _: dict = Depends(get_current_user),
 ):
     prompt = (
+        f"/no_think\n\n"
         f"You are a code grading assistant. Grade the following {payload.language} code "
         f"based on the rubric provided.\n\n"
         f"Rubric:\n{payload.rubric}\n\n"

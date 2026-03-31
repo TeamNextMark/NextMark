@@ -89,7 +89,7 @@ def _security_opts() -> list[str]:
     if APPARMOR_PROFILE:
         options.append(f"apparmor={APPARMOR_PROFILE}")
     if SECCOMP_PROFILE:
-        options.append(f"seccomp={SECCOMP_PROFILE}")
+        options.append(f"seccomp={Path(SECCOMP_PROFILE).read_text()}")
     return options
 
 
@@ -130,7 +130,8 @@ def _run_in_sandbox(job: SandboxJob) -> SandboxExecutionResult:
         container.kill()
         exit_code = 124
 
-    stdout_raw, stderr_raw = container.logs(stdout=True, stderr=True, demux=True)
+    stdout_raw = docker_client.api.logs(container.id, stdout=True, stderr=False)
+    stderr_raw = docker_client.api.logs(container.id, stdout=False, stderr=True)
     duration_ms = int((time.monotonic() - started_at) * 1000)
 
     stdout_text = (stdout_raw or b"").decode("utf-8", errors="replace")
