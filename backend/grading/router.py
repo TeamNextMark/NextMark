@@ -28,6 +28,7 @@ async def grade_submission(
     _: dict = Depends(get_current_user),
 ):
     prompt = (
+        f"/no_think\n\n"
         f"You are a code grading assistant. Grade the following {payload.language} code "
         f"based on the rubric provided.\n\n"
         f"Rubric:\n{payload.rubric}\n\n"
@@ -41,7 +42,7 @@ async def grade_submission(
         async with httpx.AsyncClient(timeout=300.0) as client:
             resp = await client.post(
                 f"{OLLAMA_BASE_URL}/api/generate",
-                json={"model": LLM_MODEL, "prompt": prompt, "stream": False},
+                json={"model": LLM_MODEL, "prompt": prompt, "stream": False, "options": {"num_predict": 150}},
             )
             resp.raise_for_status()
     except Exception as exc:
