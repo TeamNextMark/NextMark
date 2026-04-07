@@ -49,7 +49,6 @@ class UsersAccount(Base):
     notifications = relationship("Notification", back_populates="user", lazy="joined")
     logs = relationship("SystemLog", back_populates="user", lazy="joined")
     audit_histories = relationship("AuditHistory", back_populates="actor", lazy="joined")
-    uploaded_assignment_files = relationship("AssignmentFile", back_populates="uploader")
 
 
 class Course(Base):
@@ -152,7 +151,6 @@ class AssignmentFile(Base):
     uploaded_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
 
     assignment = relationship("Assignment", back_populates="assignment_files")
-    uploader = relationship("UsersAccount")
 
 
 class TestCase(Base):
