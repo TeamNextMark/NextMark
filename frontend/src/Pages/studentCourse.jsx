@@ -124,3 +124,5 @@ function StudentCourse() {
     </div>
   );
 }
+
+export default StudentCourse;

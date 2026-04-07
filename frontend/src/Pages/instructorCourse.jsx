@@ -116,3 +116,5 @@ function InstructorCourse() {
     </div>
   );
 }
+
+export default InstructorCourse;
