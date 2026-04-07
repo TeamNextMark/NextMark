@@ -11,28 +11,34 @@ function StudentCourse() {
   const { courseSlug } = useParams();
 
   const [course, setCourse] = useState(null);
+  const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const courseId = courseSlug.replace(/^[a-zA-Z]+/, "");
+
   useEffect(() => {
-    async function fetchCourse() {
+    async function fetchData() {
       try {
         const token = localStorage.getItem("accessToken");
 
-        const courseId = courseSlug.replace(/^[a-zA-Z]+/, "");
+        const [courseRes, assignmentsRes] = await Promise.all([
+          fetch(`${API_BASE}/courses/${courseId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch(`${API_BASE}/assignments/course/${courseId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
 
-        const response = await fetch(`${API_BASE}/courses/${courseId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        if (!courseRes.ok) throw new Error("Failed to load course");
+        if (!assignmentsRes.ok) throw new Error("Failed to load assignments");
 
-        if (!response.ok) {
-          throw new Error("Failed to load course");
-        }
+        const courseData = await courseRes.json();
+        const assignmentData = await assignmentsRes.json();
 
-        const data = await response.json();
-        setCourse(data);
+        setCourse(courseData);
+        setAssignments(assignmentData);
       } catch (err) {
         setError(err.message || "Something went wrong");
       } finally {
@@ -40,8 +46,12 @@ function StudentCourse() {
       }
     }
 
-    fetchCourse();
-  }, [courseSlug]);
+    fetchData();
+  }, [courseId]);
+
+  function goToAssignment(assignmentId) {
+    navigate(`/student/course/${courseSlug}/assignment/${assignmentId}`);
+  }
 
   function Dropdown() {
     const [isOpen, setIsOpen] = useState(false);
@@ -71,19 +81,11 @@ function StudentCourse() {
 
         {isOpen && (
           <div className="dropdown-menu">
-            <p>
-              {course
-                ? `${course.course_code} (${course.id}) for ${course.semester}`
-                : "No course selected."}
-            </p>
+            <p>{course?.course_description || "No description available."}</p>
           </div>
         )}
       </div>
     );
-  }
-
-  function goToAssignment() {
-    navigate(`/student/course/${courseSlug}/assignment`);
   }
 
   if (loading) return <div className="mainContent"><p>Loading course...</p></div>;
@@ -108,17 +110,21 @@ function StudentCourse() {
         <Dropdown />
 
         <div className="assignGrid">
-          <button className="assignCard" onClick={goToAssignment}>
-            Assignment 1
-          </button>
-
-          <button className="assignCard" onClick={goToAssignment}>
-            Assignment 2
-          </button>
-
-          <button className="assignCard" onClick={goToAssignment}>
-            Assignment 3
-          </button>
+          {assignments.length > 0 ? (
+            assignments.map((assignment) => (
+              <button
+                key={assignment.id}
+                className="assignCard"
+                onClick={() => goToAssignment(assignment.id)}
+              >
+                <strong>{assignment.assignment_name}</strong>
+                <div>Due: {assignment.due_date}</div>
+                <div>Language: {assignment.code_language}</div>
+              </button>
+            ))
+          ) : (
+            <p>No assignments found for this course.</p>
+          )}
         </div>
       </div>
     </div>

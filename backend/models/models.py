@@ -12,6 +12,7 @@ from sqlalchemy import (
     Numeric,
     TIMESTAMP,
     func,
+    Text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
