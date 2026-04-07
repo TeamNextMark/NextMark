@@ -48,7 +48,7 @@ function StudentHome() {
   }, []);
 
   function goToCourses(course) {
-    const slug = `${course.course_code}${course.course_id}`;
+    const slug = `${course.course_code}${course.id}`;
     navigate(`/student/course/${slug}`);
   }
 
@@ -71,13 +71,13 @@ function StudentHome() {
             <div className="courseImage">
               <img
                 src="/images/course1.jpg"
-                alt={`${course.course_code} (${course.course_id}) - ${course.semester}`}
+                alt={`${course.course_code} (${course.id}) - ${course.semester}`}
               />
             </div>
 
             <div className="courseInfo">
               <h2>
-                {course.course_code} - {course.course_id}{" "}
+                {course.course_code} - {course.id}{" "}
                 {course.course_name}
               </h2>
               <p>{course.semester}</p>
