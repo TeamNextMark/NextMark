@@ -2,11 +2,10 @@ import "../CSS/Template.css";
 import "../CSS/Home.css";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 
 const API_BASE = import.meta?.env?.VITE_API_URL || "/api";
 
-function Home() {
+function StudentHome() {
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,6 +16,10 @@ function Home() {
       try {
         const token = localStorage.getItem("accessToken");
 
+        if (!token) {
+          throw new Error("No access token found. Please log in again.");
+        }
+
         const response = await fetch(`${API_BASE}/courses/my-student-courses`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -24,15 +27,18 @@ function Home() {
         });
 
         if (!response.ok) {
-          throw new Error("Failed to load student courses");
+          let message = "Failed to load student courses";
+          try {
+            const err = await response.json();
+            message = err?.detail || err?.message || message;
+          } catch {}
+          throw new Error(message);
         }
 
         const data = await response.json();
-        console.log("Student courses:", data);
-
-        setCourses(data);
+        setCourses(Array.isArray(data) ? data : []);
       } catch (err) {
-        setError(err.message || "Something went wrong");
+        setError(err?.message || "Something went wrong");
       } finally {
         setLoading(false);
       }
@@ -42,34 +48,38 @@ function Home() {
   }, []);
 
   function goToCourses(course) {
-    const slug = `${course.course_code}${course.id}`;
+    const slug = `${course.course_code}${course.course_id}`;
     navigate(`/student/course/${slug}`);
   }
 
   return (
     <div className="mainContent">
-      <h1 className="pageTitle">Courses</h1>
+      <h1 className="pageTitle">My Courses</h1>
 
       {loading && <p>Loading courses...</p>}
-      {error && <p>{error}</p>}
-      {!loading && courses.length === 0 && <p>No enrolled courses.</p>}
+      {!loading && error && <p>{error}</p>}
 
       <div className="coursesGrid">
+        {!loading && !error && courses.length === 0 && <p>No courses assigned yet.</p>}
+
         {courses.map((course) => (
           <button
-            key={course.id}
+            key={course.course_id}
             className="courseCard"
             onClick={() => goToCourses(course)}
           >
             <div className="courseImage">
               <img
                 src="/images/course1.jpg"
-                alt={`${course.course_code} (${course.id}) - ${course.semester}`}
+                alt={`${course.course_code} (${course.course_id}) - ${course.semester}`}
               />
             </div>
 
             <div className="courseInfo">
-              <h2>{course.course_code} - {course.id}</h2>
+              <h2>
+                {course.course_code} - {course.course_id}{" "}
+                {course.course_name}
+              </h2>
               <p>{course.semester}</p>
             </div>
           </button>
@@ -79,4 +89,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default StudentHome;
