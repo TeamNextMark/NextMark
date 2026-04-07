@@ -1,122 +1,71 @@
 import "../CSS/instructorAssignment.css";
-import { useEffect, useMemo, useState } from "react";
-import { useParams } from "react-router-dom";
-
-const API_BASE = import.meta?.env?.VITE_API_URL || "/api";
 
 function InstructorAssignment() {
-  const { assignmentId } = useParams();
-
-  const [assignment, setAssignment] = useState(null);
-  const [submissions, setSubmissions] = useState([]);
-  const [selectedSubmission, setSelectedSubmission] = useState(null);
-  const [selectedSubmissionDetails, setSelectedSubmissionDetails] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [detailsLoading, setDetailsLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const token = localStorage.getItem("accessToken");
-
-        const [assignmentRes, submissionsRes] = await Promise.all([
-          fetch(`${API_BASE}/assignments/${assignmentId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch(`${API_BASE}/assignments/${assignmentId}/submissions`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
-
-        if (!assignmentRes.ok) throw new Error("Failed to load assignment");
-        if (!submissionsRes.ok) throw new Error("Failed to load submissions");
-
-        const assignmentData = await assignmentRes.json();
-        const submissionsData = await submissionsRes.json();
-
-        setAssignment(assignmentData);
-        setSubmissions(submissionsData);
-        setSelectedSubmission(submissionsData[0] || null);
-      } catch (err) {
-        setError(err.message || "Something went wrong");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchData();
-  }, [assignmentId]);
-
-  useEffect(() => {
-    async function fetchSelectedSubmissionDetails() {
-      if (!selectedSubmission?.submission_id) {
-        setSelectedSubmissionDetails(null);
-        return;
-      }
-
-      try {
-        setDetailsLoading(true);
-        const token = localStorage.getItem("accessToken");
-
-        const response = await fetch(
-          `${API_BASE}/submissions/${selectedSubmission.submission_id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        if (!response.ok) throw new Error("Failed to load submission details");
-
-        const data = await response.json();
-        setSelectedSubmissionDetails(data);
-      } catch (err) {
-        setSelectedSubmissionDetails(null);
-      } finally {
-        setDetailsLoading(false);
-      }
-    }
-
-    fetchSelectedSubmissionDetails();
-  }, [selectedSubmission]);
-
-  function formatDate(value) {
-    if (!value) return "N/A";
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return value;
-    return date.toLocaleString();
-  }
-
-  function getStatusInfo(item) {
-    if (!item) return { label: "Unknown", dotClass: "purple", tagClass: "tag-gray" };
-
-    if (!item.score && !item.faculty_reviewed) {
-      return { label: "In queue", dotClass: "purple", tagClass: "tag-gray" };
-    }
-
-    if (item.score != null && item.score < 60) {
-      return { label: "Needs review", dotClass: "red", tagClass: "tag-red" };
-    }
-
-    if (item.score != null && item.score < 80) {
-      return { label: "Medium confidence", dotClass: "yellow", tagClass: "tag-yellow" };
-    }
-
-    return { label: "Reviewed", dotClass: "green", tagClass: "tag-green" };
-  }
-
-  const reviewedCount = useMemo(
-    () => submissions.filter((s) => s.faculty_reviewed).length,
-    [submissions]
-  );
-
-  const progressPercent = submissions.length
-    ? Math.round((reviewedCount / submissions.length) * 100)
-    : 0;
-
-  if (loading) return <div className="review-page"><div className="review-body"><p>Loading...</p></div></div>;
-  if (error && !assignment) return <div className="review-page"><div className="review-body"><p>{error}</p></div></div>;
-  if (!assignment) return <div className="review-page"><div className="review-body"><p>Assignment not found.</p></div></div>;
+  const submissions = [
+    {
+      id: 1,
+      student: "student_2213_001",
+      score: "0/100",
+      time: "2025-11-14 18:45",
+      status: "Compilation error",
+      dotClass: "red",
+      active: false,
+    },
+    {
+      id: 2,
+      student: "student_2213_002",
+      score: "78/100",
+      time: "2025-11-14 19:12",
+      status: "Medium confidence",
+      dotClass: "yellow",
+      active: true,
+    },
+    {
+      id: 3,
+      student: "student_2213_003",
+      score: "95/100",
+      time: "2025-11-14 17:30",
+      status: "",
+      dotClass: "green",
+      active: false,
+    },
+    {
+      id: 4,
+      student: "student_2213_004",
+      score: "88/100",
+      time: "2025-11-14 18:00",
+      status: "",
+      dotClass: "green",
+      active: false,
+    },
+    {
+      id: 5,
+      student: "student_2213_005",
+      score: "45/100",
+      time: "2025-11-14 19:45",
+      status: "Failed 7/10 tests",
+      dotClass: "red",
+      active: false,
+    },
+    {
+      id: 6,
+      student: "student_2213_006",
+      score: "92/100",
+      time: "2025-11-14 16:15",
+      status: "",
+      dotClass: "green",
+      active: false,
+    },
+    {
+      id: 7,
+      student: "student_2213_007",
+      score: "",
+      time: "2025-11-14 20:01",
+      status: "In queue",
+      dotClass: "purple",
+      active: false,
+    },
+  ];
 
   return (
     <div className="review-page">
@@ -124,162 +73,240 @@ function InstructorAssignment() {
         <aside className="review-sidebar">
           <h2 className="sidebar-title">Submission Queue</h2>
 
-          <select className="sidebar-select" defaultValue="all">
-            <option value="all">All Submissions</option>
+          <select className="sidebar-select">
+            <option>All Submissions</option>
           </select>
 
-          <select className="sidebar-select" defaultValue="status">
-            <option value="status">Sort by: Status</option>
+          <select className="sidebar-select">
+            <option>Sort by: Status</option>
           </select>
 
           <div className="progress-block">
             <div className="progress-row">
               <span>Progress:</span>
-              <span>{reviewedCount}/{submissions.length} Reviewed</span>
+              <span>3/7 Reviewed</span>
             </div>
             <div className="progress-bar">
-              <div className="progress-fill" style={{ width: `${progressPercent}%` }} />
+              <div className="progress-fill" />
             </div>
           </div>
 
           <div className="submission-list">
-            {submissions.length > 0 ? (
-              submissions.map((item) => {
-                const statusInfo = getStatusInfo(item);
-
-                return (
-                  <div
-                    key={item.submission_id}
-                    className={`submission-item ${
-                      selectedSubmission?.submission_id === item.submission_id ? "active" : ""
-                    }`}
-                    onClick={() => setSelectedSubmission(item)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <div className="submission-top">
-                      <div className="submission-left">
-                        <span className={`status-dot ${statusInfo.dotClass}`} />
-                        <span className="student-id">{item.student_id}</span>
-                      </div>
-                      <div className="submission-score">
-                        {item.score != null ? `${item.score}/${assignment.max_score ?? 100}` : "--"}
-                      </div>
-                    </div>
-
-                    <div className="submission-time">{formatDate(item.submitted_at)}</div>
-
-                    <div className={`submission-tag ${statusInfo.tagClass}`}>
-                      {statusInfo.label}
-                    </div>
+            {submissions.map((item) => (
+              <div
+                key={item.id}
+                className={`submission-item ${item.active ? "active" : ""}`}
+              >
+                <div className="submission-top">
+                  <div className="submission-left">
+                    <span className={`status-dot ${item.dotClass}`} />
+                    <span className="student-id">{item.student}</span>
                   </div>
-                );
-              })
-            ) : (
-              <p>No submissions yet.</p>
-            )}
+                  <div className="submission-score">{item.score}</div>
+                </div>
+
+                <div className="submission-time">{item.time}</div>
+
+                {item.status && (
+                  <div
+                    className={`submission-tag ${
+                      item.dotClass === "red"
+                        ? "tag-red"
+                        : item.dotClass === "yellow"
+                        ? "tag-yellow"
+                        : item.dotClass === "purple"
+                        ? "tag-gray"
+                        : "tag-green"
+                    }`}
+                  >
+                    {item.status}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </aside>
 
         <main className="review-main">
           <section className="panel student-summary-panel">
             <div className="student-summary-left">
-              <h1>{assignment.assignment_name}</h1>
-              <p>
-                {selectedSubmission
-                  ? `Student: ${selectedSubmission.student_id} | Submitted: ${formatDate(selectedSubmission.submitted_at)}`
-                  : "No submission selected"}
-              </p>
+              <h1>Student: student_2213_002</h1>
+              <p>Submitted: 2025-11-14 19:12</p>
             </div>
 
             <div className="student-summary-right">
-              <div className="large-score">
-                {selectedSubmission?.score != null
-                  ? `${selectedSubmission.score}/${assignment.max_score ?? 100}`
-                  : "--"}
-              </div>
-              <div className="confidence-text">
-                Faculty Reviewed: {selectedSubmission?.faculty_reviewed ? "Yes" : "No"}
-              </div>
+              <div className="large-score">78/100</div>
+              <div className="confidence-text">AI Confidence: 72%</div>
             </div>
           </section>
 
           <section className="panel code-panel">
             <div className="panel-header dark-header">
-              <span>Submission Output</span>
-              <button className="small-dark-btn" type="button">Expand</button>
+              <span>quicksort.cpp</span>
+              <button className="small-dark-btn">Expand</button>
             </div>
 
             <div className="code-box">
-              <pre>
-{detailsLoading
-  ? "Loading submission details..."
-  : selectedSubmissionDetails?.stdout ||
-    selectedSubmissionDetails?.stderr ||
-    "No code/output preview available yet."}
-              </pre>
+              <pre>{`#include <iostream>
+using namespace std;
+
+void quicksort(int arr[], int low, int high) {
+    if (low < high) {
+        int pivot = arr[high];
+        int i = low - 1;
+
+        for (int j = low; j < high; j++) {
+            if (arr[j] < pivot) {
+                i++;
+                swap(arr[i], arr[j]);
+            }
+        }
+
+        swap(arr[i + 1], arr[high]);
+        int pi = i + 1;
+
+        quicksort(arr, low, pi - 1);
+        quicksort(arr, pi + 1, high);
+    }
+}`}</pre>
             </div>
           </section>
 
           <section className="panel test-results-panel">
             <div className="panel-header light-header">
-              <span>Execution Results</span>
-              <span className="passed-count">
-                {selectedSubmissionDetails?.status || "Pending"}
-              </span>
+              <span>Test Results</span>
+              <span className="passed-count">8/10 Passed</span>
             </div>
 
             <div className="test-results-content">
-              <div className="test-row">
-                <div className="test-icon">•</div>
+              <div className="test-row success">
+                <div className="test-icon">✓</div>
                 <div className="test-info">
-                  <div className="test-title">Exit Code</div>
+                  <div className="test-title">Negative numbers</div>
+                  <div className="test-detail">Input: [-5, 3, -1, 0]</div>
                   <div className="test-detail">
-                    {selectedSubmissionDetails?.exit_code ?? "N/A"}
+                    Expected: [-5, -1, 0, 3] <span className="green-text">Got: [-5, -1, 0, 3]</span>
                   </div>
                 </div>
               </div>
 
-              <div className="test-row">
-                <div className="test-icon">•</div>
+              <div className="test-row fail">
+                <div className="test-icon">✕</div>
                 <div className="test-info">
-                  <div className="test-title">Timed Out</div>
+                  <div className="test-title">Large array (10000 elements)</div>
+                  <div className="test-detail">Input: [random...]</div>
                   <div className="test-detail">
-                    {selectedSubmissionDetails?.timed_out ? "Yes" : "No"}
+                    Expected: [sorted...] <span className="red-text">Got: Timeout</span>
                   </div>
                 </div>
               </div>
-
-              <div className="test-row">
-                <div className="test-icon">•</div>
-                <div className="test-info">
-                  <div className="test-title">Duration</div>
-                  <div className="test-detail">
-                    {selectedSubmissionDetails?.duration_ms != null
-                      ? `${selectedSubmissionDetails.duration_ms} ms`
-                      : "N/A"}
-                  </div>
-                </div>
-              </div>
-
-              {selectedSubmissionDetails?.stderr && (
-                <div className="test-row fail">
-                  <div className="test-icon">✕</div>
-                  <div className="test-info">
-                    <div className="test-title">stderr</div>
-                    <div className="test-detail">{selectedSubmissionDetails.stderr}</div>
-                  </div>
-                </div>
-              )}
             </div>
           </section>
 
           <section className="feedback-box">
-            <div className="feedback-title">AI / System Feedback</div>
+            <div className="feedback-title"> AI Feedback (Confidence: 78%)</div>
             <p>
-              {selectedSubmissionDetails?.status === "completed"
-                ? "This submission has completed execution. Review output, score, and any errors before finalizing."
-                : "This submission is still queued or has limited execution details available."}
+              The implementation demonstrates correct QuickSort logic with proper
+              partitioning. However, the algorithm exhibits O(n²) worst-case
+              performance on large arrays. Consider implementing median-of-three
+              pivot selection or switching to a hybrid approach for better
+              performance on edge cases. Code style and documentation are
+              excellent.
             </p>
+          </section>
+
+          <section className="panel rubric-panel">
+            <div className="panel-header light-header">
+              <span>Rubric Breakdown</span>
+            </div>
+
+            <div className="table-wrap">
+              <table className="rubric-table">
+                <thead>
+                  <tr>
+                    <th>Criterion</th>
+                    <th>Points Earned</th>
+                    <th>Max Points</th>
+                    <th>Comments</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Correctness</td>
+                    <td>25</td>
+                    <td>30</td>
+                    <td>Failed tests 3 and 10 for large array inputs</td>
+                  </tr>
+                  <tr>
+                    <td>Efficiency</td>
+                    <td>15</td>
+                    <td>25</td>
+                    <td>Timeout on large arrays - O(n²) worst case instead of O(n log n)</td>
+                  </tr>
+                  <tr>
+                    <td>Code Style</td>
+                    <td>20</td>
+                    <td>20</td>
+                    <td>Excellent formatting and naming conventions</td>
+                  </tr>
+                  <tr>
+                    <td>Documentation</td>
+                    <td>15</td>
+                    <td>15</td>
+                    <td>Clear comments explaining algorithm</td>
+                  </tr>
+                  <tr>
+                    <td>Edge Cases</td>
+                    <td>8</td>
+                    <td>10</td>
+                    <td>Handles most edge cases but not optimized for large inputs</td>
+                  </tr>
+                  <tr className="total-row">
+                    <td>TOTAL</td>
+                    <td>83</td>
+                    <td>100</td>
+                    <td></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="panel manual-override-panel">
+            <h3 className="manual-title">Manual Override</h3>
+
+            <div className="radio-row">
+              <label>
+                <input type="radio" name="gradeOption" defaultChecked />
+                <span>Accept AI Grade (83/100)</span>
+              </label>
+
+              <label>
+                <input type="radio" name="gradeOption" />
+                <span>Manual Grade:</span>
+              </label>
+
+              <input
+                className="manual-grade-input"
+                type="text"
+                placeholder="0-100"
+              />
+              <span>/ 100</span>
+            </div>
+
+            <div className="comments-block">
+              <label className="comments-label">Instructor Comments:</label>
+              <textarea
+                className="comments-textarea"
+                placeholder="Add your comments for the student..."
+              />
+            </div>
+
+            <div className="button-row">
+              <button className="primary-btn">Finalize Grade</button>
+              <button className="warning-btn">Flag for Review</button>
+              <button className="secondary-btn">Next Submission →</button>
+            </div>
           </section>
         </main>
       </div>
