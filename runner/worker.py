@@ -250,7 +250,7 @@ def _run_in_sandbox(job: SandboxJob) -> SandboxExecutionResult:
         security_opt=_security_opts(),
         tmpfs={
             "/tmp": f"rw,nosuid,nodev,size={TMPFS_SIZE}",
-            "/sandbox": f"rw,nosuid,nodev,size={TMPFS_SIZE}",
+            "/sandbox": f"rw,nosuid,nodev,exec,size={TMPFS_SIZE}",
         },
         volumes={
             str(workspace): {"bind": "/workspace", "mode": "ro"},
