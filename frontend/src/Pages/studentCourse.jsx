@@ -103,7 +103,7 @@ function StudentCourse() {
 
       <div className="textContent">
         <div className="courseTitle">
-          <h1>{course.course_code} - {course.id}</h1>
+          <h1>{course.course_code} - {course.id} {" "} {course.course_name}</h1>
           <p>{course.semester}</p>
         </div>
 

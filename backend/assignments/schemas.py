@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+from datetime import date
 
 class AssignmentBase(BaseModel):
     id: str
@@ -22,7 +23,7 @@ class AssignmentListItem(BaseModel):
     assignment_name: str
     assignment_description: Optional[str] = None
     code_language: str
-    due_date: str
+    due_date: date
     max_files: int
     max_score: Optional[int] = None
 
