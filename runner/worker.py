@@ -14,7 +14,16 @@ from job_contract import SandboxExecutionResult, SandboxJob
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 POLL_INTERVAL_SECONDS = int(os.getenv("RUNNER_POLL_INTERVAL_SECONDS", "5"))
-WORKSPACE_BASE_DIR = Path(os.getenv("RUNNER_WORKSPACE_BASE_DIR", "/tmp/nextmark-submissions"))
+
+# Path visible inside backend/runner containers
+WORKSPACE_BASE_DIR = Path(
+    os.getenv("RUNNER_WORKSPACE_BASE_DIR", "/var/lib/nextmark/submissions")
+)
+
+# Real host path used by Docker bind mounts
+HOST_WORKSPACE_BASE_DIR = Path(
+    os.getenv("HOST_SUBMISSIONS_BASE_DIR", "/srv/nextmark/submissions")
+)
 
 PYTHON_IMAGE = os.getenv("RUNNER_SANDBOX_PYTHON_IMAGE", "nextmark-sandbox-python:latest")
 CPP_IMAGE = os.getenv("RUNNER_SANDBOX_CPP_IMAGE", "nextmark-sandbox-cpp:latest")
@@ -26,7 +35,6 @@ TIMEOUT_SECONDS = int(os.getenv("RUNNER_TIMEOUT_SECONDS", "10"))
 TMPFS_SIZE = os.getenv("RUNNER_SANDBOX_TMPFS_SIZE", "64m")
 APPARMOR_PROFILE = os.getenv("RUNNER_APPARMOR_PROFILE", "")
 SECCOMP_PROFILE = os.getenv("RUNNER_SECCOMP_PROFILE", "")
-
 
 if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL is required for runner worker")
@@ -52,6 +60,10 @@ def _build_job(row) -> SandboxJob:
 
 
 def _get_workspace_path(job: SandboxJob) -> Path:
+    """
+    Container-visible workspace path.
+    Kept for validation/debugging if needed.
+    """
     value = job.encrypted_file_paths.get("workspace_path")
     if not value:
         raise ValueError("encrypted_file_paths.workspace_path is required")
@@ -62,8 +74,26 @@ def _get_workspace_path(job: SandboxJob) -> Path:
     if not str(workspace_path).startswith(str(allowed_root)):
         raise ValueError("workspace path must be under RUNNER_WORKSPACE_BASE_DIR")
 
+    return workspace_path
+
+
+def _get_host_workspace_path(job: SandboxJob) -> Path:
+    """
+    Host-visible workspace path.
+    This must be used for Docker bind mounts.
+    """
+    value = job.encrypted_file_paths.get("host_workspace_path")
+    if not value:
+        raise ValueError("encrypted_file_paths.host_workspace_path is required")
+
+    workspace_path = Path(value).resolve()
+    allowed_root = HOST_WORKSPACE_BASE_DIR.resolve()
+
+    if not str(workspace_path).startswith(str(allowed_root)):
+        raise ValueError("host workspace path must be under HOST_SUBMISSIONS_BASE_DIR")
+
     if not workspace_path.exists() or not workspace_path.is_dir():
-        raise ValueError("workspace path does not exist")
+        raise ValueError(f"host workspace path does not exist: {workspace_path}")
 
     return workspace_path
 
@@ -94,9 +124,19 @@ def _security_opts() -> list[str]:
 
 
 def _run_in_sandbox(job: SandboxJob) -> SandboxExecutionResult:
-    workspace = _get_workspace_path(job)
+    # Optional validation of container path metadata
+    _get_workspace_path(job)
+
+    # Critical: use host path for Docker bind mount
+    workspace = _get_host_workspace_path(job)
+
     image = _image_for_language(job.language)
     command = _container_command(job.language)
+
+    print(f"[runner] submission={job.submission_id}")
+    print(f"[runner] host workspace={workspace}")
+    print(f"[runner] language={job.language}")
+    print(f"[runner] command={command}")
 
     started_at = time.monotonic()
     container = docker_client.containers.run(
@@ -144,6 +184,7 @@ def _run_in_sandbox(job: SandboxJob) -> SandboxExecutionResult:
 
     if len(stdout_text) > 50000:
         print(f"[runner] warning: stdout truncated at 50000 chars for submission={job.submission_id}")
+
     return SandboxExecutionResult(
         submission_id=job.submission_id,
         exit_code=exit_code,

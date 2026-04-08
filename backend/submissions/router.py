@@ -20,6 +20,10 @@ from backend.submissions.schemas import SubmissionCreateResponse, SubmissionStat
 router = APIRouter(tags=["submissions"], prefix="/submissions")
 
 SUBMISSIONS_BASE_DIR = Path(os.getenv("SUBMISSIONS_BASE_DIR", "/var/lib/nextmark/submissions"))
+HOST_SUBMISSIONS_BASE_DIR = Path(
+    os.getenv("HOST_SUBMISSIONS_BASE_DIR", "/srv/nextmark/submissions")
+)
+
 MAX_FILES = int(os.getenv("SUBMISSIONS_MAX_FILES", "5"))
 MAX_FILE_SIZE_BYTES = int(os.getenv("SUBMISSIONS_MAX_FILE_SIZE_BYTES", str(5 * 1024 * 1024)))
 
@@ -76,110 +80,69 @@ def _ensure_runner_entrypoint(language: str, workspace_path: Path, stored_names:
 
 
 @router.post("/", response_model=SubmissionCreateResponse, status_code=status.HTTP_201_CREATED)
-def create_submission(
-    assignment_id: str = Form(...),
-    files: list[UploadFile] = File(...),
-    db: Session = Depends(get_db),
-    claims: dict = Depends(get_current_user),
-):
-    student_id = claims.get("sub")
-    if not student_id:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing user subject in token")
+submission_id = str(uuid.uuid4())
 
-    user = db.query(UsersAccount).filter(UsersAccount.id == student_id).first()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student account not found")
+workspace_path = (SUBMISSIONS_BASE_DIR / submission_id).resolve()
+host_workspace_path = (HOST_SUBMISSIONS_BASE_DIR / submission_id).resolve()
 
-    assignment = db.query(Assignment).filter(Assignment.id == assignment_id).first()
-    if not assignment:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Assignment not found")
+base_dir = SUBMISSIONS_BASE_DIR.resolve()
+host_base_dir = HOST_SUBMISSIONS_BASE_DIR.resolve()
 
-    if "student" not in (user.position or []):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Only students can submit assignments")
+if not str(workspace_path).startswith(str(base_dir)):
+    raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="Invalid workspace path",
+    )
 
-    if not files:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="At least one file is required")
-    if len(files) > MAX_FILES:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Maximum {MAX_FILES} files allowed")
+if not str(host_workspace_path).startswith(str(host_base_dir)):
+    raise HTTPException(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail="Invalid host workspace path",
+    )
 
-    language = (assignment.code_language or "").strip().lower()
-    allowed = None
-    #if not allowed:
-        #raise HTTPException(
-            #status_code=status.HTTP_400_BAD_REQUEST,
-            #detail=f"Unsupported assignment language: {assignment.code_language}",
-        #)
+workspace_path.mkdir(parents=True, exist_ok=False)
+stored_names: list[str] = []
 
-    submission_id = str(uuid.uuid4())
-    workspace_path = (SUBMISSIONS_BASE_DIR / submission_id).resolve()
-    base_dir = SUBMISSIONS_BASE_DIR.resolve()
+try:
+    for upload in files:
+        try:
+            safe_name = _safe_filename(upload.filename or "")
+        except ValueError as exc:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
 
-    if not str(workspace_path).startswith(str(base_dir)):
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Invalid workspace path")
+        destination = workspace_path / safe_name
+        content = upload.file.read(MAX_FILE_SIZE_BYTES + 1)
+        if len(content) > MAX_FILE_SIZE_BYTES:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"File too large: {safe_name} (max {MAX_FILE_SIZE_BYTES} bytes)",
+            )
 
-    workspace_path.mkdir(parents=True, exist_ok=False)
-    stored_names: list[str] = []
+        with destination.open("wb") as out_file:
+            out_file.write(content)
 
-    try:
-        for upload in files:
-            try:
-                safe_name = _safe_filename(upload.filename or "")
-            except ValueError as exc:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+        stored_names.append(safe_name)
 
-            #suffix = Path(safe_name).suffix.lower()
-            #if suffix not in allowed:
-             #   raise HTTPException(
-              #      status_code=status.HTTP_400_BAD_REQUEST,
-               #     detail=f"File type not allowed for {language}: {safe_name}",
-                #)
+        print("DEBUG language:", language)
+        print("DEBUG stored_names:", stored_names)
+        print("DEBUG workspace_path:", workspace_path)
+        print("DEBUG host_workspace_path:", host_workspace_path)
 
-            destination = workspace_path / safe_name
-            content = upload.file.read(MAX_FILE_SIZE_BYTES + 1)
-            if len(content) > MAX_FILE_SIZE_BYTES:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"File too large: {safe_name} (max {MAX_FILE_SIZE_BYTES} bytes)",
-                )
+    _ensure_runner_entrypoint(language, workspace_path, stored_names)
 
-            with destination.open("wb") as out_file:
-                out_file.write(content)
-
-            stored_names.append(safe_name)
-
-            print("DEBUG language:", language)
-            print("DEBUG stored_names:", stored_names)
-            print("DEBUG workspace_path:", workspace_path)
-
-        _ensure_runner_entrypoint(language, workspace_path, stored_names)
-
-        submission = Submission(
-            id=submission_id,
-            assignment_id=assignment_id,
-            student_id=student_id,
-            encrypted_file_paths={
-                "workspace_path": str(workspace_path),
-                "files": stored_names,
-            },
-        )
-        db.add(submission)
-        db.commit()
-
-    except HTTPException:
-        db.rollback()
-        shutil.rmtree(workspace_path, ignore_errors=True)
-        raise
-    except Exception as exc:
-        db.rollback()
-        shutil.rmtree(workspace_path, ignore_errors=True)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Submission failed: {exc}")
-
-    return SubmissionCreateResponse(
-        submission_id=submission_id,
+    submission = Submission(
+        id=submission_id,
         assignment_id=assignment_id,
         student_id=student_id,
-        status="queued",
+        encrypted_file_paths={
+            "workspace_path": str(workspace_path),
+            "host_workspace_path": str(host_workspace_path),
+            "files": stored_names,
+        },
     )
+    db.add(submission)
+    db.commit()
+    
 
 
 @router.get("/{submission_id}", response_model=SubmissionStatusResponse)
