@@ -133,7 +133,7 @@ def create_submission(
 
             stored_names.append(safe_name)
 
-        #_ensure_runner_entrypoint(language, workspace_path, stored_names)
+        _ensure_runner_entrypoint(language, workspace_path, stored_names)
 
         submission = Submission(
             id=submission_id,
