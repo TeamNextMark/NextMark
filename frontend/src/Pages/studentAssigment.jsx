@@ -76,7 +76,7 @@ function StudentAssignment() {
   }
 
   async function handleSubmit() {
-    if (!selectedFiles.length) return;
+    //if (!selectedFiles.length) return;
 
     try {
       setSubmitting(true);
