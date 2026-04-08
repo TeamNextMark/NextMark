@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from backend.auth.tokens import get_current_user
 from backend.database.session import get_db
 from backend.models import Assignment, GradingResult, Submission, SystemLog, UsersAccount
-from backend.submissions.schemas import SubmissionCreateResponse, SubmissionStatusResponse
+from backend.submissions.schemas import SubmissionCreateResponse, SubmissionStatusResponse, SubmissionGradeUpdateRequest
 
 router = APIRouter(tags=["submissions"], prefix="/submissions")
 
@@ -270,6 +270,9 @@ def get_submission_status(
     ai_confidence = rubric_scores.get("ai_confidence")
     test_results = rubric_scores.get("test_results")
     rubric_breakdown = rubric_scores.get("rubric_breakdown")
+    instructor_comments = rubric_scores.get("instructor_comments")
+    accepted_ai_grade = rubric_scores.get("accepted_ai_grade")
+    ai_recommended_score = rubric_scores.get("ai_recommended_score")
 
     return SubmissionStatusResponse(
         submission_id=submission.id,
@@ -290,4 +293,62 @@ def get_submission_status(
         ai_confidence=ai_confidence,
         test_results=test_results,
         rubric_breakdown=rubric_breakdown,
+        instructor_comments=instructor_comments,
+        accepted_ai_grade=accepted_ai_grade,
+        ai_recommended_score=ai_recommended_score,
     )
+
+
+@router.patch("/{submission_id}/grade")
+def finalize_submission_grade(
+    submission_id: str,
+    payload: SubmissionGradeUpdateRequest,
+    db: Session = Depends(get_db),
+    claims: dict = Depends(get_current_user),
+):
+    current_user_id = claims.get("sub")
+    if not current_user_id:
+        raise HTTPException(status_code=401, detail="Missing user subject in token")
+
+    current_user = db.query(UsersAccount).filter(UsersAccount.id == current_user_id).first()
+    if not current_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    roles = set(current_user.position or [])
+    if not bool({"faculty", "admin", "ta"}.intersection(roles)):
+        raise HTTPException(status_code=403, detail="Only faculty/admin/ta can finalize grades")
+
+    grading = db.query(GradingResult).filter(GradingResult.submission_id == submission_id).first()
+    if not grading:
+        raise HTTPException(status_code=404, detail="Grading result not found")
+
+    rubric_scores = grading.rubric_scores if isinstance(grading.rubric_scores, dict) else {}
+
+    ai_recommended_score = rubric_scores.get("ai_recommended_score", float(grading.total_points_earned))
+
+    if payload.accept_ai_grade:
+        final_score = float(ai_recommended_score)
+    else:
+        if payload.manual_score is None:
+            raise HTTPException(status_code=400, detail="Manual score is required when AI score is not accepted")
+        final_score = float(payload.manual_score)
+
+    rubric_scores["ai_recommended_score"] = ai_recommended_score
+    rubric_scores["accepted_ai_grade"] = payload.accept_ai_grade
+    rubric_scores["instructor_comments"] = payload.instructor_comments or ""
+
+    grading.total_points_earned = final_score
+    grading.rubric_scores = rubric_scores
+    grading.faculty_reviewed = True
+
+    db.add(grading)
+    db.commit()
+    db.refresh(grading)
+
+    return {
+        "submission_id": submission_id,
+        "score": float(grading.total_points_earned),
+        "faculty_reviewed": grading.faculty_reviewed,
+        "accepted_ai_grade": rubric_scores.get("accepted_ai_grade"),
+        "instructor_comments": rubric_scores.get("instructor_comments"),
+    }

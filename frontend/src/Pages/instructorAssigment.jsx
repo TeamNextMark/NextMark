@@ -15,6 +15,11 @@ function InstructorAssignment() {
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const [acceptAiGrade, setAcceptAiGrade] = useState(true);
+  const [manualScore, setManualScore] = useState("");
+  const [instructorComments, setInstructorComments] = useState("");
+  const [savingGrade, setSavingGrade] = useState(false);
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -115,6 +120,92 @@ function InstructorAssignment() {
     fetchSelectedSubmissionDetails();
   }, [selectedSubmission]);
 
+  useEffect(() => {
+    if (!selectedSubmissionDetails) return;
+
+    setAcceptAiGrade(
+      selectedSubmissionDetails?.accepted_ai_grade ?? true
+    );
+
+    setManualScore(
+      selectedSubmissionDetails?.score != null
+        ? String(selectedSubmissionDetails.score)
+        : ""
+    );
+
+    setInstructorComments(
+      selectedSubmissionDetails?.instructor_comments || ""
+    );
+  }, [selectedSubmissionDetails]);
+
+  async function finalizeGrade() {
+    if (!selectedSubmission?.submission_id) return;
+
+    try {
+      setSavingGrade(true);
+
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        throw new Error("No access token found.");
+      }
+
+      const response = await fetch(
+        `${API_BASE}/submissions/${selectedSubmission.submission_id}/grade`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            accept_ai_grade: acceptAiGrade,
+            manual_score: acceptAiGrade ? null : Number(manualScore),
+            instructor_comments: instructorComments,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        let message = "Failed to finalize grade";
+        try {
+          const err = await response.json();
+          message = err?.detail || err?.message || message;
+        } catch {}
+        throw new Error(message);
+      }
+
+      const refreshed = await fetch(
+        `${API_BASE}/submissions/${selectedSubmission.submission_id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (!refreshed.ok) {
+        throw new Error("Failed to refresh submission details");
+      }
+
+      const refreshedData = await refreshed.json();
+      setSelectedSubmissionDetails(refreshedData);
+
+      setSubmissions((prev) =>
+        prev.map((item) =>
+          item.submission_id === selectedSubmission.submission_id
+            ? {
+                ...item,
+                score: refreshedData.score,
+                faculty_reviewed: refreshedData.faculty_reviewed,
+              }
+            : item
+        )
+      );
+    } catch (err) {
+      alert(err?.message || "Could not save grade");
+    } finally {
+      setSavingGrade(false);
+    }
+  }
+
   function formatDate(value) {
     if (!value) return "N/A";
     const date = new Date(value);
@@ -181,6 +272,11 @@ function InstructorAssignment() {
     selectedSubmissionDetails?.ai_confidence != null
       ? Math.round(selectedSubmissionDetails.ai_confidence * 100)
       : null;
+
+  const aiRecommendedScore =
+    selectedSubmissionDetails?.ai_recommended_score ??
+    selectedSubmissionDetails?.score ??
+    0;
 
   if (loading) {
     return (
@@ -425,6 +521,15 @@ function InstructorAssignment() {
                   : "This submission is still queued or has limited execution details available.")}
             </p>
 
+            {selectedSubmissionDetails?.instructor_comments && (
+              <div style={{ marginTop: "16px" }}>
+                <strong>Instructor Comments:</strong>
+                <p style={{ marginTop: "6px" }}>
+                  {selectedSubmissionDetails.instructor_comments}
+                </p>
+              </div>
+            )}
+
             {Array.isArray(selectedSubmissionDetails?.rubric_breakdown) &&
               selectedSubmissionDetails.rubric_breakdown.length > 0 && (
                 <div style={{ marginTop: "16px" }}>
@@ -450,6 +555,100 @@ function InstructorAssignment() {
                   </table>
                 </div>
               )}
+          </section>
+
+          <section className="panel" style={{ marginTop: "20px" }}>
+            <div className="panel-header light-header">
+              <span>Instructor Review</span>
+            </div>
+
+            <div style={{ padding: "16px" }}>
+              <div style={{ marginBottom: "16px", fontWeight: 600 }}>
+                Final Score Decision
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                <label>
+                  <input
+                    type="radio"
+                    name="gradeOption"
+                    checked={acceptAiGrade}
+                    onChange={() => setAcceptAiGrade(true)}
+                  />
+                  {" "}
+                  Accept AI Grade ({aiRecommendedScore}/{assignmentMaxScore})
+                </label>
+
+                <label>
+                  <input
+                    type="radio"
+                    name="gradeOption"
+                    checked={!acceptAiGrade}
+                    onChange={() => setAcceptAiGrade(false)}
+                  />
+                  {" "}
+                  Manual Grade
+                </label>
+              </div>
+
+              <div style={{ marginTop: "16px" }}>
+                <label style={{ display: "block", marginBottom: "8px" }}>
+                  Manual Score
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max={assignmentMaxScore}
+                  step="0.01"
+                  disabled={acceptAiGrade}
+                  value={manualScore}
+                  onChange={(e) => setManualScore(e.target.value)}
+                  style={{
+                    width: "120px",
+                    padding: "8px",
+                    borderRadius: "8px",
+                    border: "1px solid #ccc",
+                  }}
+                />
+                <span style={{ marginLeft: "8px" }}>/ {assignmentMaxScore}</span>
+              </div>
+
+              <div style={{ marginTop: "20px" }}>
+                <label style={{ display: "block", marginBottom: "8px" }}>
+                  Instructor Comments
+                </label>
+                <textarea
+                  value={instructorComments}
+                  onChange={(e) => setInstructorComments(e.target.value)}
+                  placeholder="Add comments for the student..."
+                  style={{
+                    width: "100%",
+                    minHeight: "110px",
+                    padding: "12px",
+                    borderRadius: "10px",
+                    border: "1px solid #ccc",
+                    resize: "vertical",
+                  }}
+                />
+              </div>
+
+              <div style={{ marginTop: "20px", display: "flex", gap: "12px" }}>
+                <button
+                  type="button"
+                  onClick={finalizeGrade}
+                  disabled={savingGrade}
+                  style={{
+                    padding: "10px 16px",
+                    borderRadius: "10px",
+                    border: "none",
+                    cursor: "pointer",
+                    fontWeight: 600,
+                  }}
+                >
+                  {savingGrade ? "Saving..." : "Finalize Grade"}
+                </button>
+              </div>
+            </div>
           </section>
         </main>
       </div>

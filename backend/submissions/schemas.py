@@ -5,6 +5,12 @@
 from pydantic import BaseModel
 
 
+
+class SubmissionGradeUpdateRequest(BaseModel):
+    accept_ai_grade: bool = True
+    manual_score: float | None = None
+    instructor_comments: str | None = None
+
 class SubmissionCreateResponse(BaseModel):
     submission_id: str
     assignment_id: str
@@ -31,3 +37,6 @@ class SubmissionStatusResponse(BaseModel):
     ai_confidence: float | None = None
     test_results: list[dict] | None = None
     rubric_breakdown: list[dict] | None = None
+    instructor_comments: str | None = None
+    accepted_ai_grade: bool | None = None
+    ai_recommended_score: float | None = None
