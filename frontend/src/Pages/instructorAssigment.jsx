@@ -18,7 +18,13 @@ function InstructorAssignment() {
   useEffect(() => {
     async function fetchData() {
       try {
+        setLoading(true);
+        setError("");
+
         const token = localStorage.getItem("accessToken");
+        if (!token) {
+          throw new Error("No access token found. Please log in again.");
+        }
 
         const [assignmentRes, submissionsRes] = await Promise.all([
           fetch(`${API_BASE}/assignments/${assignmentId}`, {
@@ -29,17 +35,34 @@ function InstructorAssignment() {
           }),
         ]);
 
-        if (!assignmentRes.ok) throw new Error("Failed to load assignment");
-        if (!submissionsRes.ok) throw new Error("Failed to load submissions");
+        if (!assignmentRes.ok) {
+          let message = "Failed to load assignment";
+          try {
+            const err = await assignmentRes.json();
+            message = err?.detail || err?.message || message;
+          } catch {}
+          throw new Error(message);
+        }
+
+        if (!submissionsRes.ok) {
+          let message = "Failed to load submissions";
+          try {
+            const err = await submissionsRes.json();
+            message = err?.detail || err?.message || message;
+          } catch {}
+          throw new Error(message);
+        }
 
         const assignmentData = await assignmentRes.json();
         const submissionsData = await submissionsRes.json();
 
+        const safeSubmissions = Array.isArray(submissionsData) ? submissionsData : [];
+
         setAssignment(assignmentData);
-        setSubmissions(submissionsData);
-        setSelectedSubmission(submissionsData[0] || null);
+        setSubmissions(safeSubmissions);
+        setSelectedSubmission(safeSubmissions[0] || null);
       } catch (err) {
-        setError(err.message || "Something went wrong");
+        setError(err?.message || "Something went wrong");
       } finally {
         setLoading(false);
       }
@@ -57,7 +80,11 @@ function InstructorAssignment() {
 
       try {
         setDetailsLoading(true);
+
         const token = localStorage.getItem("accessToken");
+        if (!token) {
+          throw new Error("No access token found.");
+        }
 
         const response = await fetch(
           `${API_BASE}/submissions/${selectedSubmission.submission_id}`,
@@ -66,11 +93,18 @@ function InstructorAssignment() {
           }
         );
 
-        if (!response.ok) throw new Error("Failed to load submission details");
+        if (!response.ok) {
+          let message = "Failed to load submission details";
+          try {
+            const err = await response.json();
+            message = err?.detail || err?.message || message;
+          } catch {}
+          throw new Error(message);
+        }
 
         const data = await response.json();
         setSelectedSubmissionDetails(data);
-      } catch (err) {
+      } catch {
         setSelectedSubmissionDetails(null);
       } finally {
         setDetailsLoading(false);
@@ -83,14 +117,16 @@ function InstructorAssignment() {
   function formatDate(value) {
     if (!value) return "N/A";
     const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return value;
+    if (Number.isNaN(date.getTime())) return String(value);
     return date.toLocaleString();
   }
 
   function getStatusInfo(item) {
-    if (!item) return { label: "Unknown", dotClass: "purple", tagClass: "tag-gray" };
+    if (!item) {
+      return { label: "Unknown", dotClass: "purple", tagClass: "tag-gray" };
+    }
 
-    if (!item.score && !item.faculty_reviewed) {
+    if (item.score == null && !item.faculty_reviewed) {
       return { label: "In queue", dotClass: "purple", tagClass: "tag-gray" };
     }
 
@@ -114,9 +150,43 @@ function InstructorAssignment() {
     ? Math.round((reviewedCount / submissions.length) * 100)
     : 0;
 
-  if (loading) return <div className="review-page"><div className="review-body"><p>Loading...</p></div></div>;
-  if (error && !assignment) return <div className="review-page"><div className="review-body"><p>{error}</p></div></div>;
-  if (!assignment) return <div className="review-page"><div className="review-body"><p>Assignment not found.</p></div></div>;
+  const assignmentTitle =
+    assignment?.assignment_name ||
+    assignment?.title ||
+    assignment?.name ||
+    "Untitled Assignment";
+
+  const assignmentMaxScore = assignment?.max_score ?? 100;
+
+  if (loading) {
+    return (
+      <div className="review-page">
+        <div className="review-body">
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !assignment) {
+    return (
+      <div className="review-page">
+        <div className="review-body">
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!assignment) {
+    return (
+      <div className="review-page">
+        <div className="review-body">
+          <p>Assignment not found.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="review-page">
@@ -135,10 +205,15 @@ function InstructorAssignment() {
           <div className="progress-block">
             <div className="progress-row">
               <span>Progress:</span>
-              <span>{reviewedCount}/{submissions.length} Reviewed</span>
+              <span>
+                {reviewedCount}/{submissions.length} Reviewed
+              </span>
             </div>
             <div className="progress-bar">
-              <div className="progress-fill" style={{ width: `${progressPercent}%` }} />
+              <div
+                className="progress-fill"
+                style={{ width: `${progressPercent}%` }}
+              />
             </div>
           </div>
 
@@ -151,7 +226,9 @@ function InstructorAssignment() {
                   <div
                     key={item.submission_id}
                     className={`submission-item ${
-                      selectedSubmission?.submission_id === item.submission_id ? "active" : ""
+                      selectedSubmission?.submission_id === item.submission_id
+                        ? "active"
+                        : ""
                     }`}
                     onClick={() => setSelectedSubmission(item)}
                     style={{ cursor: "pointer" }}
@@ -159,14 +236,23 @@ function InstructorAssignment() {
                     <div className="submission-top">
                       <div className="submission-left">
                         <span className={`status-dot ${statusInfo.dotClass}`} />
-                        <span className="student-id">{item.student_id}</span>
+                        <span className="student-id">
+                          {item.student_id ||
+                            item.student_email ||
+                            item.user_id ||
+                            "Unknown Student"}
+                        </span>
                       </div>
                       <div className="submission-score">
-                        {item.score != null ? `${item.score}/${assignment.max_score ?? 100}` : "--"}
+                        {item.score != null
+                          ? `${item.score}/${assignmentMaxScore}`
+                          : "--"}
                       </div>
                     </div>
 
-                    <div className="submission-time">{formatDate(item.submitted_at)}</div>
+                    <div className="submission-time">
+                      {formatDate(item.submitted_at)}
+                    </div>
 
                     <div className={`submission-tag ${statusInfo.tagClass}`}>
                       {statusInfo.label}
@@ -183,10 +269,15 @@ function InstructorAssignment() {
         <main className="review-main">
           <section className="panel student-summary-panel">
             <div className="student-summary-left">
-              <h1>{assignment.assignment_name}</h1>
+              <h1>{assignmentTitle}</h1>
               <p>
                 {selectedSubmission
-                  ? `Student: ${selectedSubmission.student_id} | Submitted: ${formatDate(selectedSubmission.submitted_at)}`
+                  ? `Student: ${
+                      selectedSubmission.student_id ||
+                      selectedSubmission.student_email ||
+                      selectedSubmission.user_id ||
+                      "Unknown"
+                    } | Submitted: ${formatDate(selectedSubmission.submitted_at)}`
                   : "No submission selected"}
               </p>
             </div>
@@ -194,7 +285,7 @@ function InstructorAssignment() {
             <div className="student-summary-right">
               <div className="large-score">
                 {selectedSubmission?.score != null
-                  ? `${selectedSubmission.score}/${assignment.max_score ?? 100}`
+                  ? `${selectedSubmission.score}/${assignmentMaxScore}`
                   : "--"}
               </div>
               <div className="confidence-text">
@@ -206,7 +297,9 @@ function InstructorAssignment() {
           <section className="panel code-panel">
             <div className="panel-header dark-header">
               <span>Submission Output</span>
-              <button className="small-dark-btn" type="button">Expand</button>
+              <button className="small-dark-btn" type="button">
+                Expand
+              </button>
             </div>
 
             <div className="code-box">
@@ -215,6 +308,7 @@ function InstructorAssignment() {
   ? "Loading submission details..."
   : selectedSubmissionDetails?.stdout ||
     selectedSubmissionDetails?.stderr ||
+    selectedSubmissionDetails?.output ||
     "No code/output preview available yet."}
               </pre>
             </div>

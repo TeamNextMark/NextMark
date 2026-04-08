@@ -84,7 +84,7 @@ function Header({ user, setUser }) {
         <img className="headerLogo" src={logo} alt="NM logo" />
 
         <div className="textBlock">
-          <p className="appName">NextMark</p>
+          <p className="appName">NextMark AI</p>
           <p className="courseName">{subtitle}</p>
         </div>
       </div>

@@ -76,10 +76,10 @@ function Home() {
             </div>
 
             <div className="courseInfo">
-              <h2>
+              <h3>
                 {course.course_code} - {course.id}{" "}
                 {course.course_name}
-              </h2>
+              </h3>
               <p>{course.semester}</p>
             </div>
           </button>
