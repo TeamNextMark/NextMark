@@ -26,9 +26,9 @@ MAX_FILE_SIZE_BYTES = int(os.getenv("SUBMISSIONS_MAX_FILE_SIZE_BYTES", str(5 * 1
 
 def _allowed_extensions(language: str) -> set[str]:
     lang = (language or "").lower()
-    if language == "python":
+    if "python" in lang:
         return {".py"}
-    if language == "cpp":
+    if "cpp" in lang:
         return {".cpp", ".cc", ".cxx", ".hpp", ".h"}
     return set()
 
@@ -43,21 +43,35 @@ def _safe_filename(name: str) -> str:
 
 
 def _ensure_runner_entrypoint(language: str, workspace_path: Path, stored_names: list[str]) -> None:
-    if language == "python":
+    lang = (language or "").lower()
+
+    if "python" in lang:
         if "main.py" in stored_names:
             return
-        first_source = next((n for n in stored_names if Path(n).suffix.lower() == ".py"), None)
+
+        first_source = next(
+            (n for n in stored_names if Path(n).suffix.lower() == ".py"),
+            None
+        )
+
         if not first_source:
             raise ValueError("at least one .py file is required")
+
         shutil.copyfile(workspace_path / first_source, workspace_path / "main.py")
         return
 
-    if language == "cpp":
+    if "cpp" in lang or "c++" in lang:
         if "main.cpp" in stored_names:
             return
-        first_source = next((n for n in stored_names if Path(n).suffix.lower() in {".cpp", ".cc", ".cxx"}), None)
+
+        first_source = next(
+            (n for n in stored_names if Path(n).suffix.lower() in {".cpp", ".cc", ".cxx"}),
+            None
+        )
+
         if not first_source:
-            raise ValueError("at least one C++ source file (.cpp/.cc/.cxx) is required")
+            raise ValueError("at least one C++ source file is required")
+
         shutil.copyfile(workspace_path / first_source, workspace_path / "main.cpp")
 
 
