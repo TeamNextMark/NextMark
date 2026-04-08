@@ -103,12 +103,12 @@ def create_submission(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Maximum {MAX_FILES} files allowed")
 
     language = (assignment.code_language or "").strip().lower()
-    allowed = None
-    #if not allowed:
-        #raise HTTPException(
-            #status_code=status.HTTP_400_BAD_REQUEST,
-            #detail=f"Unsupported assignment language: {assignment.code_language}",
-        #)
+    allowed = _allowed_extensions(language)
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported assignment language: {assignment.code_language}",
+        )
 
     submission_id = str(uuid.uuid4())
     workspace_path = (SUBMISSIONS_BASE_DIR / submission_id).resolve()
@@ -127,12 +127,12 @@ def create_submission(
             except ValueError as exc:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
 
-            #suffix = Path(safe_name).suffix.lower()
-            #if suffix not in allowed:
-             #   raise HTTPException(
-              #      status_code=status.HTTP_400_BAD_REQUEST,
-               #     detail=f"File type not allowed for {language}: {safe_name}",
-                #)
+            suffix = Path(safe_name).suffix.lower()
+            if suffix not in allowed:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"File type not allowed for {language}: {safe_name}",
+                )
 
             destination = workspace_path / safe_name
             content = upload.file.read(MAX_FILE_SIZE_BYTES + 1)
@@ -147,9 +147,6 @@ def create_submission(
 
             stored_names.append(safe_name)
 
-            print("DEBUG language:", language)
-            print("DEBUG stored_names:", stored_names)
-            print("DEBUG workspace_path:", workspace_path)
 
         _ensure_runner_entrypoint(language, workspace_path, stored_names)
 
