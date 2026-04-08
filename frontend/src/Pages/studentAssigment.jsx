@@ -246,7 +246,7 @@ function StudentAssignment() {
           </button>
           <button
             className="submit-btn"
-            disabled={!selectedFiles.length || submitting}
+            //disabled={!selectedFiles.length || submitting}
             onClick={handleSubmit}
           >
             {submitting ? "Submitting..." : "Submit Assignment"}
