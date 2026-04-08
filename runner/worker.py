@@ -91,7 +91,7 @@ def _build_job(row) -> SandboxJob:
     if isinstance(file_paths, str):
         file_paths = json.loads(file_paths)
 
-    job = SandboxJob(
+    return SandboxJob(
         submission_id=row.submission_id,
         assignment_id=row.assignment_id,
         student_id=row.student_id,
@@ -99,11 +99,6 @@ def _build_job(row) -> SandboxJob:
         file_paths=file_paths,
         queued_at=datetime.now(timezone.utc),
     )
-
-    # attach rubric metadata for grading step
-    job.line_items = row.line_items
-    job.total_points = row.total_points
-    return job
 
 
 def _get_workspace_path(job: SandboxJob) -> Path:
@@ -222,7 +217,7 @@ def _run_in_sandbox(job: SandboxJob) -> SandboxExecutionResult:
     if len(stdout_text) > 50000:
         print(f"[runner] warning: stdout truncated at 50000 chars for submission={job.submission_id}")
 
-    result = SandboxExecutionResult(
+    return SandboxExecutionResult(
         submission_id=job.submission_id,
         exit_code=exit_code,
         stdout=stdout_text[:50000],
@@ -231,11 +226,6 @@ def _run_in_sandbox(job: SandboxJob) -> SandboxExecutionResult:
         timed_out=timed_out,
         completed_at=datetime.now(timezone.utc),
     )
-
-    # attach rubric metadata for store step
-    result.line_items = getattr(job, "line_items", None)
-    result.total_points = getattr(job, "total_points", None)
-    return result
 
 
 def _pick_next_submission(session):
@@ -266,9 +256,9 @@ def _pick_next_submission(session):
     return session.execute(statement).mappings().first()
 
 
-def _store_result(session, result: SandboxExecutionResult):
-    parsed_rubric = _parse_rubric_line_items(getattr(result, "line_items", None))
-    total_points = float(getattr(result, "total_points", 100) or 100)
+def _store_result(session, row, result: SandboxExecutionResult):
+    parsed_rubric = _parse_rubric_line_items(row.line_items)
+    total_points = float(row.total_points or 100)
 
     if not parsed_rubric:
         parsed_rubric = [{"criterion": "Correctness", "max": total_points}]
@@ -419,7 +409,7 @@ def run_loop():
             try:
                 job = _build_job(row)
                 result = _run_in_sandbox(job)
-                _store_result(session, result)
+                _store_result(session, row, result)
                 print(f"[runner] processed submission={job.submission_id} exit={result.exit_code}")
             except Exception as exc:
                 session.rollback()
