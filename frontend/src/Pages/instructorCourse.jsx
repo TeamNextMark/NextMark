@@ -43,7 +43,7 @@ function InstructorCourse() {
     fetchCourse();
   }, [courseSlug]);
 
-  function Dropdown() {
+function Dropdown() {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
 
@@ -116,5 +116,3 @@ function InstructorCourse() {
     </div>
   );
 }
-
-export default InstructorCourse;
