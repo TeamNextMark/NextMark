@@ -201,7 +201,7 @@ def _container_command(language: str) -> list[str]:
         return [
             "bash",
             "-lc",
-            "g++ -std=c++20 -O2 -o /sandbox/app /workspace/main.cpp && /sandbox/app",
+            "g++ -std=c++20 -O2 -o /sandbox/app /workspace/main.cpp && chmod 755 /sandbox/app && /sandbox/app",
         ]
     raise ValueError(f"Unsupported language: {language}")
 
