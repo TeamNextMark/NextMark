@@ -147,6 +147,10 @@ def create_submission(
 
             stored_names.append(safe_name)
 
+            print("DEBUG language:", language)
+            print("DEBUG stored_names:", stored_names)
+            print("DEBUG workspace_path:", workspace_path)
+
         _ensure_runner_entrypoint(language, workspace_path, stored_names)
 
         submission = Submission(
