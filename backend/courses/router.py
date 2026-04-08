@@ -10,7 +10,9 @@ router = APIRouter(tags=["courses"], prefix="/courses")
 
 
 @router.post("/", response_model=schemas.Course, status_code=status.HTTP_201_CREATED)
-def create_course(payload: schemas.CourseCreate, db: Session = Depends(get_db), _: dict = Depends(get_current_user)):
+def create_course(payload: schemas.CourseCreate, db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    if not any(r in current_user.get("roles", []) for r in ("faculty", "admin")):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Faculty or admin role required")
     faculty = get_user(db, payload.faculty_id)
     if not faculty:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Faculty user not found")
