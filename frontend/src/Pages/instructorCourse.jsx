@@ -53,6 +53,10 @@ function InstructorCourse() {
     navigate(`/faculty/course/${courseSlug}/assignment/${assignmentId}`);
   }
 
+  function goToCreateAssignment() {
+    navigate(`/faculty/course/${courseSlug}/create-assignment`);
+  }
+
   function Dropdown() {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
@@ -108,6 +112,12 @@ function InstructorCourse() {
         </div>
 
         <Dropdown />
+
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "12px" }}>
+          <button className="assignCard" style={{ width: "auto" }} onClick={goToCreateAssignment}>
+            + Create Assignment
+          </button>
+        </div>
 
         <div className="assignGrid">
           {assignments.length > 0 ? (

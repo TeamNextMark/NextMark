@@ -14,6 +14,7 @@ import InstructorCourse from "./Pages/instructorCourse";
 import StudentAssignment from "./Pages/studentAssigment";
 import InstructorAssignment from "./Pages/instructorAssigment";
 import StudentSubmissionPage from "./Pages/studentSubmission";
+import CreateAssignment from "./Pages/createAssignment";
 
 function HomeRedirect({ user }) {
   if (!user) return <Navigate to="/" replace />;
@@ -117,6 +118,15 @@ export default function App() {
           element={
             <ProtectedRoute user={user} allowedRoles={["student"]}>
               <StudentSubmissionPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/faculty/course/:courseSlug/create-assignment"
+          element={
+            <ProtectedRoute user={user} allowedRoles={["faculty"]}>
+              <CreateAssignment user={user} />
             </ProtectedRoute>
           }
         />
