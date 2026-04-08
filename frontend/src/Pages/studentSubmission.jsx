@@ -14,6 +14,8 @@ function StudentSubmissionPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    let isMounted = true;
+
     async function fetchSubmission() {
       try {
         setLoading(true);
@@ -22,10 +24,6 @@ function StudentSubmissionPage() {
         const token = localStorage.getItem("accessToken");
         if (!token) {
           throw new Error("No access token found. Please log in again.");
-        }
-
-        if (!submissionId) {
-          throw new Error("Missing submission ID.");
         }
 
         const response = await fetch(`${API_BASE}/submissions/${submissionId}`, {
@@ -44,15 +42,18 @@ function StudentSubmissionPage() {
         }
 
         const data = await response.json();
-        setSubmission(data);
+        if (isMounted) setSubmission(data);
       } catch (err) {
-        setError(err?.message || "Something went wrong.");
+        if (isMounted) setError(err?.message || "Something went wrong.");
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     }
 
     fetchSubmission();
+    return () => {
+      isMounted = false;
+    };
   }, [submissionId]);
 
   function formatDate(value) {
@@ -62,46 +63,181 @@ function StudentSubmissionPage() {
     return date.toLocaleString();
   }
 
+  function getStatusClass(status) {
+    const normalized = (status || "").toLowerCase();
+    if (normalized === "completed") return "status-completed";
+    if (normalized === "queued") return "status-queued";
+    if (normalized === "running") return "status-running";
+    if (normalized === "failed") return "status-failed";
+    return "status-default";
+  }
+
   if (loading) {
     return (
-      <div className="mainContent">
-        <p>Loading submission...</p>
+      <div className="submission-page">
+        <div className="submission-shell">
+          <div className="submission-card loading-card">
+            <p>Loading submission...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="mainContent">
-        <p>{error}</p>
+      <div className="submission-page">
+        <div className="submission-shell">
+          <div className="submission-card error-card">
+            <h1>Unable to load submission</h1>
+            <p>{error}</p>
+            <div className="submission-actions">
+              <button
+                className="secondary-btn"
+                onClick={() =>
+                  navigate(`/student/course/${courseSlug}/assignment/${assignmentId}`)
+                }
+              >
+                Back to Assignment
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!submission) {
     return (
-      <div className="mainContent">
-        <p>Submission not found.</p>
+      <div className="submission-page">
+        <div className="submission-shell">
+          <div className="submission-card error-card">
+            <h1>Submission not found</h1>
+            <p>We couldn’t find the submission details for this assignment.</p>
+            <div className="submission-actions">
+              <button
+                className="secondary-btn"
+                onClick={() =>
+                  navigate(`/student/course/${courseSlug}/assignment/${assignmentId}`)
+                }
+              >
+                Back to Assignment
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="mainContent">
-      <div className="submissionPage">
-        <h1>Submission Confirmation</h1>
+    <div className="submission-page">
+      <div className="submission-shell">
+        <div className="submission-card">
+          <div className="submission-hero">
+            <div className="success-icon">✓</div>
 
-        <p><strong>Submission ID:</strong> {submission.submission_id}</p>
-        <p><strong>Assignment ID:</strong> {submission.assignment_id}</p>
-        <p><strong>Status:</strong> {submission.status || "queued"}</p>
-        <p><strong>Submitted:</strong> {formatDate(submission.submitted_at)}</p>
-        <p><strong>Score:</strong> {submission.score ?? "Pending"}</p>
-        <p><strong>Faculty Reviewed:</strong> {submission.faculty_reviewed ? "Yes" : "No"}</p>
+            <div className="submission-hero-text">
+              <p className="eyebrow">Submission received</p>
+              <h1>Assignment submitted successfully</h1>
+              <p className="hero-subtext">
+                Your work has been uploaded and queued for processing.
+              </p>
+            </div>
 
-        <div style={{ marginTop: "20px" }}>
-          <button onClick={() => navigate(`/student/course/${courseSlug}/assignment/${assignmentId}`)}>
-            Back to Assignment
-          </button>
+            <div className={`status-pill ${getStatusClass(submission.status)}`}>
+              {submission.status || "queued"}
+            </div>
+          </div>
+
+          <div className="submission-grid">
+            <div className="info-panel">
+              <h2>Submission Details</h2>
+
+              <div className="info-row">
+                <span className="info-label">Submission ID</span>
+                <span className="info-value">{submission.submission_id}</span>
+              </div>
+
+              <div className="info-row">
+                <span className="info-label">Assignment ID</span>
+                <span className="info-value">{submission.assignment_id}</span>
+              </div>
+
+              <div className="info-row">
+                <span className="info-label">Submitted At</span>
+                <span className="info-value">{formatDate(submission.submitted_at)}</span>
+              </div>
+
+              <div className="info-row">
+                <span className="info-label">Score</span>
+                <span className="info-value">
+                  {submission.score ?? "Pending"}
+                </span>
+              </div>
+
+              <div className="info-row">
+                <span className="info-label">Faculty Reviewed</span>
+                <span className="info-value">
+                  {submission.faculty_reviewed ? "Yes" : "No"}
+                </span>
+              </div>
+            </div>
+
+            <div className="info-panel">
+              <h2>What happens next?</h2>
+
+              <div className="timeline">
+                <div className="timeline-item active">
+                  <div className="timeline-dot" />
+                  <div>
+                    <p className="timeline-title">Uploaded</p>
+                    <p className="timeline-text">
+                      Your file submission was received by the system.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="timeline-item">
+                  <div className="timeline-dot" />
+                  <div>
+                    <p className="timeline-title">Queued for processing</p>
+                    <p className="timeline-text">
+                      The system will prepare and run your submission.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="timeline-item">
+                  <div className="timeline-dot" />
+                  <div>
+                    <p className="timeline-title">Results available</p>
+                    <p className="timeline-text">
+                      You can return later to review status and feedback.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="submission-actions">
+            <button
+              className="secondary-btn"
+              onClick={() =>
+                navigate(`/student/course/${courseSlug}/assignment/${assignmentId}`)
+              }
+            >
+              Back to Assignment
+            </button>
+
+            <button
+              className="primary-btn"
+              onClick={() => navigate(`/student/course/${courseSlug}`)}
+            >
+              Go to Course
+            </button>
+          </div>
         </div>
       </div>
     </div>
