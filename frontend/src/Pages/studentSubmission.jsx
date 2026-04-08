@@ -1,147 +1,111 @@
 import "../CSS/Template.css";
 import "../CSS/Submission.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 const API_BASE = import.meta?.env?.VITE_API_URL || "/api";
 
-function StudentSubmission() {
+function StudentSubmissionPage() {
   const navigate = useNavigate();
-  const { courseSlug, assignmentId } = useParams();
+  const { courseSlug, assignmentId, submissionId } = useParams();
 
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [submitting, setSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
+  const [submission, setSubmission] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [submissionResult, setSubmissionResult] = useState(null);
 
-  function handleFileChange(e) {
-    const files = Array.from(e.target.files || []);
-    setSelectedFiles(files);
-    setSuccessMessage("");
-    setError("");
+  useEffect(() => {
+    async function fetchSubmission() {
+      try {
+        setLoading(true);
+        setError("");
+
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
+          throw new Error("No access token found. Please log in again.");
+        }
+
+        if (!submissionId) {
+          throw new Error("Missing submission ID.");
+        }
+
+        const response = await fetch(`${API_BASE}/submissions/${submissionId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          let message = "Failed to load submission.";
+          try {
+            const err = await response.json();
+            message = err?.detail || err?.message || message;
+          } catch {}
+          throw new Error(message);
+        }
+
+        const data = await response.json();
+        setSubmission(data);
+      } catch (err) {
+        setError(err?.message || "Something went wrong.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchSubmission();
+  }, [submissionId]);
+
+  function formatDate(value) {
+    if (!value) return "N/A";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleString();
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  if (loading) {
+    return (
+      <div className="mainContent">
+        <p>Loading submission...</p>
+      </div>
+    );
+  }
 
-    try {
-      setSubmitting(true);
-      setError("");
-      setSuccessMessage("");
-      setSubmissionResult(null);
+  if (error) {
+    return (
+      <div className="mainContent">
+        <p>{error}</p>
+      </div>
+    );
+  }
 
-      const token = localStorage.getItem("accessToken");
-      if (!token) {
-        throw new Error("No access token found. Please log in again.");
-      }
-
-      if (selectedFiles.length === 0) {
-        throw new Error("Please select at least one file before submitting.");
-      }
-
-      const formData = new FormData();
-      selectedFiles.forEach((file) => {
-        formData.append("files", file);
-      });
-
-      const response = await fetch(`${API_BASE}/assignments/${assignmentId}/submit`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        let message = "Submission failed.";
-        try {
-          const err = await response.json();
-          message = err?.detail || err?.message || message;
-        } catch {}
-        throw new Error(message);
-      }
-
-      const data = await response.json();
-      setSubmissionResult(data);
-      setSuccessMessage("Assignment submitted successfully.");
-      setSelectedFiles([]);
-    } catch (err) {
-      setError(err?.message || "Something went wrong while submitting.");
-    } finally {
-      setSubmitting(false);
-    }
+  if (!submission) {
+    return (
+      <div className="mainContent">
+        <p>Submission not found.</p>
+      </div>
+    );
   }
 
   return (
     <div className="mainContent">
       <div className="submissionPage">
-        <h1 className="pageTitle">Submit Assignment</h1>
+        <h1>Submission Confirmation</h1>
 
-        <button
-          className="backButton"
-          type="button"
-          onClick={() => navigate(`/student/course/${courseSlug}/assignment/${assignmentId}`)}
-        >
-          ← Back to Assignment
-        </button>
+        <p><strong>Submission ID:</strong> {submission.submission_id}</p>
+        <p><strong>Assignment ID:</strong> {submission.assignment_id}</p>
+        <p><strong>Status:</strong> {submission.status || "queued"}</p>
+        <p><strong>Submitted:</strong> {formatDate(submission.submitted_at)}</p>
+        <p><strong>Score:</strong> {submission.score ?? "Pending"}</p>
+        <p><strong>Faculty Reviewed:</strong> {submission.faculty_reviewed ? "Yes" : "No"}</p>
 
-        <form className="submissionCard" onSubmit={handleSubmit}>
-          <label className="fileLabel">Choose file(s)</label>
-          <input
-            type="file"
-            multiple
-            onChange={handleFileChange}
-            disabled={submitting}
-          />
-
-          <div className="selectedFiles">
-            {selectedFiles.length > 0 ? (
-              selectedFiles.map((file, index) => (
-                <p key={index}>{file.name}</p>
-              ))
-            ) : (
-              <p>No files selected yet.</p>
-            )}
-          </div>
-
-          <button className="submitButton" type="submit" disabled={submitting}>
-            {submitting ? "Submitting..." : "Submit Assignment"}
+        <div style={{ marginTop: "20px" }}>
+          <button onClick={() => navigate(`/student/course/${courseSlug}/assignment/${assignmentId}`)}>
+            Back to Assignment
           </button>
-        </form>
-
-        {successMessage && (
-          <div className="successBox">
-            <p>{successMessage}</p>
-          </div>
-        )}
-
-        {error && (
-          <div className="errorBox">
-            <p>{error}</p>
-          </div>
-        )}
-
-        {submissionResult && (
-          <div className="resultCard">
-            <h2>Submission Result</h2>
-            <p>
-              <strong>Status:</strong>{" "}
-              {submissionResult.status || "Submitted"}
-            </p>
-            <p>
-              <strong>Submission ID:</strong>{" "}
-              {submissionResult.submission_id || "N/A"}
-            </p>
-            <p>
-              <strong>Submitted At:</strong>{" "}
-              {submissionResult.submitted_at || "N/A"}
-            </p>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
 }
 
-export default StudentSubmission;
+export default StudentSubmissionPage;

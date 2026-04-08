@@ -13,7 +13,7 @@ import StudentCourse from "./Pages/studentCourse";
 import InstructorCourse from "./Pages/instructorCourse";
 import StudentAssignment from "./Pages/studentAssigment";
 import InstructorAssignment from "./Pages/instructorAssigment";
-import StudentSubmission from "./Pages/studentSubmission";
+import StudentSubmissionPage from "./Pages/studentSubmission";
 
 function HomeRedirect({ user }) {
   if (!user) return <Navigate to="/" replace />;
@@ -113,10 +113,10 @@ export default function App() {
         />
 
         <Route
-          path="/student/course/:courseSlug/assignment/:assignmentId/submit"
+          path="/student/course/:courseSlug/assignment/:assignmentId/submission/:submissionId"
           element={
             <ProtectedRoute user={user} allowedRoles={["student"]}>
-              <StudentSubmission />
+              <StudentSubmissionPage />
             </ProtectedRoute>
           }
         />
