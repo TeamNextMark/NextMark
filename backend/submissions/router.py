@@ -25,6 +25,7 @@ MAX_FILE_SIZE_BYTES = int(os.getenv("SUBMISSIONS_MAX_FILE_SIZE_BYTES", str(5 * 1
 
 
 def _allowed_extensions(language: str) -> set[str]:
+    lang = (language or "").lower()
     if language == "python":
         return {".py"}
     if language == "cpp":
@@ -89,11 +90,11 @@ def create_submission(
 
     language = (assignment.code_language or "").strip().lower()
     allowed = None
-    if not allowed:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Unsupported assignment language: {assignment.code_language}",
-        )
+    #if not allowed:
+        #raise HTTPException(
+            #status_code=status.HTTP_400_BAD_REQUEST,
+            #detail=f"Unsupported assignment language: {assignment.code_language}",
+        #)
 
     submission_id = str(uuid.uuid4())
     workspace_path = (SUBMISSIONS_BASE_DIR / submission_id).resolve()
