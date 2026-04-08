@@ -53,17 +53,13 @@ def _build_job(row) -> SandboxJob:
         submission_id=row.submission_id,
         assignment_id=row.assignment_id,
         student_id=row.student_id,
-        language=row.code_language.lower(),
+        language=(row.code_language or "").lower(),
         encrypted_file_paths=encrypted_file_paths,
         queued_at=datetime.now(timezone.utc),
     )
 
 
 def _get_workspace_path(job: SandboxJob) -> Path:
-    """
-    Container-visible workspace path.
-    Kept for validation/debugging if needed.
-    """
     value = job.encrypted_file_paths.get("workspace_path")
     if not value:
         raise ValueError("encrypted_file_paths.workspace_path is required")
@@ -78,10 +74,6 @@ def _get_workspace_path(job: SandboxJob) -> Path:
 
 
 def _get_host_workspace_path(job: SandboxJob) -> Path:
-    """
-    Host-visible workspace path.
-    This must be used for Docker bind mounts.
-    """
     value = job.encrypted_file_paths.get("host_workspace_path")
     if not value:
         raise ValueError("encrypted_file_paths.host_workspace_path is required")
@@ -102,7 +94,11 @@ def _container_command(language: str) -> list[str]:
     if language == "python":
         return ["python", "main.py"]
     if language == "cpp":
-        return ["bash", "-lc", "g++ -std=c++20 -O2 -o /sandbox/app /workspace/main.cpp && /sandbox/app"]
+        return [
+            "bash",
+            "-lc",
+            "g++ -std=c++20 -O2 -o /sandbox/app /workspace/main.cpp && /sandbox/app",
+        ]
     raise ValueError(f"Unsupported language: {language}")
 
 
@@ -124,10 +120,7 @@ def _security_opts() -> list[str]:
 
 
 def _run_in_sandbox(job: SandboxJob) -> SandboxExecutionResult:
-    # Optional validation of container path metadata
     _get_workspace_path(job)
-
-    # Critical: use host path for Docker bind mount
     workspace = _get_host_workspace_path(job)
 
     image = _image_for_language(job.language)
@@ -189,7 +182,7 @@ def _run_in_sandbox(job: SandboxJob) -> SandboxExecutionResult:
         submission_id=job.submission_id,
         exit_code=exit_code,
         stdout=stdout_text[:50000],
-        stderr=stderr_text,
+        stderr=stderr_text[:50000],
         duration_ms=duration_ms,
         timed_out=timed_out,
         completed_at=datetime.now(timezone.utc),

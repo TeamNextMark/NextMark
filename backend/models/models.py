@@ -174,7 +174,7 @@ class Submission(Base):
     assignment_id: str = Column("assignment_id", String, ForeignKey("assignment.assignment_id"), nullable=False)
     student_id: str = Column("student_id", String, ForeignKey("users_account.id_users"), nullable=False)
     submitted_at = Column("submitted_at", TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
-    encrypted_file_paths: dict = Column("encrypted_file_paths", JSONB, nullable=False)
+    file_paths: dict = Column("file_paths", JSONB, nullable=False)
 
     assignment = relationship("Assignment", back_populates="submissions")
     student = relationship("UsersAccount", back_populates="submissions")
