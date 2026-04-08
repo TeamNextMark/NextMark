@@ -45,40 +45,105 @@ SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 docker_client = docker.from_env()
 
 
+def _safe_float(value, default=0.0):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return float(default)
+
+
+def _normalize_rubric_item(item, index=0):
+    if not isinstance(item, dict):
+        return None
+
+    criterion = (
+        item.get("criterion")
+        or item.get("name")
+        or item.get("title")
+        or item.get("label")
+        or f"Criterion {index + 1}"
+    )
+
+    max_points = (
+        item.get("max")
+        or item.get("points")
+        or item.get("max_points")
+        or item.get("score")
+        or 0
+    )
+
+    return {
+        "criterion": str(criterion).strip(),
+        "max": _safe_float(max_points, 0),
+    }
+
+
 def _parse_rubric_line_items(line_items):
+    """
+    Supports:
+    1) list of dicts:
+       [{"criterion":"Correctness","max":60},{"criterion":"Style","max":40}]
+
+    2) single dict:
+       {"criterion":"Correctness","max":100}
+
+    3) wrapped dict:
+       {"items":[{"criterion":"Correctness","max":60},{"criterion":"Style","max":40}]}
+
+    4) JSON string of any of the above
+
+    5) plain text fallback like:
+       "Correctness: 60 pts, Style: 40 pts"
+    """
     if not line_items:
         return []
 
+    # Case 1: already a list
     if isinstance(line_items, list):
         parsed = []
-        for item in line_items:
-            if isinstance(item, dict):
-                parsed.append(
-                    {
-                        "criterion": item.get("criterion") or item.get("name") or "Unnamed Criterion",
-                        "max": float(item.get("max") or item.get("points") or item.get("max_points") or 0),
-                    }
-                )
+        for idx, item in enumerate(line_items):
+            normalized = _normalize_rubric_item(item, idx)
+            if normalized:
+                parsed.append(normalized)
         return parsed
 
+    # Case 2 or 3: dict
     if isinstance(line_items, dict):
-        return [
-            {
-                "criterion": line_items.get("criterion") or line_items.get("name") or "Unnamed Criterion",
-                "max": float(line_items.get("max") or line_items.get("points") or line_items.get("max_points") or 0),
-            }
-        ]
+        if isinstance(line_items.get("items"), list):
+            parsed = []
+            for idx, item in enumerate(line_items["items"]):
+                normalized = _normalize_rubric_item(item, idx)
+                if normalized:
+                    parsed.append(normalized)
+            return parsed
 
+        normalized = _normalize_rubric_item(line_items, 0)
+        return [normalized] if normalized else []
+
+    # Case 4 or 5: string
     if isinstance(line_items, str):
+        raw = line_items.strip()
+
+        if not raw:
+            return []
+
+        # First try to decode as JSON
+        try:
+            decoded = json.loads(raw)
+            return _parse_rubric_line_items(decoded)
+        except Exception:
+            pass
+
+        # Fallback: parse "Criterion: 10 pts, Style: 20 pts"
         items = []
-        parts = [p.strip() for p in line_items.split(",") if p.strip()]
-        for part in parts:
-            match = re.match(r"(.+?):\s*(\d+)\s*pts?", part, re.IGNORECASE)
+        parts = [p.strip() for p in raw.split(",") if p.strip()]
+        for idx, part in enumerate(parts):
+            match = re.match(r"(.+?):\s*(\d+(?:\.\d+)?)\s*pts?", part, re.IGNORECASE)
             if match:
                 items.append(
                     {
                         "criterion": match.group(1).strip(),
-                        "max": float(match.group(2)),
+                        "max": _safe_float(match.group(2), 0),
                     }
                 )
         return items
@@ -258,7 +323,11 @@ def _pick_next_submission(session):
 
 def _store_result(session, row, result: SandboxExecutionResult):
     parsed_rubric = _parse_rubric_line_items(row.line_items)
-    total_points = float(row.total_points or 100)
+    total_points = _safe_float(row.total_points, 100)
+
+    print(f"[runner] raw rubric line_items type={type(row.line_items).__name__}")
+    print(f"[runner] raw rubric line_items={row.line_items}")
+    print(f"[runner] parsed rubric={parsed_rubric}")
 
     if not parsed_rubric:
         parsed_rubric = [{"criterion": "Correctness", "max": total_points}]
@@ -269,7 +338,7 @@ def _store_result(session, row, result: SandboxExecutionResult):
     earned_total = 0.0
 
     for item in parsed_rubric:
-        max_points = float(item.get("max", 0))
+        max_points = _safe_float(item.get("max"), 0)
         earned = max_points if passed else 0.0
         earned_total += earned
 
@@ -281,6 +350,14 @@ def _store_result(session, row, result: SandboxExecutionResult):
                 "comment": "Program executed successfully." if passed else "Program failed to execute.",
             }
         )
+
+    # If rubric items sum to 0 because malformed points were stored,
+    # fall back to total_points so grading_result is still usable.
+    if earned_total == 0 and parsed_rubric:
+        if len(parsed_rubric) == 1:
+            rubric_breakdown[0]["max"] = total_points
+            rubric_breakdown[0]["earned"] = total_points if passed else 0.0
+            earned_total = total_points if passed else 0.0
 
     score = round(earned_total, 2)
 
@@ -373,6 +450,7 @@ def _store_result(session, row, result: SandboxExecutionResult):
         "exit_code": result.exit_code,
         "timed_out": result.timed_out,
         "duration_ms": result.duration_ms,
+        "parsed_rubric": parsed_rubric,
     }
 
     session.execute(
