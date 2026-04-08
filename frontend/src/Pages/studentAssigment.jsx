@@ -201,7 +201,7 @@ function StudentAssignment() {
               ref={fileInputRef}
               type="file"
               multiple
-              hidden
+              //hidden
               //accept={getAcceptedTypes(assignment.code_language)}
               onChange={handleFileChange}
             />
