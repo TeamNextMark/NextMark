@@ -20,7 +20,7 @@ services:
     networks:
       - nextmark-net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U nextmark"]
+      test: ["CMD-SHELL", "pg_isready -U nextmark -d nextmark_db"]
       interval: 10s
       timeout: 5s
       retries: 5
