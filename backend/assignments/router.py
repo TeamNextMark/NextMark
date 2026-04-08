@@ -17,7 +17,7 @@ from backend.assignments import schemas
 router = APIRouter(prefix="/assignments", tags=["assignments"])
 
 
-@router.post("/", response_model=schemas.AssignmentBase, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=schemas.AssignmentBase, status_code=status.HTTP_201_CREATED)
 def create_assignment(
     payload: schemas.AssignmentCreate,
     db: Session = Depends(get_db),

@@ -105,7 +105,7 @@ function CreateAssignment() {
       setSaving(true);
       const token = localStorage.getItem("accessToken");
 
-      const response = await fetch(`${API_BASE}/assignments`, {
+      const response = await fetch(`${API_BASE}/assignments/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
