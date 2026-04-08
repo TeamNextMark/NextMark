@@ -84,9 +84,6 @@ def _get_host_workspace_path(job: SandboxJob) -> Path:
     if not str(workspace_path).startswith(str(allowed_root)):
         raise ValueError("host workspace path must be under HOST_SUBMISSIONS_BASE_DIR")
 
-    if not workspace_path.exists() or not workspace_path.is_dir():
-        raise ValueError(f"host workspace path does not exist: {workspace_path}")
-
     return workspace_path
 
 
