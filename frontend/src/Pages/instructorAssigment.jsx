@@ -104,7 +104,8 @@ function InstructorAssignment() {
 
         const data = await response.json();
         setSelectedSubmissionDetails(data);
-      } catch {
+      } catch (err) {
+        console.error(err);
         setSelectedSubmissionDetails(null);
       } finally {
         setDetailsLoading(false);
@@ -157,6 +158,29 @@ function InstructorAssignment() {
     "Untitled Assignment";
 
   const assignmentMaxScore = assignment?.max_score ?? 100;
+
+  const selectedScore =
+    selectedSubmissionDetails?.score ?? selectedSubmission?.score ?? null;
+
+  const selectedReviewed =
+    selectedSubmissionDetails?.faculty_reviewed ?? selectedSubmission?.faculty_reviewed ?? false;
+
+  const codeOrOutput = detailsLoading
+    ? "Loading submission details..."
+    : selectedSubmissionDetails?.code_preview ||
+      selectedSubmissionDetails?.stdout ||
+      selectedSubmissionDetails?.stderr ||
+      selectedSubmissionDetails?.output ||
+      "No code/output preview available yet.";
+
+  const previewLabel =
+    selectedSubmissionDetails?.code_filename ||
+    (selectedSubmissionDetails?.code_preview ? "Submitted Code" : "Submission Output");
+
+  const aiConfidencePercent =
+    selectedSubmissionDetails?.ai_confidence != null
+      ? Math.round(selectedSubmissionDetails.ai_confidence * 100)
+      : null;
 
   if (loading) {
     return (
@@ -284,33 +308,31 @@ function InstructorAssignment() {
 
             <div className="student-summary-right">
               <div className="large-score">
-                {selectedSubmission?.score != null
-                  ? `${selectedSubmission.score}/${assignmentMaxScore}`
+                {selectedScore != null
+                  ? `${selectedScore}/${assignmentMaxScore}`
                   : "--"}
               </div>
               <div className="confidence-text">
-                Faculty Reviewed: {selectedSubmission?.faculty_reviewed ? "Yes" : "No"}
+                Faculty Reviewed: {selectedReviewed ? "Yes" : "No"}
               </div>
+              {aiConfidencePercent != null && (
+                <div className="confidence-text">
+                  AI Confidence: {aiConfidencePercent}%
+                </div>
+              )}
             </div>
           </section>
 
           <section className="panel code-panel">
             <div className="panel-header dark-header">
-              <span>Submission Output</span>
+              <span>{previewLabel}</span>
               <button className="small-dark-btn" type="button">
                 Expand
               </button>
             </div>
 
             <div className="code-box">
-              <pre>
-{detailsLoading
-  ? "Loading submission details..."
-  : selectedSubmissionDetails?.stdout ||
-    selectedSubmissionDetails?.stderr ||
-    selectedSubmissionDetails?.output ||
-    "No code/output preview available yet."}
-              </pre>
+              <pre>{codeOrOutput}</pre>
             </div>
           </section>
 
@@ -338,7 +360,11 @@ function InstructorAssignment() {
                 <div className="test-info">
                   <div className="test-title">Timed Out</div>
                   <div className="test-detail">
-                    {selectedSubmissionDetails?.timed_out ? "Yes" : "No"}
+                    {selectedSubmissionDetails?.timed_out == null
+                      ? "N/A"
+                      : selectedSubmissionDetails.timed_out
+                      ? "Yes"
+                      : "No"}
                   </div>
                 </div>
               </div>
@@ -355,6 +381,25 @@ function InstructorAssignment() {
                 </div>
               </div>
 
+              {Array.isArray(selectedSubmissionDetails?.test_results) &&
+                selectedSubmissionDetails.test_results.map((test, index) => (
+                  <div
+                    key={`${test?.name || "test"}-${index}`}
+                    className={`test-row ${test?.passed ? "" : "fail"}`}
+                  >
+                    <div className="test-icon">{test?.passed ? "✓" : "✕"}</div>
+                    <div className="test-info">
+                      <div className="test-title">{test?.name || `Test ${index + 1}`}</div>
+                      <div className="test-detail">
+                        Expected: {test?.expected ?? "N/A"}
+                      </div>
+                      <div className="test-detail">
+                        Got: {test?.got ?? "N/A"}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
               {selectedSubmissionDetails?.stderr && (
                 <div className="test-row fail">
                   <div className="test-icon">✕</div>
@@ -368,12 +413,43 @@ function InstructorAssignment() {
           </section>
 
           <section className="feedback-box">
-            <div className="feedback-title">AI / System Feedback</div>
+            <div className="feedback-title">
+              AI / System Feedback
+              {aiConfidencePercent != null ? ` (${aiConfidencePercent}% confidence)` : ""}
+            </div>
+
             <p>
-              {selectedSubmissionDetails?.status === "completed"
-                ? "This submission has completed execution. Review output, score, and any errors before finalizing."
-                : "This submission is still queued or has limited execution details available."}
+              {selectedSubmissionDetails?.ai_feedback ||
+                (selectedSubmissionDetails?.status === "completed"
+                  ? "This submission has completed execution. Review output, score, and any errors before finalizing."
+                  : "This submission is still queued or has limited execution details available.")}
             </p>
+
+            {Array.isArray(selectedSubmissionDetails?.rubric_breakdown) &&
+              selectedSubmissionDetails.rubric_breakdown.length > 0 && (
+                <div style={{ marginTop: "16px" }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                    <thead>
+                      <tr>
+                        <th style={{ textAlign: "left", padding: "8px" }}>Criterion</th>
+                        <th style={{ textAlign: "left", padding: "8px" }}>Earned</th>
+                        <th style={{ textAlign: "left", padding: "8px" }}>Max</th>
+                        <th style={{ textAlign: "left", padding: "8px" }}>Comment</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedSubmissionDetails.rubric_breakdown.map((item, index) => (
+                        <tr key={`${item?.criterion || "criterion"}-${index}`}>
+                          <td style={{ padding: "8px" }}>{item?.criterion ?? "N/A"}</td>
+                          <td style={{ padding: "8px" }}>{item?.earned ?? "N/A"}</td>
+                          <td style={{ padding: "8px" }}>{item?.max ?? "N/A"}</td>
+                          <td style={{ padding: "8px" }}>{item?.comment ?? "N/A"}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
           </section>
         </main>
       </div>
