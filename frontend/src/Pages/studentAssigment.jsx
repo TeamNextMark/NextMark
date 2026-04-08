@@ -86,6 +86,9 @@ function StudentAssignment() {
       setError("");
 
       const token = localStorage.getItem("accessToken");
+      if (!token) {
+        throw new Error("No access token found. Please log in again.");
+      }
 
       const formData = new FormData();
       formData.append("assignment_id", assignmentId);
@@ -106,7 +109,6 @@ function StudentAssignment() {
 
       const created = await response.json();
 
-      // refresh submissions
       const refreshed = await fetch(
         `${API_BASE}/assignments/${assignmentId}/my-submissions`,
         {
@@ -124,12 +126,10 @@ function StudentAssignment() {
       setSelectedFiles([]);
       if (fileInputRef.current) fileInputRef.current.value = "";
 
-      // navigate to confirmation page
       navigate(
         `/student/course/${courseSlug}/assignment/${assignmentId}/submission/${created.submission_id}`,
         { replace: true }
       );
-
     } catch (err) {
       setError(err.message || "Submission failed");
     } finally {
