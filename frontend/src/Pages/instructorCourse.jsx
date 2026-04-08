@@ -35,6 +35,7 @@ function InstructorCourse() {
         if (!assignmentsRes.ok) throw new Error("Failed to load assignments");
 
         const courseData = await courseRes.json();
+        console.log("courseData:", courseData);
         const assignmentData = await assignmentsRes.json();
 
         setCourse(courseData);
