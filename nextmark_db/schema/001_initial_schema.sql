@@ -80,7 +80,7 @@ CREATE TABLE submission (
     assignment_id TEXT NOT NULL,
     student_id TEXT NOT NULL,
     submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    encrypted_file_paths JSONB NOT NULL,
+    file_paths JSONB NOT NULL,
     CONSTRAINT fk_submission_assignment
         FOREIGN KEY (assignment_id)
         REFERENCES assignment(assignment_id),
