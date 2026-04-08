@@ -83,6 +83,7 @@ function StudentAssignment() {
       setError("");
 
       const token = localStorage.getItem("accessToken");
+
       const formData = new FormData();
       selectedFiles.forEach((file) => formData.append("files", file));
 
@@ -120,7 +121,12 @@ function StudentAssignment() {
 
       setSelectedFiles([]);
       if (fileInputRef.current) fileInputRef.current.value = "";
-      alert(`Submission queued: ${created.submission_id}`);
+
+      navigate(
+        `/student/course/${courseSlug}/assignment/${assignmentId}/submission/${created.submission_id}`,
+        { replace: true }
+      );
+
     } catch (err) {
       setError(err.message || "Submission failed");
     } finally {
