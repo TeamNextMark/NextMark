@@ -65,6 +65,13 @@ body {
     color: black;
 }
 
+.assignment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
 .assignGrid {
     margin-top: 10px;
     flex-direction: row;

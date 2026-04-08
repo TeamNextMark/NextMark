@@ -113,8 +113,9 @@ function InstructorCourse() {
 
         <Dropdown />
 
-        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "12px" }}>
-          <button className="assignCard" style={{ width: "auto" }} onClick={goToCreateAssignment}>
+        <div className="assignment-header">
+          <h2>Assignments</h2>
+          <button className="primary-btn" onClick={goToCreateAssignment}>
             + Create Assignment
           </button>
         </div>
