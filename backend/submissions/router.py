@@ -88,7 +88,7 @@ def create_submission(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Maximum {MAX_FILES} files allowed")
 
     language = (assignment.code_language or "").strip().lower()
-    allowed = _allowed_extensions(language)
+    allowed = None
     if not allowed:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -112,12 +112,12 @@ def create_submission(
             except ValueError as exc:
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
 
-            suffix = Path(safe_name).suffix.lower()
-            if suffix not in allowed:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail=f"File type not allowed for {language}: {safe_name}",
-                )
+            #suffix = Path(safe_name).suffix.lower()
+            #if suffix not in allowed:
+             #   raise HTTPException(
+              #      status_code=status.HTTP_400_BAD_REQUEST,
+               #     detail=f"File type not allowed for {language}: {safe_name}",
+                #)
 
             destination = workspace_path / safe_name
             content = upload.file.read(MAX_FILE_SIZE_BYTES + 1)
@@ -132,7 +132,7 @@ def create_submission(
 
             stored_names.append(safe_name)
 
-        _ensure_runner_entrypoint(language, workspace_path, stored_names)
+        #_ensure_runner_entrypoint(language, workspace_path, stored_names)
 
         submission = Submission(
             id=submission_id,

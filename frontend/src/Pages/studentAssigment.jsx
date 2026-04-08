@@ -202,7 +202,7 @@ function StudentAssignment() {
               type="file"
               multiple
               hidden
-              accept={getAcceptedTypes(assignment.code_language)}
+              //accept={getAcceptedTypes(assignment.code_language)}
               onChange={handleFileChange}
             />
           </div>
