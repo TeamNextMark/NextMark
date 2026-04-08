@@ -1,7 +1,3 @@
-# Name: GitHub Copilot
-# Date: 2026-03-30
-# Description: Student submission endpoint that stores uploaded files and queues DB rows for runner.
-
 from __future__ import annotations
 
 import os
@@ -32,7 +28,7 @@ def _allowed_extensions(language: str) -> set[str]:
     lang = (language or "").lower()
     if "python" in lang:
         return {".py"}
-    if "cpp" in lang:
+    if "cpp" in lang or "c++" in lang:
         return {".cpp", ".cc", ".cxx", ".hpp", ".h"}
     return set()
 
@@ -55,7 +51,7 @@ def _ensure_runner_entrypoint(language: str, workspace_path: Path, stored_names:
 
         first_source = next(
             (n for n in stored_names if Path(n).suffix.lower() == ".py"),
-            None
+            None,
         )
 
         if not first_source:
@@ -70,7 +66,7 @@ def _ensure_runner_entrypoint(language: str, workspace_path: Path, stored_names:
 
         first_source = next(
             (n for n in stored_names if Path(n).suffix.lower() in {".cpp", ".cc", ".cxx"}),
-            None
+            None,
         )
 
         if not first_source:
@@ -103,68 +99,79 @@ def create_submission(
 
     if not files:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="At least one file is required")
+
     if len(files) > MAX_FILES:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Maximum {MAX_FILES} files allowed")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Maximum {MAX_FILES} files allowed",
+        )
 
     language = (assignment.code_language or "").strip().lower()
-    allowed = None
-    #if not allowed:
-        #raise HTTPException(
-            #status_code=status.HTTP_400_BAD_REQUEST,
-            #detail=f"Unsupported assignment language: {assignment.code_language}",
-        #)
+    allowed = _allowed_extensions(language)
+
+    if not allowed:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported assignment language: {assignment.code_language}",
+        )
 
     submission_id = str(uuid.uuid4())
+
     workspace_path = (SUBMISSIONS_BASE_DIR / submission_id).resolve()
+    host_workspace_path = (HOST_SUBMISSIONS_BASE_DIR / submission_id).resolve()
+
     base_dir = SUBMISSIONS_BASE_DIR.resolve()
+    host_base_dir = HOST_SUBMISSIONS_BASE_DIR.resolve()
 
-if not str(workspace_path).startswith(str(base_dir)):
-    raise HTTPException(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        detail="Invalid workspace path",
-    )
+    if not str(workspace_path).startswith(str(base_dir)):
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Invalid workspace path",
+        )
 
-if not str(host_workspace_path).startswith(str(host_base_dir)):
-    raise HTTPException(
-        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        detail="Invalid host workspace path",
-    )
+    if not str(host_workspace_path).startswith(str(host_base_dir)):
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Invalid host workspace path",
+        )
 
-workspace_path.mkdir(parents=True, exist_ok=False)
-stored_names: list[str] = []
+    workspace_path.mkdir(parents=True, exist_ok=False)
+    stored_names: list[str] = []
 
-try:
-    for upload in files:
-        try:
-            safe_name = _safe_filename(upload.filename or "")
-        except ValueError as exc:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
+    try:
+        for upload in files:
+            try:
+                safe_name = _safe_filename(upload.filename or "")
+            except ValueError as exc:
+                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc))
 
-            #suffix = Path(safe_name).suffix.lower()
-            #if suffix not in allowed:
-             #   raise HTTPException(
-              #      status_code=status.HTTP_400_BAD_REQUEST,
-               #     detail=f"File type not allowed for {language}: {safe_name}",
-                #)
+            suffix = Path(safe_name).suffix.lower()
+            if suffix not in allowed:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"File type not allowed for {language}: {safe_name}",
+                )
 
             destination = workspace_path / safe_name
             content = upload.file.read(MAX_FILE_SIZE_BYTES + 1)
+
             if len(content) > MAX_FILE_SIZE_BYTES:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"File too large: {safe_name} (max {MAX_FILE_SIZE_BYTES} bytes)",
                 )
 
-        with destination.open("wb") as out_file:
-            out_file.write(content)
+            with destination.open("wb") as out_file:
+                out_file.write(content)
 
-        stored_names.append(safe_name)
+            stored_names.append(safe_name)
 
             print("DEBUG language:", language)
             print("DEBUG stored_names:", stored_names)
             print("DEBUG workspace_path:", workspace_path)
+            print("DEBUG host_workspace_path:", host_workspace_path)
 
-    _ensure_runner_entrypoint(language, workspace_path, stored_names)
+        _ensure_runner_entrypoint(language, workspace_path, stored_names)
 
         submission = Submission(
             id=submission_id,
@@ -172,6 +179,7 @@ try:
             student_id=student_id,
             encrypted_file_paths={
                 "workspace_path": str(workspace_path),
+                "host_workspace_path": str(host_workspace_path),
                 "files": stored_names,
             },
         )
@@ -185,7 +193,10 @@ try:
     except Exception as exc:
         db.rollback()
         shutil.rmtree(workspace_path, ignore_errors=True)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Submission failed: {exc}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Submission failed: {exc}",
+        )
 
     return SubmissionCreateResponse(
         submission_id=submission_id,
