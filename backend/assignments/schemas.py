@@ -39,7 +39,7 @@ class AssignmentBase(BaseModel):
     course_id: str
     rubric_version_id: str
     code_language: str
-    due_date: str
+    due_date: date
     assignment_name: str
     assignment_description: Optional[str] = None
     max_files: int
