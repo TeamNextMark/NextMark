@@ -13,6 +13,7 @@ import StudentCourse from "./Pages/studentCourse";
 import InstructorCourse from "./Pages/instructorCourse";
 import StudentAssignment from "./Pages/studentAssigment";
 import InstructorAssignment from "./Pages/instructorAssigment";
+import StudentSubmission from "./Pages/studentSubmission";
 
 function HomeRedirect({ user }) {
   if (!user) return <Navigate to="/" replace />;
