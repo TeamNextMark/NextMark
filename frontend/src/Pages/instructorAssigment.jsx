@@ -214,24 +214,24 @@ function InstructorAssignment() {
   }
 
   function getStatusInfo(item) {
-    if (!item) {
-      return { label: "Unknown", dotClass: "purple", tagClass: "tag-gray" };
-    }
+  if (!item) {
+    return { label: "Unknown", dotClass: "purple", tagClass: "tag-gray" };
+  }
 
-    if (item.score == null && !item.faculty_reviewed) {
-      return { label: "In queue", dotClass: "purple", tagClass: "tag-gray" };
-    }
-
-    if (item.score != null && item.score < 60) {
-      return { label: "Needs review", dotClass: "red", tagClass: "tag-red" };
-    }
-
-    if (item.score != null && item.score < 80) {
-      return { label: "Medium confidence", dotClass: "yellow", tagClass: "tag-yellow" };
-    }
-
+  if (item.faculty_reviewed) {
     return { label: "Reviewed", dotClass: "green", tagClass: "tag-green" };
   }
+
+  if (item.score == null) {
+    return { label: "In queue", dotClass: "purple", tagClass: "tag-gray" };
+  }
+
+  if (item.score < 60) {
+    return { label: "Needs review", dotClass: "red", tagClass: "tag-red" };
+  }
+
+  return { label: "Pending faculty review", dotClass: "yellow", tagClass: "tag-yellow" };
+}
 
   const reviewedCount = useMemo(
     () => submissions.filter((s) => s.faculty_reviewed).length,
