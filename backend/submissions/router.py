@@ -177,7 +177,7 @@ def create_submission(
             id=submission_id,
             assignment_id=assignment_id,
             student_id=student_id,
-            encrypted_file_paths={
+            file_paths={
                 "workspace_path": str(workspace_path),
                 "host_workspace_path": str(host_workspace_path),
                 "files": stored_names,

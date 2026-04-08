@@ -45,24 +45,24 @@ docker_client = docker.from_env()
 
 
 def _build_job(row) -> SandboxJob:
-    encrypted_file_paths = row.encrypted_file_paths
-    if isinstance(encrypted_file_paths, str):
-        encrypted_file_paths = json.loads(encrypted_file_paths)
+    file_paths = row.file_paths
+    if isinstance(file_paths, str):
+        file_paths = json.loads(file_paths)
 
     return SandboxJob(
         submission_id=row.submission_id,
         assignment_id=row.assignment_id,
         student_id=row.student_id,
         language=(row.code_language or "").lower(),
-        encrypted_file_paths=encrypted_file_paths,
+        file_paths=file_paths,
         queued_at=datetime.now(timezone.utc),
     )
 
 
 def _get_workspace_path(job: SandboxJob) -> Path:
-    value = job.encrypted_file_paths.get("workspace_path")
+    value = job.file_paths.get("workspace_path")
     if not value:
-        raise ValueError("encrypted_file_paths.workspace_path is required")
+        raise ValueError("file_paths.workspace_path is required")
 
     workspace_path = Path(value).resolve()
     allowed_root = WORKSPACE_BASE_DIR.resolve()
@@ -74,9 +74,9 @@ def _get_workspace_path(job: SandboxJob) -> Path:
 
 
 def _get_host_workspace_path(job: SandboxJob) -> Path:
-    value = job.encrypted_file_paths.get("host_workspace_path")
+    value = job.file_paths.get("host_workspace_path")
     if not value:
-        raise ValueError("encrypted_file_paths.host_workspace_path is required")
+        raise ValueError("file_paths.host_workspace_path is required")
 
     workspace_path = Path(value).resolve()
     allowed_root = HOST_WORKSPACE_BASE_DIR.resolve()
@@ -196,7 +196,7 @@ def _pick_next_submission(session):
             s.submission_id,
             s.assignment_id,
             s.student_id,
-            s.encrypted_file_paths,
+            s.file_paths,
             a.code_language
         FROM submission s
         JOIN assignment a ON a.assignment_id = s.assignment_id
