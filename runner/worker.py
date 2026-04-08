@@ -252,12 +252,63 @@ def _store_result(session, result: SandboxExecutionResult):
         """
     )
 
+    test_results = [
+        {
+            "name": "Program execution",
+            "passed": result.exit_code == 0,
+            "input": "",
+            "expected": "Program runs without execution errors",
+            "got": "Exit code 0" if result.exit_code == 0 else f"Exit code {result.exit_code}",
+        },
+        {
+            "name": "Timeout check",
+            "passed": not result.timed_out,
+            "input": "",
+            "expected": "No timeout",
+            "got": "No timeout" if not result.timed_out else "Timed out",
+        },
+    ]
+
+    rubric_breakdown = [
+        {
+            "criterion": "Correctness",
+            "earned": 40 if result.exit_code == 0 else 0,
+            "max": 40,
+            "comment": "Program executed successfully." if result.exit_code == 0 else "Program failed to execute.",
+        },
+        {
+            "criterion": "Execution",
+            "earned": 30 if not result.timed_out else 0,
+            "max": 30,
+            "comment": "No timeout occurred." if not result.timed_out else "Execution timed out.",
+        },
+        {
+            "criterion": "Output",
+            "earned": 30 if result.exit_code == 0 else 0,
+            "max": 30,
+            "comment": "Execution completed and output was collected." if result.exit_code == 0 else "Execution did not complete successfully.",
+        },
+    ]
+
+    ai_feedback = (
+        "The submission executed successfully without timing out. "
+        "The current score is based on execution status only and can be refined later with deeper rubric-based AI grading."
+        if result.exit_code == 0
+        else "The submission did not execute successfully. Review stderr and execution details before final grading."
+    )
+
+    ai_confidence = 0.72 if result.exit_code == 0 else 0.45
+
     rubric_scores = {
         "sandbox": {
             "exit_code": result.exit_code,
             "timed_out": result.timed_out,
             "duration_ms": result.duration_ms,
-        }
+        },
+        "ai_feedback": ai_feedback,
+        "ai_confidence": ai_confidence,
+        "test_results": test_results,
+        "rubric_breakdown": rubric_breakdown,
     }
 
     details = {

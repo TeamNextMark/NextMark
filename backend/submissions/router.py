@@ -245,6 +245,32 @@ def get_submission_status(
 
     details = exec_log.details if exec_log and isinstance(exec_log.details, dict) else {}
 
+    file_paths = submission.file_paths if isinstance(submission.file_paths, dict) else {}
+    stored_files = file_paths.get("files", [])
+    workspace_path_str = file_paths.get("workspace_path")
+
+    code_filename = None
+    code_preview = None
+
+    if stored_files and workspace_path_str:
+        workspace_path = Path(workspace_path_str)
+        code_filename = stored_files[0]
+        code_path = workspace_path / code_filename
+
+        if code_path.exists() and code_path.is_file():
+            code_preview = code_path.read_text(encoding="utf-8", errors="replace")
+
+    rubric_scores = (
+        grading.rubric_scores
+        if grading and isinstance(grading.rubric_scores, dict)
+        else {}
+    )
+
+    ai_feedback = rubric_scores.get("ai_feedback")
+    ai_confidence = rubric_scores.get("ai_confidence")
+    test_results = rubric_scores.get("test_results")
+    rubric_breakdown = rubric_scores.get("rubric_breakdown")
+
     return SubmissionStatusResponse(
         submission_id=submission.id,
         assignment_id=submission.assignment_id,
@@ -258,4 +284,10 @@ def get_submission_status(
         duration_ms=details.get("duration_ms") if details else None,
         stdout=details.get("stdout") if details else None,
         stderr=details.get("stderr") if details else None,
+        code_filename=code_filename,
+        code_preview=code_preview,
+        ai_feedback=ai_feedback,
+        ai_confidence=ai_confidence,
+        test_results=test_results,
+        rubric_breakdown=rubric_breakdown,
     )

@@ -25,3 +25,9 @@ class SubmissionStatusResponse(BaseModel):
     duration_ms: int | None = None
     stdout: str | None = None
     stderr: str | None = None
+    code_filename: str | None = None
+    code_preview: str | None = None
+    ai_feedback: str | None = None
+    ai_confidence: float | None = None
+    test_results: list[dict] | None = None
+    rubric_breakdown: list[dict] | None = None
