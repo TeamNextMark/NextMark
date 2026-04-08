@@ -76,7 +76,10 @@ function StudentAssignment() {
   }
 
   async function handleSubmit() {
-    //if (!selectedFiles.length) return;
+    if (!selectedFiles.length) {
+      setError("Please select at least one file before submitting.");
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -85,18 +88,16 @@ function StudentAssignment() {
       const token = localStorage.getItem("accessToken");
 
       const formData = new FormData();
+      formData.append("assignment_id", assignmentId);
       selectedFiles.forEach((file) => formData.append("files", file));
 
-      const response = await fetch(
-        `${API_BASE}/submissions/assignments/${assignmentId}/submissions`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        }
-      );
+      const response = await fetch(`${API_BASE}/submissions/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
       if (!response.ok) {
         const errData = await response.json().catch(() => ({}));
@@ -105,6 +106,7 @@ function StudentAssignment() {
 
       const created = await response.json();
 
+      // refresh submissions
       const refreshed = await fetch(
         `${API_BASE}/assignments/${assignmentId}/my-submissions`,
         {
@@ -122,6 +124,7 @@ function StudentAssignment() {
       setSelectedFiles([]);
       if (fileInputRef.current) fileInputRef.current.value = "";
 
+      // navigate to confirmation page
       navigate(
         `/student/course/${courseSlug}/assignment/${assignmentId}/submission/${created.submission_id}`,
         { replace: true }
@@ -246,7 +249,7 @@ function StudentAssignment() {
           </button>
           <button
             className="submit-btn"
-            //disabled={!selectedFiles.length || submitting}
+            disabled={!selectedFiles.length || submitting}
             onClick={handleSubmit}
           >
             {submitting ? "Submitting..." : "Submit Assignment"}
