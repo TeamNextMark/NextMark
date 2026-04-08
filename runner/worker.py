@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -44,12 +45,53 @@ SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
 docker_client = docker.from_env()
 
 
+def _parse_rubric_line_items(line_items):
+    if not line_items:
+        return []
+
+    if isinstance(line_items, list):
+        parsed = []
+        for item in line_items:
+            if isinstance(item, dict):
+                parsed.append(
+                    {
+                        "criterion": item.get("criterion") or item.get("name") or "Unnamed Criterion",
+                        "max": float(item.get("max") or item.get("points") or item.get("max_points") or 0),
+                    }
+                )
+        return parsed
+
+    if isinstance(line_items, dict):
+        return [
+            {
+                "criterion": line_items.get("criterion") or line_items.get("name") or "Unnamed Criterion",
+                "max": float(line_items.get("max") or line_items.get("points") or line_items.get("max_points") or 0),
+            }
+        ]
+
+    if isinstance(line_items, str):
+        items = []
+        parts = [p.strip() for p in line_items.split(",") if p.strip()]
+        for part in parts:
+            match = re.match(r"(.+?):\s*(\d+)\s*pts?", part, re.IGNORECASE)
+            if match:
+                items.append(
+                    {
+                        "criterion": match.group(1).strip(),
+                        "max": float(match.group(2)),
+                    }
+                )
+        return items
+
+    return []
+
+
 def _build_job(row) -> SandboxJob:
     file_paths = row.file_paths
     if isinstance(file_paths, str):
         file_paths = json.loads(file_paths)
 
-    return SandboxJob(
+    job = SandboxJob(
         submission_id=row.submission_id,
         assignment_id=row.assignment_id,
         student_id=row.student_id,
@@ -57,6 +99,11 @@ def _build_job(row) -> SandboxJob:
         file_paths=file_paths,
         queued_at=datetime.now(timezone.utc),
     )
+
+    # attach rubric metadata for grading step
+    job.line_items = row.line_items
+    job.total_points = row.total_points
+    return job
 
 
 def _get_workspace_path(job: SandboxJob) -> Path:
@@ -175,7 +222,7 @@ def _run_in_sandbox(job: SandboxJob) -> SandboxExecutionResult:
     if len(stdout_text) > 50000:
         print(f"[runner] warning: stdout truncated at 50000 chars for submission={job.submission_id}")
 
-    return SandboxExecutionResult(
+    result = SandboxExecutionResult(
         submission_id=job.submission_id,
         exit_code=exit_code,
         stdout=stdout_text[:50000],
@@ -184,6 +231,11 @@ def _run_in_sandbox(job: SandboxJob) -> SandboxExecutionResult:
         timed_out=timed_out,
         completed_at=datetime.now(timezone.utc),
     )
+
+    # attach rubric metadata for store step
+    result.line_items = getattr(job, "line_items", None)
+    result.total_points = getattr(job, "total_points", None)
+    return result
 
 
 def _pick_next_submission(session):
@@ -194,10 +246,18 @@ def _pick_next_submission(session):
             s.assignment_id,
             s.student_id,
             s.file_paths,
-            a.code_language
+            a.code_language,
+            rt.line_items,
+            rt.total_points
         FROM submission s
-        JOIN assignment a ON a.assignment_id = s.assignment_id
-        LEFT JOIN grading_result g ON g.submission_id = s.submission_id
+        JOIN assignment a
+            ON a.assignment_id = s.assignment_id
+        JOIN assignment_rubric ar
+            ON ar.rubric_version_id = a.rubric_version_id
+        JOIN rubric_template rt
+            ON rt.template_id = ar.template_id
+        LEFT JOIN grading_result g
+            ON g.submission_id = s.submission_id
         WHERE g.submission_id IS NULL
         ORDER BY s.submitted_at ASC
         LIMIT 1
@@ -207,7 +267,57 @@ def _pick_next_submission(session):
 
 
 def _store_result(session, result: SandboxExecutionResult):
-    score = 0.0 if result.exit_code != 0 else 100.0
+    parsed_rubric = _parse_rubric_line_items(getattr(result, "line_items", None))
+    total_points = float(getattr(result, "total_points", 100) or 100)
+
+    if not parsed_rubric:
+        parsed_rubric = [{"criterion": "Correctness", "max": total_points}]
+
+    passed = result.exit_code == 0 and not result.timed_out
+
+    rubric_breakdown = []
+    earned_total = 0.0
+
+    for item in parsed_rubric:
+        max_points = float(item.get("max", 0))
+        earned = max_points if passed else 0.0
+        earned_total += earned
+
+        rubric_breakdown.append(
+            {
+                "criterion": item.get("criterion", "Unnamed Criterion"),
+                "earned": earned,
+                "max": max_points,
+                "comment": "Program executed successfully." if passed else "Program failed to execute.",
+            }
+        )
+
+    score = round(earned_total, 2)
+
+    test_results = [
+        {
+            "name": "Program execution",
+            "passed": result.exit_code == 0,
+            "input": "",
+            "expected": "Program runs without execution errors",
+            "got": "Exit code 0" if result.exit_code == 0 else f"Exit code {result.exit_code}",
+        },
+        {
+            "name": "Timeout check",
+            "passed": not result.timed_out,
+            "input": "",
+            "expected": "No timeout",
+            "got": "No timeout" if not result.timed_out else "Timed out",
+        },
+    ]
+
+    ai_feedback = (
+        "The submission executed successfully. The recommended score is based on the assignment rubric from the database."
+        if passed
+        else "The submission did not execute successfully. Review stderr and execution details before final grading."
+    )
+
+    ai_confidence = 0.78 if passed else 0.45
 
     insert_grading = text(
         """
@@ -252,53 +362,6 @@ def _store_result(session, result: SandboxExecutionResult):
         """
     )
 
-    test_results = [
-        {
-            "name": "Program execution",
-            "passed": result.exit_code == 0,
-            "input": "",
-            "expected": "Program runs without execution errors",
-            "got": "Exit code 0" if result.exit_code == 0 else f"Exit code {result.exit_code}",
-        },
-        {
-            "name": "Timeout check",
-            "passed": not result.timed_out,
-            "input": "",
-            "expected": "No timeout",
-            "got": "No timeout" if not result.timed_out else "Timed out",
-        },
-    ]
-
-    rubric_breakdown = [
-        {
-            "criterion": "Correctness",
-            "earned": 40 if result.exit_code == 0 else 0,
-            "max": 40,
-            "comment": "Program executed successfully." if result.exit_code == 0 else "Program failed to execute.",
-        },
-        {
-            "criterion": "Execution",
-            "earned": 30 if not result.timed_out else 0,
-            "max": 30,
-            "comment": "No timeout occurred." if not result.timed_out else "Execution timed out.",
-        },
-        {
-            "criterion": "Output",
-            "earned": 30 if result.exit_code == 0 else 0,
-            "max": 30,
-            "comment": "Execution completed and output was collected." if result.exit_code == 0 else "Execution did not complete successfully.",
-        },
-    ]
-
-    ai_feedback = (
-        "The submission executed successfully without timing out. "
-        "The current score is based on execution status only and can be refined later with deeper rubric-based AI grading."
-        if result.exit_code == 0
-        else "The submission did not execute successfully. Review stderr and execution details before final grading."
-    )
-
-    ai_confidence = 0.72 if result.exit_code == 0 else 0.45
-
     rubric_scores = {
         "sandbox": {
             "exit_code": result.exit_code,
@@ -309,6 +372,9 @@ def _store_result(session, result: SandboxExecutionResult):
         "ai_confidence": ai_confidence,
         "test_results": test_results,
         "rubric_breakdown": rubric_breakdown,
+        "ai_recommended_score": score,
+        "accepted_ai_grade": False,
+        "instructor_comments": "",
     }
 
     details = {
