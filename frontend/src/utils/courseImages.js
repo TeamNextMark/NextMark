@@ -1,9 +1,9 @@
-import desert from "./Images/Banners/desert.jpg";
-import galaxy from "./Images/Banners/galaxy.jpg";
-import mountain from "./Images/Banners/mountain.jpg";
+import desert from "../Images/Banners/desert.jpg";
+import galaxy from "../Images/Banners/galaxy.jpg";
+import mountain from "../Images/Banners/mountain.jpg";
 import mountainRange from "./Images/Banners/mountainRange.jpg";
-import pond from "./Images/Banners/pond.jpg";
-import rain from "./Images/Banners/rain.jpg";
+import pond from "../Images/Banners/pond.jpg";
+import rain from "../Images/Banners/rain.jpg";
 
 const STORAGE_KEY = "nextmark-course-image-map-v1";
 
