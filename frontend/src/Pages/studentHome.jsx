@@ -1,5 +1,6 @@
 import "../CSS/Template.css";
 import "../CSS/Home.css";
+import { getCourseImage } from "../utils/courseImages";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
@@ -70,7 +71,7 @@ function StudentHome() {
           >
             <div className="courseImage">
               <img
-                src="/images/course1.jpg"
+                src={getCourseImage(course)}
                 alt={`${course.course_code} (${course.id}) - ${course.semester}`}
               />
             </div>

@@ -1,5 +1,6 @@
 import "../CSS/Template.css";
 import "../CSS/Course.css";
+import { getCourseImage } from "../utils/courseImages";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import logo from "../Images/downArrow.png";
@@ -96,7 +97,7 @@ function StudentCourse() {
     <div className="mainContent">
       <div className="courseBanner">
         <img
-          src="/images/course1.jpg"
+          src={getCourseImage(course)}
           alt={`${course.course_code} (${course.id}) - ${course.semester}`}
         />
       </div>

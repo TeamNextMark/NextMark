@@ -28,7 +28,7 @@ body {
 }
 
 .sidebar-title {
-  font-size: 26px;
+  font-size: 18px;
   margin: 4px 0 12px;
   color: #111827;
 }
@@ -196,7 +196,7 @@ body {
 
 .student-summary-left p {
   margin: 0;
-  font-size: 20px;
+  font-size: 18px;
   color: #6b7280;
 }
 
