@@ -95,17 +95,20 @@ function StudentCourse() {
 
   return (
     <div className="mainContent">
-      <div className="courseBanner">
+      <div className="courseHero">
         <img
           src={getCourseImage(course)}
-          alt={`${course.course_code} (${course.id}) - ${course.semester}`}
+          alt={course.course_code}
+          className="heroImage"
         />
-      </div>
 
-      <div className="textContent">
-        <div className="courseTitle">
-          <h1>{course.course_code} - {course.id} {course.course_name}</h1>
-          <p>{course.semester}</p>
+        <div className="heroOverlay">
+          <div className="courseTitle">
+            <h1>
+              {course.course_code} - {course.id} {course.course_name}
+            </h1>
+            <p>{course.semester}</p>
+          </div>
         </div>
 
         <Dropdown />

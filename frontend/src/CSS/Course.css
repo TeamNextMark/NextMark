@@ -93,14 +93,45 @@ body {
     transform: translateY(-2px);
 }
 
-.courseBanner {
+/* HERO CONTAINER */
+.courseHero {
+  position: relative;
   width: 100%;
-  height: 350px; /* adjust this */
+  height: 300px; /* adjust if you want taller */
   overflow: hidden;
 }
 
-.courseBanner img {
+/* IMAGE */
+.heroImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* DARK OVERLAY */
+.courseHero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.7));
+}
+
+/* TEXT ON TOP */
+.heroOverlay {
+  position: absolute;
+  bottom: 20px;
+  left: 30px;
+  color: white;
+  z-index: 2;
+}
+
+/* TITLE STYLING */
+.courseTitle h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.courseTitle p {
+  margin: 5px 0 0;
+  opacity: 0.9;
 }
