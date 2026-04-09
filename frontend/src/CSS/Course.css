@@ -1,68 +1,91 @@
 body {
-    padding: 0;
-    margin: 0;
+  padding: 0;
+  margin: 0;
 }
 
 .mainContent {
-    margin: 0px;
+  margin: 0;
 }
 
 .courseBanner {
-    background-color: rgb(227, 227, 227);
-    padding: 80px;
+  width: 100%;
+  height: 270px;
+  overflow: hidden;
+  background-color: rgb(227, 227, 227);
+}
+
+.courseBanner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .textContent {
-    padding-left: 10px;
-    padding-right: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 14px;
+  padding-bottom: 10px;
 }
 
 .courseTitle {
-    border: 2px solid transparent;
-    border-radius: 5px;
-    margin-bottom: 15px;
-    padding-left: 10px;
-    box-shadow: 0px 0px 10px;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  padding-left: 10px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  box-shadow: 0px 0px 10px;
+  background: white;
+}
+
+.courseTitle h1 {
+  margin: 0;
+}
+
+.courseTitle p {
+  margin: 4px 0 0 0;
 }
 
 .descDD {
-    border-bottom: 2px solid;
-    margin-bottom: 5px;
+  border-bottom: 2px solid;
+  margin-bottom: 5px;
 }
 
 .courseDesc {
-    border: transparent;
-    background: transparent;
-    font-size: 30px;
-    margin-bottom: 5px;
-    margin-top: 10px;
+  border: transparent;
+  background: transparent;
+  font-size: 30px;
+  margin-bottom: 5px;
+  margin-top: 10px;
+  cursor: pointer;
 }
 
 .arrow {
-    height: 15px;
-    width: auto;
+  height: 15px;
+  width: auto;
 }
 
 .arrowDirection {
-    display: inline-block;
-    margin-left: 6px;
-    transition: transform 0.3s ease;
+  display: inline-block;
+  margin-left: 6px;
+  transition: transform 0.3s ease;
 }
 
 .arrowDirection.open {
-    transform: rotate(180deg);
+  transform: rotate(180deg);
 }
 
 .dropdown-menu {
-    background: rgb(227, 227, 227);
-    border: 2px solid transparent;
-    border-radius: 10px;
-    padding: 10px;
-    margin-bottom: 10px;
+  background: rgb(227, 227, 227);
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 10px;
 }
 
 .dropdown-menu p {
-    color: black;
+  color: black;
 }
 
 .assignment-header {
@@ -73,65 +96,24 @@ body {
 }
 
 .assignGrid {
-    margin-top: 10px;
-    flex-direction: row;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .assignCard {
-    border: 2px solid transparent;
-    border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 15px;
-    box-shadow: 0px 0px 10px;
-    width: 100%;
-    text-align: left;
-    font-size: 16px;
-
+  border: 2px solid transparent;
+  border-radius: 5px;
+  padding: 10px;
+  box-shadow: 0px 0px 10px;
+  width: 100%;
+  text-align: left;
+  font-size: 16px;
+  background: white;
+  cursor: pointer;
 }
 
 .assignCard:hover {
-    transform: translateY(-2px);
-}
-
-/* HERO CONTAINER */
-.courseHero {
-  position: relative;
-  width: 100%;
-  height: 300px; /* adjust if you want taller */
-  overflow: hidden;
-}
-
-/* IMAGE */
-.heroImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* DARK OVERLAY */
-.courseHero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.7));
-}
-
-/* TEXT ON TOP */
-.heroOverlay {
-  position: absolute;
-  bottom: 20px;
-  left: 30px;
-  color: white;
-  z-index: 2;
-}
-
-/* TITLE STYLING */
-.courseTitle h1 {
-  margin: 0;
-  font-size: 28px;
-}
-
-.courseTitle p {
-  margin: 5px 0 0;
-  opacity: 0.9;
+  transform: translateY(-2px);
 }
