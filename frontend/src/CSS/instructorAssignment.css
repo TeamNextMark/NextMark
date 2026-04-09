@@ -28,7 +28,7 @@ body {
 }
 
 .sidebar-title {
-  font-size: 14px;
+  font-size: 26px;
   margin: 4px 0 12px;
   color: #111827;
 }
@@ -190,13 +190,13 @@ body {
 
 .student-summary-left h1 {
   margin: 0 0 6px;
-  font-size: 14px;
+  font-size: 26px;
   color: #111827;
 }
 
 .student-summary-left p {
   margin: 0;
-  font-size: 12px;
+  font-size: 20px;
   color: #6b7280;
 }
 

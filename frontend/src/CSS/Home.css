@@ -41,6 +41,7 @@ body {
 
 .courseCard h2 {
   color: black;
+  font-size: 26px;
 }
 
 .courseCard:hover {
