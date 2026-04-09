@@ -1,9 +1,9 @@
 import "../CSS/Template.css";
 import "../CSS/Course.css";
-import { getCourseImage } from "../utils/courseImages";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import logo from "../Images/downArrow.png";
+import { getCourseImage } from "../utils/courseImages";
 
 const API_BASE = import.meta?.env?.VITE_API_URL || "/api";
 
@@ -104,7 +104,7 @@ function StudentCourse() {
 
       <div className="textContent">
         <div className="courseTitle">
-          <h1>{course.course_code} - {course.id} {" "} {course.course_name}</h1>
+          <h1>{course.course_code} - {course.id} {course.course_name}</h1>
           <p>{course.semester}</p>
         </div>
 

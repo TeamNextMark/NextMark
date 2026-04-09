@@ -1,8 +1,8 @@
 import "../CSS/Template.css";
 import "../CSS/Home.css";
-import { getCourseImage } from "../utils/courseImages";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { assignImagesToCourses } from "../utils/courseImages";
 
 const API_BASE = import.meta?.env?.VITE_API_URL || "/api";
 
@@ -48,6 +48,8 @@ function Home() {
     fetchCourses();
   }, []);
 
+  const coursesWithImages = useMemo(() => assignImagesToCourses(courses), [courses]);
+
   function goToCourses(course) {
     const slug = `${course.course_code}${course.id}`;
     navigate(`/faculty/course/${slug}`);
@@ -61,9 +63,9 @@ function Home() {
       {!loading && error && <p>{error}</p>}
 
       <div className="coursesGrid">
-        {!loading && !error && courses.length === 0 && <p>No courses assigned yet.</p>}
+        {!loading && !error && coursesWithImages.length === 0 && <p>No courses assigned yet.</p>}
 
-        {courses.map((course) => (
+        {coursesWithImages.map((course) => (
           <button
             key={course.course_id}
             className="courseCard"
@@ -71,15 +73,14 @@ function Home() {
           >
             <div className="courseImage">
               <img
-                src={getCourseImage(course)}
+                src={course.image}
                 alt={`${course.course_code} (${course.id}) - ${course.semester}`}
               />
             </div>
 
             <div className="courseInfo">
               <h2>
-                {course.course_code} - {course.id}{" "}
-                {course.course_name}
+                {course.course_code} - {course.id} {course.course_name}
               </h2>
               <p>{course.semester}</p>
             </div>
