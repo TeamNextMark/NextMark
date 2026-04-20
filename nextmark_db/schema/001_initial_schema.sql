@@ -40,12 +40,28 @@ CREATE TABLE assignment (
     rubric_version_id TEXT NOT NULL,
     code_language TEXT NOT NULL,
     due_date DATE NOT NULL,
+    assignment_name TEXT NOT NULL DEFAULT 'Untitled Assignment',
+    assignment_description TEXT NULL,
+    max_files INTEGER NOT NULL DEFAULT 1,
+    max_score INTEGER NULL,
     CONSTRAINT fk_assignment_course
         FOREIGN KEY (course_id)
         REFERENCES course(course_id),
     CONSTRAINT fk_assignment_rubric
         FOREIGN KEY (rubric_version_id)
         REFERENCES assignment_rubric(rubric_version_id)
+);
+
+CREATE TABLE assignment_file (
+    assignment_file_id TEXT PRIMARY KEY,
+    assignment_id TEXT NOT NULL,
+    file_name TEXT NOT NULL,
+    file_path TEXT NOT NULL,
+    uploaded_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT fk_assignment_file_assignment
+        FOREIGN KEY (assignment_id)
+        REFERENCES assignment(assignment_id)
+        ON DELETE CASCADE
 );
 
 CREATE TABLE test_case (
@@ -64,7 +80,7 @@ CREATE TABLE submission (
     assignment_id TEXT NOT NULL,
     student_id TEXT NOT NULL,
     submitted_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    encrypted_file_paths JSONB NOT NULL,
+    file_paths JSONB NOT NULL,
     CONSTRAINT fk_submission_assignment
         FOREIGN KEY (assignment_id)
         REFERENCES assignment(assignment_id),
@@ -169,5 +185,22 @@ CREATE TABLE audit_history (
     CONSTRAINT fk_audit_history_actor
         FOREIGN KEY (actor_id)
         REFERENCES users_account(id_users)
+);
+
+CREATE TABLE course_enrollment (
+    enrollment_id SERIAL PRIMARY KEY,
+    course_id VARCHAR NOT NULL,
+    student_id VARCHAR NOT NULL,
+    enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_enrollment_course
+        FOREIGN KEY (course_id) REFERENCES course(course_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_enrollment_student
+        FOREIGN KEY (student_id) REFERENCES users_account(id_users)
+        ON DELETE CASCADE,
+
+    CONSTRAINT unique_student_course UNIQUE (course_id, student_id)
 );
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../CSS/Header.css";
 import logo from "../Images/homeHeaderLogo.png";
@@ -35,24 +35,45 @@ function Header({ user, setUser }) {
 
   const getHomeRoute = () => {
     if (!user?.roles) return "/";
-    if (user.roles.includes("instructor")) return "/home/instructor";
+    if (user.roles.includes("faculty")) return "/home/faculty";
     if (user.roles.includes("admin")) return "/home/admin";
     if (user.roles.includes("ta")) return "/home/ta";
     return "/home/student";
   };
 
   const canGoAdmin = user?.roles?.includes("admin");
-  const canGoInstructor = user?.roles?.includes("instructor");
+  const canGoInstructor = user?.roles?.includes("faculty");
   const canGoTA = user?.roles?.includes("ta");
   const canGoStudent = user?.roles?.includes("student");
 
-  let subtitle;
+  const subtitle = useMemo(() => {
+    const path = location.pathname;
 
-  if (location.pathname.startsWith("/home") || location.pathname.startsWith("/admin")) {
-    subtitle = "Arkansas Tech University";
-  } else {
-    subtitle = "Course Name";
-  }
+    if (
+      path.startsWith("/home") ||
+      path.startsWith("/admin") ||
+      path === "/"
+    ) {
+      return "Arkansas Tech University";
+    }
+
+    const courseMatch = path.match(/^\/(student|faculty)\/course\/([^/]+)/);
+
+    if (courseMatch) {
+      const courseSlug = courseMatch[2];
+      const match = courseSlug.match(/^([a-zA-Z]+)(.+)$/);
+
+      if (match) {
+        const courseCode = match[1].toUpperCase();
+        const courseId = match[2];
+        return `${courseCode} - ${courseId}`;
+      }
+
+      return courseSlug.toUpperCase();
+    }
+
+    return "Course Name";
+  }, [location.pathname]);
 
   return (
     <header className="header">
@@ -63,7 +84,7 @@ function Header({ user, setUser }) {
         <img className="headerLogo" src={logo} alt="NM logo" />
 
         <div className="textBlock">
-          <p className="appName">NextMark</p>
+          <p className="appName">NextMark AI</p>
           <p className="courseName">{subtitle}</p>
         </div>
       </div>
@@ -99,7 +120,7 @@ function Header({ user, setUser }) {
                 {canGoInstructor && (
                   <button
                     className="dropdownItem"
-                    onClick={() => navigate("/home/instructor")}
+                    onClick={() => navigate("/home/faculty")}
                     type="button"
                   >
                     Instructor Homepage

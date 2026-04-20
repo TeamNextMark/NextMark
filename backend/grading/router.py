@@ -25,9 +25,12 @@ class GradeResponse(BaseModel):
 @router.post("/", response_model=GradeResponse)
 async def grade_submission(
     payload: GradeRequest,
-    _: dict = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
 ):
+    if not any(r in current_user.get("roles", []) for r in ("faculty", "ta")):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Faculty or TA role required")
     prompt = (
+        f"/no_think\n\n"
         f"You are a code grading assistant. Grade the following {payload.language} code "
         f"based on the rubric provided.\n\n"
         f"Rubric:\n{payload.rubric}\n\n"

@@ -6,6 +6,8 @@ class CourseBase(BaseModel):
     course_code: str
     semester: str
     faculty_id: str
+    course_name: str
+    course_description: Optional[str] = None
 
 
 class CourseCreate(CourseBase):

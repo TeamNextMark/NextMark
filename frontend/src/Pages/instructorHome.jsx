@@ -1,69 +1,91 @@
-import "../CSS/Template.css"
+import "../CSS/Template.css";
 import "../CSS/Home.css";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { assignImagesToCourses } from "../utils/courseImages";
+
+const API_BASE = import.meta?.env?.VITE_API_URL || "/api";
+
 function Home() {
   const navigate = useNavigate();
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  function goToCourses() {
-    navigate("/faculty/courses");
+  useEffect(() => {
+    async function fetchCourses() {
+      try {
+        const token = localStorage.getItem("accessToken");
+
+        if (!token) {
+          throw new Error("No access token found. Please log in again.");
+        }
+
+        const response = await fetch(`${API_BASE}/courses/my-faculty-courses`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          let message = "Failed to load faculty courses";
+          try {
+            const err = await response.json();
+            message = err?.detail || err?.message || message;
+          } catch {}
+          throw new Error(message);
+        }
+
+        const data = await response.json();
+        setCourses(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setError(err?.message || "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchCourses();
+  }, []);
+
+  const coursesWithImages = useMemo(() => assignImagesToCourses(courses), [courses]);
+
+  function goToCourses(course) {
+    const slug = `${course.course_code}${course.id}`;
+    navigate(`/faculty/course/${slug}`);
   }
 
   return (
     <div className="mainContent">
       <h1 className="pageTitle">Courses</h1>
 
+      {loading && <p>Loading courses...</p>}
+      {!loading && error && <p>{error}</p>}
+
       <div className="coursesGrid">
+        {!loading && !error && coursesWithImages.length === 0 && <p>No courses assigned yet.</p>}
 
-        <button className="courseCard" onClick={goToCourses}>
-          <div className="courseImage">
-            <img src="/images/course1.jpg" alt="Course 1" />
-          </div>
+        {coursesWithImages.map((course) => (
+          <button
+            key={course.course_id}
+            className="courseCard"
+            onClick={() => goToCourses(course)}
+          >
+            <div className="courseImage">
+              <img
+                src={course.image}
+                alt={`${course.course_code} (${course.id}) - ${course.semester}`}
+              />
+            </div>
 
-          <div className="courseInfo">
-            <h2>Class 1</h2>
-          </div>
-        </button>
-
-        <button className="courseCard" onClick={goToCourses}>
-          <div className="courseImage">
-            <img src="/images/course2.jpg" alt="Course 2" />
-          </div>
-
-          <div className="courseInfo">
-            <h2>Class 2</h2>
-          </div>
-        </button>
-
-        <button className="courseCard" onClick={goToCourses}>
-          <div className="courseImage">
-            <img src="/images/course3.jpg" alt="Course 3" />
-          </div>
-
-          <div className="courseInfo">
-            <h2>Class 3</h2>
-          </div>
-        </button>
-
-        <button className="courseCard" onClick={goToCourses}>
-          <div className="courseImage">
-            <img src="/images/course3.jpg" alt="Course 3" />
-          </div>
-
-          <div className="courseInfo">
-            <h2>Class 4</h2>
-          </div>
-        </button>
-
-        <button className="courseCard" onClick={goToCourses}>
-          <div className="courseImage">
-            <img src="/images/course3.jpg" alt="Course 3" />
-          </div>
-
-          <div className="courseInfo">
-            <h2>Class 5</h2>
-          </div>
-        </button>
-
+            <div className="courseInfo">
+              <h2>
+                {course.course_code} - {course.id} {course.course_name}
+              </h2>
+              <p>{course.semester}</p>
+            </div>
+          </button>
+        ))}
       </div>
     </div>
   );

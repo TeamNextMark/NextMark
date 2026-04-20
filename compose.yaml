@@ -20,7 +20,7 @@ services:
     networks:
       - nextmark-net
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U nextmark"]
+      test: ["CMD-SHELL", "pg_isready -U nextmark -d nextmark_db"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -50,7 +50,7 @@ services:
       LLM_MODEL: qwen3:4b
       SECRET_KEY: ${SECRET_KEY}
     volumes:
-      - submissions-data:/var/lib/nextmark/submissions
+      - /srv/nextmark/submissions:/var/lib/nextmark/submissions
     networks:
       - nextmark-net
     depends_on:
@@ -84,7 +84,8 @@ services:
       RUNNER_SECCOMP_PROFILE: /runner/security/seccomp-nextmark.json
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - submissions-data:/var/lib/nextmark/submissions
+      - /srv/nextmark/submissions:/var/lib/nextmark/submissions
+      - /srv/nextmark/submissions:/srv/nextmark/submissions
       - ./runner/security:/runner/security:ro
     networks:
       - nextmark-net
@@ -133,4 +134,3 @@ networks:
 volumes:
   postgres-data:
   ollama-data:
-  submissions-data:

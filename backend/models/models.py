@@ -12,6 +12,7 @@ from sqlalchemy import (
     Numeric,
     TIMESTAMP,
     func,
+    Text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
@@ -30,13 +31,18 @@ class UsersAccount(Base):
     id: str = Column("id_users", String, primary_key=True, default=gen_uuid)
     position: list[str] = Column("position_users", ARRAY(String), nullable=False, default=["student"])
     email: str = Column("email_users", String, nullable=False, unique=True)
-    hashed_password: str = Column(
-        "encryptedpassword_users", String, nullable=False
-    )
+    hashed_password: str = Column("encryptedpassword_users", String, nullable=False)
     ferpa_consent: bool = Column("ferpa_consent", Boolean, nullable=False, default=False)
 
     # relationships
     courses = relationship("Course", back_populates="faculty", lazy="joined")
+    enrollments = relationship("CourseEnrollment", back_populates="student")
+    enrolled_courses = relationship(
+        "Course",
+        secondary="course_enrollment",
+        back_populates="students",
+        viewonly=True,
+    )
     submissions = relationship("Submission", back_populates="student", lazy="joined")
     flags_resolved = relationship("Flag", back_populates="resolved_by_user", lazy="joined")
     feedbacks = relationship("Feedback", back_populates="author", lazy="joined")
@@ -52,9 +58,45 @@ class Course(Base):
     faculty_id: str = Column("faculty_id", String, ForeignKey("users_account.id_users"), nullable=False)
     course_code: str = Column("course_code", String, nullable=False)
     semester: str = Column("semester", String, nullable=False)
+    course_name = Column(Text, nullable=False)
+    course_description = Column(Text, nullable=True)
 
     faculty = relationship("UsersAccount", back_populates="courses")
     assignments = relationship("Assignment", back_populates="course")
+    enrollments = relationship("CourseEnrollment", back_populates="course")
+    students = relationship(
+        "UsersAccount",
+        secondary="course_enrollment",
+        back_populates="enrolled_courses",
+        viewonly=True,
+    )
+
+
+class CourseEnrollment(Base):
+    __tablename__ = "course_enrollment"
+
+    id: int = Column("enrollment_id", Integer, primary_key=True, index=True)
+    course_id: str = Column(
+        "course_id",
+        String,
+        ForeignKey("course.course_id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    student_id: str = Column(
+        "student_id",
+        String,
+        ForeignKey("users_account.id_users", ondelete="CASCADE"),
+        nullable=False,
+    )
+    enrolled_at = Column(
+        "enrolled_at",
+        TIMESTAMP(timezone=False),
+        nullable=False,
+        server_default=func.now(),
+    )
+
+    course = relationship("Course", back_populates="enrollments")
+    student = relationship("UsersAccount", back_populates="enrollments")
 
 
 class RubricTemplate(Base):
@@ -87,11 +129,28 @@ class Assignment(Base):
     rubric_version_id: str = Column("rubric_version_id", String, ForeignKey("assignment_rubric.rubric_version_id"), nullable=False)
     code_language: str = Column("code_language", String, nullable=False)
     due_date: Date = Column("due_date", Date, nullable=False)
+    assignment_name = Column(Text, nullable=False)
+    assignment_description = Column(Text, nullable=True)
+    max_files = Column(Integer, nullable=False, default=1)
+    max_score = Column(Integer, nullable=True)
+
 
     course = relationship("Course", back_populates="assignments")
     rubric = relationship("AssignmentRubric", back_populates="assignments")
     test_cases = relationship("TestCase", back_populates="assignment")
     submissions = relationship("Submission", back_populates="assignment")
+    assignment_files = relationship("AssignmentFile", back_populates="assignment", cascade="all, delete-orphan")
+
+class AssignmentFile(Base):
+    __tablename__ = "assignment_file"
+
+    assignment_file_id = Column(Text, primary_key=True)
+    assignment_id = Column(Text, ForeignKey("assignment.assignment_id", ondelete="CASCADE"), nullable=False)
+    file_name = Column(Text, nullable=False)
+    file_path = Column(Text, nullable=False)
+    uploaded_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
+
+    assignment = relationship("Assignment", back_populates="assignment_files")
 
 
 class TestCase(Base):
@@ -115,7 +174,7 @@ class Submission(Base):
     assignment_id: str = Column("assignment_id", String, ForeignKey("assignment.assignment_id"), nullable=False)
     student_id: str = Column("student_id", String, ForeignKey("users_account.id_users"), nullable=False)
     submitted_at = Column("submitted_at", TIMESTAMP(timezone=True), nullable=False, server_default=func.now())
-    encrypted_file_paths: dict = Column("encrypted_file_paths", JSONB, nullable=False)
+    file_paths: dict = Column("file_paths", JSONB, nullable=False)
 
     assignment = relationship("Assignment", back_populates="submissions")
     student = relationship("UsersAccount", back_populates="submissions")

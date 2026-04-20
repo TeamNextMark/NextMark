@@ -13,6 +13,8 @@ import StudentCourse from "./Pages/studentCourse";
 import InstructorCourse from "./Pages/instructorCourse";
 import StudentAssignment from "./Pages/studentAssigment";
 import InstructorAssignment from "./Pages/instructorAssigment";
+import StudentSubmissionPage from "./Pages/studentSubmission";
+import CreateAssignment from "./Pages/createAssignment";
 
 function HomeRedirect({ user }) {
   if (!user) return <Navigate to="/" replace />;
@@ -28,7 +30,7 @@ function HomeRedirect({ user }) {
 export default function App() {
   const [user, setUser] = useState(() => {
     const saved = localStorage.getItem("user");
-    return saved ? JSON.parse(saved) : {roles: ["admin"] };
+    return saved ? JSON.parse(saved) : null;
   });
 
   return (
@@ -76,7 +78,7 @@ export default function App() {
         />
 
         <Route
-          path="/student/courses"
+          path="/student/course/:courseSlug"
           element={
             <ProtectedRoute user={user} allowedRoles={["student"]}>
               <StudentCourse user={user} />
@@ -85,7 +87,7 @@ export default function App() {
         />
 
         <Route
-          path="/faculty/courses"
+          path="/faculty/course/:courseSlug"
           element={
             <ProtectedRoute user={user} allowedRoles={["faculty"]}>
               <InstructorCourse user={user} />
@@ -94,7 +96,7 @@ export default function App() {
         />
 
         <Route
-          path="/student/course/assignment"
+          path="/student/course/:courseSlug/assignment/:assignmentId"
           element={
             <ProtectedRoute user={user} allowedRoles={["student"]}>
               <StudentAssignment user={user} />
@@ -103,10 +105,28 @@ export default function App() {
         />
 
         <Route
-          path="/faculty/course/assignment"
+          path="/faculty/course/:courseSlug/assignment/:assignmentId"
           element={
             <ProtectedRoute user={user} allowedRoles={["faculty"]}>
               <InstructorAssignment user={user} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student/course/:courseSlug/assignment/:assignmentId/submission/:submissionId"
+          element={
+            <ProtectedRoute user={user} allowedRoles={["student"]}>
+              <StudentSubmissionPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/faculty/course/:courseSlug/create-assignment"
+          element={
+            <ProtectedRoute user={user} allowedRoles={["faculty"]}>
+              <CreateAssignment user={user} />
             </ProtectedRoute>
           }
         />

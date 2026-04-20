@@ -1,6 +1,7 @@
 from .models import (
     UsersAccount,
     Course,
+    CourseEnrollment,
     RubricTemplate,
     AssignmentRubric,
     Assignment,

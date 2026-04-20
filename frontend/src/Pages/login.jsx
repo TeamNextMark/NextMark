@@ -60,6 +60,7 @@ function Login({ setUser }) {
       else if (firstRole === "student") appRole = "student";
 
       const userObj = {
+        id: data?.user?.id,
         email: data?.user?.email || cleanEmail,
         roles: [appRole],
       };
