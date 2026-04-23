@@ -7,7 +7,6 @@ import ProtectedRoute from "./Components/protectedRoute";
 import Login from "./Pages/login";
 import AdminHome from "./Pages/adminHome";
 import InstructorHome from "./Pages/instructorHome";
-import TAHome from "./Pages/taHome";
 import StudentHome from "./Pages/studentHome";
 import StudentCourse from "./Pages/studentCourse";
 import InstructorCourse from "./Pages/instructorCourse";
@@ -23,7 +22,6 @@ function HomeRedirect({ user }) {
 
   if (roles.includes("admin")) return <Navigate to="/home/admin" replace />;
   if (roles.includes("faculty")) return <Navigate to="/home/faculty" replace />;
-  if (roles.includes("ta")) return <Navigate to="/home/ta" replace />;
   return <Navigate to="/home/student" replace />;
 }
 
@@ -60,10 +58,10 @@ export default function App() {
         />
 
         <Route
-          path="/home/ta"
+          path="/home/student"
           element={
             <ProtectedRoute user={user} allowedRoles={["ta"]}>
-              <TAHome user={user} />
+              <StudentHome user={user} />
             </ProtectedRoute>
           }
         />

@@ -57,7 +57,7 @@ function Home() {
 
   return (
     <div className="mainContent">
-      <h1 className="pageTitle">Courses</h1>
+      <h1 className="pageTitle">My Courses</h1>
 
       {loading && <p>Loading courses...</p>}
       {!loading && error && <p>{error}</p>}
