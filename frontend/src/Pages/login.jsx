@@ -70,7 +70,7 @@ function Login({ setUser }) {
 
       if (appRole === "admin") navigate("/home/admin", { replace: true });
       else if (appRole === "faculty") navigate("/home/faculty", { replace: true });
-      else if (appRole === "ta") navigate("/home/ta", { replace: true });
+      else if (appRole === "ta") navigate("/home/student", { replace: true });
       else navigate("/home/student", { replace: true });
 
     } catch (err) {
