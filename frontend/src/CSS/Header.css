@@ -10,7 +10,7 @@ p {
 
 .header {
   height: 64px;
-  background: linear-gradient(90deg, #115740, #FFCD00);
+  background: linear-gradient(90deg, #115740, #FFCD00);  
   font-family: 'Titling Gothic';
   letter-spacing: 2px;
   color: #ffffff;
@@ -19,8 +19,7 @@ p {
   padding: 0 20px;
   position: sticky;
   top: 0;
-  z-index: 9999;
-  overflow: visible;
+  z-index: 10000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   justify-content: space-between;
 }
@@ -46,18 +45,23 @@ p {
   font-size: 20px;
 }
 
-.headerRight,
-.userWrapper {
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   position: relative;
-  overflow: visible;
-  z-index: 10000;
+  z-index: 10001;
 }
 
+.userWrapper {
+  position: relative;
+}
 
 .user {
   background: transparent;
   border: transparent;
   color: black;
+
   padding: 8px 12px;
   border-radius: 10px;
   font-weight: 700;
@@ -70,16 +74,19 @@ p {
 
 .userDropdown {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 6px);
   right: 0;
-  width: 190px;
+
+  width: 160px;
   background: #ffffff;
   color: #111827;
+
   border-radius: 12px;
   border: 1px solid #e5e7eb;
   box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+
   overflow: hidden;
-  z-index: 10001;
+  z-index: 10002;
 }
 
 .dropdownItem {
@@ -88,6 +95,7 @@ p {
   background: transparent;
   border: none;
   text-align: left;
+
   font-weight: 700;
   cursor: pointer;
 }
@@ -100,6 +108,7 @@ p {
   background: #115740;
   border: transparent;
   color: #ffffff;
+
   padding: 8px 14px;
   border-radius: 10px;
   font-weight: 700;
