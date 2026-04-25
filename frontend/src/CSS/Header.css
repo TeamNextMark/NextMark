@@ -19,7 +19,7 @@ p {
   padding: 0 20px;
   position: sticky;
   top: 0;
-  z-index: 999998;
+  z-index: 9999;
   overflow: visible;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   justify-content: space-between;
@@ -46,18 +46,13 @@ p {
   font-size: 20px;
 }
 
-.headerRight {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  position: relative;
-  overflow: visible;
-}
-
+.headerRight,
 .userWrapper {
   position: relative;
   overflow: visible;
+  z-index: 10000;
 }
+
 
 .user {
   background: transparent;
@@ -74,20 +69,17 @@ p {
 }
 
 .userDropdown {
-  position: fixed;
-  top: 64px;
-  right: 100px;
-
-  width: 180px;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 190px;
   background: #ffffff;
   color: #111827;
-
   border-radius: 12px;
   border: 1px solid #e5e7eb;
   box-shadow: 0 10px 24px rgba(0,0,0,0.18);
-
   overflow: hidden;
-  z-index: 999999;
+  z-index: 10001;
 }
 
 .dropdownItem {
