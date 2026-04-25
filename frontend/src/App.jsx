@@ -22,6 +22,7 @@ function HomeRedirect({ user }) {
 
   if (roles.includes("admin")) return <Navigate to="/home/admin" replace />;
   if (roles.includes("faculty")) return <Navigate to="/home/faculty" replace />;
+  if (roles.includes("ta")) return <Navigate to="/home/student" replace />;
   return <Navigate to="/home/student" replace />;
 }
 
