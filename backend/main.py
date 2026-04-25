@@ -6,6 +6,7 @@ from backend.grading.router import router as grading_router
 from backend.submissions.router import router as submissions_router
 from backend.assignments.router import router as assignments_router
 from backend.auth.tokens import get_current_user
+from backend.admin.router import router as admin_router
 
 app = FastAPI()
 
@@ -14,6 +15,7 @@ app.include_router(courses_router)
 app.include_router(grading_router)
 app.include_router(submissions_router)
 app.include_router(assignments_router)
+app.include_router(admin_router)
 
 @app.get("/healthz")
 def healthz(_: dict = Depends(get_current_user)):

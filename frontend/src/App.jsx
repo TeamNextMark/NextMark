@@ -15,6 +15,12 @@ import FacultyAssignment from "./Pages/instructorAssigment";
 import StudentSubmissionPage from "./Pages/studentSubmission";
 import CreateAssignment from "./Pages/createAssignment";
 import TACourse from "./Pages/taCourse";
+import AdminUsers from "./Pages/adminUsers";
+import CreateUser from "./Pages/createUser";
+import EditUser from "./Pages/editUser";
+import AdminCourses from "./Pages/adminCourses";
+import CreateCourse from "./Pages/createCourse";
+import EditCourse from "./Pages/editCourse";
 
 function HomeRedirect({ user }) {
   if (!user) return <Navigate to="/" replace />;
@@ -46,6 +52,60 @@ export default function App() {
           element={
             <ProtectedRoute user={user} allowedRoles={["admin"]}>
               <AdminHome user={user} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute user={user} allowedRoles={["admin"]}>
+              <AdminUsers user={user} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/users/create"
+          element={
+            <ProtectedRoute user={user} allowedRoles={["admin"]}>
+              <CreateUser user={user} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/users/:userId/edit"
+          element={
+            <ProtectedRoute user={user} allowedRoles={["admin"]}>
+              <EditUser user={user} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/courses"
+          element={
+            <ProtectedRoute user={user} allowedRoles={["admin"]}>
+              <AdminCourses user={user} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/courses/create"
+          element={
+            <ProtectedRoute user={user} allowedRoles={["admin"]}>
+              <CreateCourse user={user} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/courses/:courseId/edit"
+          element={
+            <ProtectedRoute user={user} allowedRoles={["admin"]}>
+              <EditCourse user={user} />
             </ProtectedRoute>
           }
         />
