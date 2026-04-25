@@ -14,6 +14,7 @@ import StudentAssignment from "./Pages/studentAssigment";
 import InstructorAssignment from "./Pages/instructorAssigment";
 import StudentSubmissionPage from "./Pages/studentSubmission";
 import CreateAssignment from "./Pages/createAssignment";
+import TACourse from "./Pages/taCourse";
 
 function HomeRedirect({ user }) {
   if (!user) return <Navigate to="/" replace />;
@@ -89,7 +90,7 @@ export default function App() {
           path="/ta/course/:courseSlug"
           element={
             <ProtectedRoute user={user} allowedRoles={["ta"]}>
-              <InstructorCourse user={user} />
+              <TACourse user={user} />
             </ProtectedRoute>
           }
         />
