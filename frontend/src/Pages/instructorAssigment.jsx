@@ -1,4 +1,4 @@
-import "../CSS/facultyAssignment.css";
+import "../CSS/instructorAssignment.css";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
