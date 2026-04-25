@@ -38,7 +38,7 @@ function Header({ user, setUser }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const roles = user?.roles || [];
+  const roles = user?.roles || user?.position || [];
 
   const isAdmin = roles.includes("admin");
   const isFaculty = roles.includes("faculty");
@@ -60,6 +60,9 @@ function Header({ user, setUser }) {
   const subtitle = useMemo(() => {
     const path = location.pathname;
 
+    if (path.startsWith("/admin/users")) return "Admin - Manage Users";
+    if (path.startsWith("/admin/courses")) return "Admin - Manage Classes";
+
     if (
       path.startsWith("/home") ||
       path.startsWith("/admin") ||
@@ -68,7 +71,7 @@ function Header({ user, setUser }) {
       return "Arkansas Tech University";
     }
 
-    const courseMatch = path.match(/^\/(student|faculty)\/course\/([^/]+)/);
+    const courseMatch = path.match(/^\/(student|faculty|ta)\/course\/([^/]+)/);
 
     if (courseMatch) {
       const courseSlug = courseMatch[2];
@@ -125,6 +128,26 @@ function Header({ user, setUser }) {
                     type="button"
                   >
                     Admin Homepage
+                  </button>
+                )}
+
+                {canGoAdmin && !location.pathname.startsWith("/admin/users") && (
+                  <button
+                    className="dropdownItem"
+                    onClick={() => goTo("/admin/users")}
+                    type="button"
+                  >
+                    Manage Users
+                  </button>
+                )}
+
+                {canGoAdmin && !location.pathname.startsWith("/admin/courses") && (
+                  <button
+                    className="dropdownItem"
+                    onClick={() => goTo("/admin/courses")}
+                    type="button"
+                  >
+                    Manage Classes
                   </button>
                 )}
 
