@@ -79,14 +79,14 @@ class Course(Base):
         cascade="all, delete-orphan",
     )
 
-    class CourseFaculty(Base):
-        __tablename__ = "course_faculty"
+class CourseFaculty(Base):
+    __tablename__ = "course_faculty"
 
-        course_id = Column(String, ForeignKey("course.course_id"), primary_key=True)
-        faculty_id = Column(String, ForeignKey("users_account.id_users"), primary_key=True)
+    course_id = Column(String, ForeignKey("course.course_id"), primary_key=True)
+    faculty_id = Column(String, ForeignKey("users_account.id_users"), primary_key=True)
 
-        course = relationship("Course", back_populates="faculty_links")
-        faculty = relationship("UsersAccount", back_populates="faculty_courses")    
+    course = relationship("Course", back_populates="faculty_links")
+    faculty = relationship("UsersAccount", back_populates="faculty_courses")    
 
 
 class CourseEnrollment(Base):
