@@ -54,10 +54,13 @@ function FacultyHome({ user }) {
     const slug = `${course.course_code}${course.id}`;
     const roles = user?.roles || [];
 
-    if (roles.includes("faculty") || roles.includes("ta")) {
+    if (roles.includes("faculty")) {
       navigate(`/faculty/course/${slug}`);
-    } else {
+    } else if (roles.includes("ta")){
       navigate(`/ta/course/${slug}`);
+    } else {
+      console.warn("Unauthorized role tried to access course:", roles);
+      navigate("/home");
     }
   }
 
