@@ -8,6 +8,7 @@ from backend.models.models import (
     Assignment,
     AssignmentRubric,
     Course,
+    CourseFaculty,
     Submission,
     GradingResult,
     RubricTemplate,
@@ -33,7 +34,7 @@ def create_assignment(
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    if "admin" not in roles and course.faculty_id != user_id:
+    if "admin" not in roles and CourseFaculty.faculty_id != user_id:
         raise HTTPException(status_code=403, detail="You can only create assignments for your own courses")
 
     rubric_items = [

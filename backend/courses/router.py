@@ -21,6 +21,8 @@ def create_course(payload: schemas.CourseCreate, db: Session = Depends(get_db), 
         course_code=payload.course_code,
         semester=payload.semester,
         faculty_id=payload.faculty_id,
+        course_name=payload.course_name,
+        course_description=payload.course_description,
     )
 
 

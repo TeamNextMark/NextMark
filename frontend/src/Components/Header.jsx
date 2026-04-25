@@ -22,6 +22,11 @@ function Header({ user, setUser }) {
     navigate("/", { replace: true });
   }
 
+  function goTo(path) {
+    setOpen(false);
+    navigate(path);
+  }
+
   useEffect(() => {
     function handleClickOutside(e) {
       if (userRef.current && !userRef.current.contains(e.target)) {
@@ -35,16 +40,16 @@ function Header({ user, setUser }) {
 
   const getHomeRoute = () => {
     if (!user?.roles) return "/";
-    if (user.roles.includes("faculty")) return "/home/faculty";
     if (user.roles.includes("admin")) return "/home/admin";
-    if (user.roles.includes("ta")) return "/home/ta";
+    if (user.roles.includes("faculty")) return "/home/faculty";
+    if (user.roles.includes("ta")) return "/home/student";
     return "/home/student";
   };
 
   const canGoAdmin = user?.roles?.includes("admin");
-  const canGoInstructor = user?.roles?.includes("faculty");
+  const canGoInstructor = user?.roles?.includes("faculty") || user?.roles?.includes("ta");
   const canGoTA = user?.roles?.includes("ta");
-  const canGoStudent = user?.roles?.includes("student");
+  const canGoStudent = user?.roles?.includes("student") || user?.roles?.includes("ta");
 
   const subtitle = useMemo(() => {
     const path = location.pathname;
@@ -110,7 +115,7 @@ function Header({ user, setUser }) {
                 {canGoAdmin && (
                   <button
                     className="dropdownItem"
-                    onClick={() => navigate("/home/admin")}
+                    onClick={() => goTo("/home/admin")}
                     type="button"
                   >
                     Admin Homepage
@@ -120,30 +125,30 @@ function Header({ user, setUser }) {
                 {canGoInstructor && (
                   <button
                     className="dropdownItem"
-                    onClick={() => navigate("/home/faculty")}
+                    onClick={() => goTo("/home/faculty")}
                     type="button"
                   >
                     Instructor Homepage
                   </button>
                 )}
 
-                {canGoTA && (
-                  <button
-                    className="dropdownItem"
-                    onClick={() => navigate("/home/ta")}
-                    type="button"
-                  >
-                    TA Homepage
-                  </button>
-                )}
-
                 {canGoStudent && (
                   <button
                     className="dropdownItem"
-                    onClick={() => navigate("/home/student")}
+                    onClick={() => goTo("/home/student")}
                     type="button"
                   >
                     Student Homepage
+                  </button>
+                )}
+
+                {canGoTA && (
+                  <button
+                    className="dropdownItem"
+                    onClick={() => goTo("/home/ta")}
+                    type="button"
+                  >
+                    TA Homepage
                   </button>
                 )}
               </div>

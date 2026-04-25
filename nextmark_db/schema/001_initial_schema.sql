@@ -11,7 +11,9 @@ CREATE TABLE users_account (
 CREATE TABLE course (
     course_id TEXT PRIMARY KEY,
     course_code TEXT NOT NULL,
-    semester TEXT NOT NULL
+    semester TEXT NOT NULL,
+    course_name TEXT NOT NULL,
+    course_description TEXT 
 );
 
 CREATE TABLE course_faculty (

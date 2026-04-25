@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 import uuid
 
-from backend.models import Course, CourseEnrollment
+from backend.models import Course, CourseFaculty, CourseEnrollment
 
 
 def get_course(db: Session, course_id: str) -> Course | None:
@@ -15,7 +15,8 @@ def list_courses(db: Session, *, skip: int = 0, limit: int = 100):
 def list_courses_for_faculty(db: Session, faculty_id: str):
     return (
         db.query(Course)
-        .filter(Course.faculty_id == faculty_id)
+        .join(CourseFaculty, CourseFaculty.course_id == Course.id)
+        .filter(CourseFaculty.faculty_id == faculty_id)
         .order_by(Course.semester, Course.course_code)
         .all()
     )
@@ -31,14 +32,25 @@ def list_courses_for_student(db: Session, student_id: str):
     )
 
 
-def create_course(db: Session, *, course_code: str, semester: str, faculty_id: str) -> Course:
+def create_course(db: Session, *, course_code: str, semester: str, faculty_id: str, course_name: str, course_description: str | None = None,) -> Course:
     course = Course(
         id=str(uuid.uuid4()),
         course_code=course_code,
         semester=semester,
+        course_name=course_name,
+        course_description=course_description,
+    )
+
+    db.add(course)
+    db.flush()
+
+    course_faculty = CourseFaculty(
+        course_id=course.id,
         faculty_id=faculty_id,
     )
-    db.add(course)
+
+    db.add(course_faculty)
     db.commit()
     db.refresh(course)
+    
     return course

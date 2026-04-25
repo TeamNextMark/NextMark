@@ -51,7 +51,7 @@ export default function App() {
         <Route
           path="/home/faculty"
           element={
-            <ProtectedRoute user={user} allowedRoles={["faculty"]}>
+            <ProtectedRoute user={user} allowedRoles={["faculty", "ta"]}>
               <InstructorHome user={user} />
             </ProtectedRoute>
           }
@@ -60,16 +60,7 @@ export default function App() {
         <Route
           path="/home/student"
           element={
-            <ProtectedRoute user={user} allowedRoles={["ta"]}>
-              <StudentHome user={user} />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/home/student"
-          element={
-            <ProtectedRoute user={user} allowedRoles={["student"]}>
+            <ProtectedRoute user={user} allowedRoles={["student", "ta"]}>
               <StudentHome user={user} />
             </ProtectedRoute>
           }
@@ -78,7 +69,7 @@ export default function App() {
         <Route
           path="/student/course/:courseSlug"
           element={
-            <ProtectedRoute user={user} allowedRoles={["student"]}>
+            <ProtectedRoute user={user} allowedRoles={["student", "ta"]}>
               <StudentCourse user={user} />
             </ProtectedRoute>
           }
@@ -96,7 +87,7 @@ export default function App() {
         <Route
           path="/student/course/:courseSlug/assignment/:assignmentId"
           element={
-            <ProtectedRoute user={user} allowedRoles={["student"]}>
+            <ProtectedRoute user={user} allowedRoles={["student", "ta"]}>
               <StudentAssignment user={user} />
             </ProtectedRoute>
           }
@@ -105,7 +96,7 @@ export default function App() {
         <Route
           path="/faculty/course/:courseSlug/assignment/:assignmentId"
           element={
-            <ProtectedRoute user={user} allowedRoles={["faculty"]}>
+            <ProtectedRoute user={user} allowedRoles={["faculty", "ta"]}>
               <InstructorAssignment user={user} />
             </ProtectedRoute>
           }
@@ -114,7 +105,7 @@ export default function App() {
         <Route
           path="/student/course/:courseSlug/assignment/:assignmentId/submission/:submissionId"
           element={
-            <ProtectedRoute user={user} allowedRoles={["student"]}>
+            <ProtectedRoute user={user} allowedRoles={["student", "ta"]}>
               <StudentSubmissionPage />
             </ProtectedRoute>
           }
