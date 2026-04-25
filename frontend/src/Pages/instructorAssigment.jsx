@@ -1,10 +1,10 @@
-import "../CSS/instructorAssignment.css";
+import "../CSS/facultyAssignment.css";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
 const API_BASE = import.meta?.env?.VITE_API_URL || "/api";
 
-function InstructorAssignment() {
+function FacultyAssignment() {
   const { assignmentId } = useParams();
 
   const [assignment, setAssignment] = useState(null);
@@ -17,7 +17,7 @@ function InstructorAssignment() {
 
   const [acceptAiGrade, setAcceptAiGrade] = useState(true);
   const [manualScore, setManualScore] = useState("");
-  const [instructorComments, setInstructorComments] = useState("");
+  const [facultyComments, setFacultyComments] = useState("");
   const [savingGrade, setSavingGrade] = useState(false);
 
   useEffect(() => {
@@ -133,8 +133,8 @@ function InstructorAssignment() {
         : ""
     );
 
-    setInstructorComments(
-      selectedSubmissionDetails?.instructor_comments || ""
+    setFacultyComments(
+      selectedSubmissionDetails?.faculty_comments || ""
     );
   }, [selectedSubmissionDetails]);
 
@@ -160,7 +160,7 @@ function InstructorAssignment() {
           body: JSON.stringify({
             accept_ai_grade: acceptAiGrade,
             manual_score: acceptAiGrade ? null : Number(manualScore),
-            instructor_comments: instructorComments,
+            faculty_comments: facultyComments,
           }),
         }
       );
@@ -521,11 +521,11 @@ function InstructorAssignment() {
                   : "This submission is still queued or has limited execution details available.")}
             </p>
 
-            {selectedSubmissionDetails?.instructor_comments && (
+            {selectedSubmissionDetails?.faculty_comments && (
               <div style={{ marginTop: "16px" }}>
                 <strong>Instructor Comments:</strong>
                 <p style={{ marginTop: "6px" }}>
-                  {selectedSubmissionDetails.instructor_comments}
+                  {selectedSubmissionDetails.faculty_comments}
                 </p>
               </div>
             )}
@@ -618,8 +618,8 @@ function InstructorAssignment() {
                   Instructor Comments
                 </label>
                 <textarea
-                  value={instructorComments}
-                  onChange={(e) => setInstructorComments(e.target.value)}
+                  value={facultyComments}
+                  onChange={(e) => setFacultyComments(e.target.value)}
                   placeholder="Add comments for the student..."
                   style={{
                     width: "100%",
@@ -656,4 +656,4 @@ function InstructorAssignment() {
   );
 }
 
-export default InstructorAssignment;
+export default FacultyAssignment;

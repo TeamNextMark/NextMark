@@ -6,7 +6,7 @@ import { assignImagesToCourses } from "../utils/courseImages";
 
 const API_BASE = import.meta?.env?.VITE_API_URL || "/api";
 
-function Home() {
+function FacultyHome({ user }) {
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -97,4 +97,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default FacultyHome;

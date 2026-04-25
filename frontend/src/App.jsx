@@ -6,12 +6,12 @@ import ProtectedRoute from "./Components/protectedRoute";
 
 import Login from "./Pages/login";
 import AdminHome from "./Pages/adminHome";
-import InstructorHome from "./Pages/instructorHome";
+import FacultyHome from "./Pages/instructorHome";
 import StudentHome from "./Pages/studentHome";
 import StudentCourse from "./Pages/studentCourse";
-import InstructorCourse from "./Pages/instructorCourse";
+import FacultyCourse from "./Pages/instructorCourse";
 import StudentAssignment from "./Pages/studentAssigment";
-import InstructorAssignment from "./Pages/instructorAssigment";
+import FacultyAssignment from "./Pages/instructorAssigment";
 import StudentSubmissionPage from "./Pages/studentSubmission";
 import CreateAssignment from "./Pages/createAssignment";
 import TACourse from "./Pages/taCourse";
@@ -54,7 +54,7 @@ export default function App() {
           path="/home/faculty"
           element={
             <ProtectedRoute user={user} allowedRoles={["faculty", "ta"]}>
-              <InstructorHome user={user} />
+              <FacultyHome user={user} />
             </ProtectedRoute>
           }
         />
@@ -81,7 +81,7 @@ export default function App() {
           path="/faculty/course/:courseSlug"
           element={
             <ProtectedRoute user={user} allowedRoles={["faculty"]}>
-              <InstructorCourse user={user} />
+              <FacultyCourse user={user} />
             </ProtectedRoute>
           }
         />
@@ -108,7 +108,7 @@ export default function App() {
           path="/faculty/course/:courseSlug/assignment/:assignmentId"
           element={
             <ProtectedRoute user={user} allowedRoles={["faculty", "ta"]}>
-              <InstructorAssignment user={user} />
+              <FacultyAssignment user={user} />
             </ProtectedRoute>
           }
         />

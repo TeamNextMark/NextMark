@@ -7,7 +7,7 @@ import { getCourseImage } from "../utils/courseImages";
 
 const API_BASE = import.meta?.env?.VITE_API_URL || "/api";
 
-function InstructorCourse() {
+function FacultyCourse() {
   const navigate = useNavigate();
   const { courseSlug } = useParams();
 
@@ -145,4 +145,4 @@ function InstructorCourse() {
   );
 }
 
-export default InstructorCourse;
+export default FacultyCourse;
