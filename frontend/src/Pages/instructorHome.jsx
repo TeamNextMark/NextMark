@@ -52,7 +52,13 @@ function Home() {
 
   function goToCourses(course) {
     const slug = `${course.course_code}${course.id}`;
-    navigate(`/faculty/course/${slug}`);
+    const roles = user?.roles || [];
+
+    if (roles.includes("faculty") || roles.includes("ta")) {
+      navigate(`/faculty/course/${slug}`);
+    } else {
+      navigate(`/ta/course/${slug}`);
+    }
   }
 
   return (

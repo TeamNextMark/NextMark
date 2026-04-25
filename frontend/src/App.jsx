@@ -86,6 +86,15 @@ export default function App() {
         />
 
         <Route
+          path="/ta/course/:courseSlug"
+          element={
+            <ProtectedRoute user={user} allowedRoles={["ta"]}>
+              <InstructorCourse user={user} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/student/course/:courseSlug/assignment/:assignmentId"
           element={
             <ProtectedRoute user={user} allowedRoles={["student", "ta"]}>
