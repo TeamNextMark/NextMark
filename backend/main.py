@@ -17,7 +17,7 @@ app.include_router(grading_router)
 app.include_router(submissions_router)
 app.include_router(assignments_router)
 app.include_router(admin_router)
-app.include_router(enrollments_router, prefix="/api")
+app.include_router(enrollments_router)
 
 @app.get("/healthz")
 def healthz(_: dict = Depends(get_current_user)):
