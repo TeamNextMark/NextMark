@@ -53,8 +53,8 @@ function CourseEnrollment() {
 
           <tbody>
             {courses.map((course) => (
-              <tr key={course.course_id}>
-                <td>{course.course_id}</td>
+              <tr key={course.id}>
+                <td>{course.id}</td>
                 <td>{course.subject}</td>
                 <td>{course.course_name || course.name}</td>
                 <td>{course.term}</td>
@@ -62,7 +62,7 @@ function CourseEnrollment() {
                   <button
                     className="primaryButton"
                     onClick={() =>
-                      navigate(`/admin/courses/${course.course_id}/enrollment`)
+                      navigate(`/admin/courses/${course.id}/enrollment`)
                     }
                   >
                     Enroll Students

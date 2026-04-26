@@ -110,8 +110,8 @@ function EnrollStudents() {
 
         {course && (
           <p>
-            {course.subject} {course.course_id} -{" "}
-            {course.course_name || course.name}
+            {course.id} -{" "}
+            {course.course_name}
           </p>
         )}
       </div>
