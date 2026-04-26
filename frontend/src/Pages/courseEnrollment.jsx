@@ -1,3 +1,5 @@
+import "../CSS/Template.css";
+import "../CSS/Admin.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 

@@ -1,0 +1,200 @@
+.adminPage {
+  margin: 28px;
+}
+
+.adminHeader {
+  margin-bottom: 22px;
+}
+
+.adminTitle {
+  font-size: 46px;
+  color: #115740;
+  border-bottom: 3px solid #115740;
+  padding-bottom: 6px;
+  margin-bottom: 6px;
+}
+
+.adminSubtitle {
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.adminCard {
+  max-width: 720px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+  padding: 28px;
+}
+
+.adminForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.adminInput,
+.adminTextarea,
+.adminSelect {
+  padding: 13px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 15px;
+  background: #ffffff;
+}
+
+.adminTextarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.adminInput:focus,
+.adminTextarea:focus,
+.adminSelect:focus {
+  outline: none;
+  border-color: #115740;
+  box-shadow: 0 0 0 3px rgba(17, 87, 64, 0.15);
+}
+
+.adminRoleGroup {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.adminCheckboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 700;
+  color: #115740;
+}
+
+.adminActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.primaryBtn,
+.secondaryBtn,
+.dangerBtn {
+  border: none;
+  border-radius: 10px;
+  padding: 11px 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.primaryBtn {
+  background: #115740;
+  color: white;
+}
+
+.primaryBtn:hover {
+  background: #39934d;
+}
+
+.secondaryBtn {
+  background: #f3f4f6;
+  color: #115740;
+  border: 1px solid #d1d5db;
+}
+
+.secondaryBtn:hover {
+  background: #e5e7eb;
+}
+
+.dangerBtn {
+  background: #b91c1c;
+  color: white;
+}
+
+.dangerBtn:hover {
+  background: #991b1b;
+}
+
+.adminGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.adminListCard {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.07);
+  padding: 20px;
+}
+
+.adminListCard h2 {
+  color: #115740;
+  margin-bottom: 8px;
+  font-size: 24px;
+}
+
+.adminListCard p {
+  color: #6b7280;
+  margin-bottom: 14px;
+}
+
+.adminTableWrapper {
+  background: white;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  margin-top: 20px;
+}
+
+.adminTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.adminTable th {
+  background: #115740;
+  color: white;
+  text-align: left;
+  padding: 14px;
+  font-size: 14px;
+}
+
+.adminTable td {
+  padding: 14px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #111827;
+}
+
+.adminTable tr:hover {
+  background: #f9fafb;
+}
+
+.errorText {
+  color: #b91c1c !important;
+  background: #fee2e2;
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 700px) {
+  .adminRoleGroup {
+    grid-template-columns: 1fr;
+  }
+
+  .adminActions {
+    flex-direction: column;
+  }
+
+  .adminTitle {
+    font-size: 36px;
+  }
+}
