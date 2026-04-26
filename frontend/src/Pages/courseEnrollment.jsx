@@ -62,7 +62,7 @@ function CourseEnrollment() {
                   <button
                     className="primaryButton"
                     onClick={() =>
-                      navigate(`/admin/enrollments/${course.course_id}`)
+                      navigate(`/admin/courses/${course.course_id}/enrollment`)
                     }
                   >
                     Enroll Students
