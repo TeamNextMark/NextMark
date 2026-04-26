@@ -41,7 +41,7 @@ function EnrollStudents() {
         try {
             const token = localStorage.getItem("accessToken");
 
-            const response = await fetch(`${API_BASE}/users?role=student`, {
+            const response = await fetch(`${API_BASE}/admin/users`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -52,7 +52,14 @@ function EnrollStudents() {
             }
 
             const data = await response.json();
-            setStudents(data);
+
+            const onlyStudents = data.filter((user) =>
+            user.roles?.includes("student") ||
+            user.position?.includes("student") ||
+            user.role === "student"
+            );
+
+            setStudents(onlyStudents);
         } catch (error) {
             console.error("Failed to fetch students:", error);
         }
