@@ -55,13 +55,10 @@ function Header({ user, setUser }) {
 
   const canGoAdmin = isAdmin;
   const canGoFaculty = isFaculty || isTA || isAdmin;
-  const canGoStudent = isStudent || isTA || isAdmin;
+  const canGoStudent = isStudent || isTA;
 
   const subtitle = useMemo(() => {
     const path = location.pathname;
-
-    if (path.startsWith("/admin/users")) return "Admin - Manage Users";
-    if (path.startsWith("/admin/courses")) return "Admin - Manage Classes";
 
     if (
       path.startsWith("/home") ||

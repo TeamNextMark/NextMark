@@ -21,6 +21,8 @@ import EditUser from "./Pages/editUser";
 import AdminCourses from "./Pages/adminCourses";
 import CreateCourse from "./Pages/createCourse";
 import EditCourse from "./Pages/editCourse";
+import CourseEnrollment from "./Pages/courseEnrollment";
+import EnrollStudents from "./Pages/enrollStudents";
 
 function HomeRedirect({ user }) {
   if (!user) return <Navigate to="/" replace />;
@@ -102,10 +104,28 @@ export default function App() {
         />
 
         <Route
+          path="/admin/courses/enrollment"
+          element={
+            <ProtectedRoute user={user} allowedRoles={["admin"]}>
+              <CourseEnrollment user={user} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/admin/courses/:courseId/edit"
           element={
             <ProtectedRoute user={user} allowedRoles={["admin"]}>
               <EditCourse user={user} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/courses/:courseId/enrollment"
+          element={
+            <ProtectedRoute user={user} allowedRoles={["admin"]}>
+              <EnrollStudents user={user} />
             </ProtectedRoute>
           }
         />

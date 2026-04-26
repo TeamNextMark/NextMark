@@ -62,7 +62,7 @@ function AdminCourses() {
         {courses.map((course) => (
           <div className="courseCard" key={course.id}>
             <div className="courseInfo">
-              <h2>{course.course_code} - {course.course_name}</h2>
+              <h2>{course.course_code} - {course.courseId} {course.course_name}</h2>
               <p>{course.semester}</p>
 
               <button onClick={() => navigate(`/admin/courses/${course.id}/edit`)}>
