@@ -11,15 +11,26 @@ function CourseEnrollment() {
     fetchCourses();
   }, []);
 
-  async function fetchCourses() {
-    try {
-      const response = await fetch(`${API_BASE}/courses/`);
-      const data = await response.json();
-      setCourses(data);
-    } catch (error) {
-      console.error("Failed to fetch courses:", error);
+    async function fetchCourses() {
+        try {
+            const token = localStorage.getItem("accessToken");
+
+            const response = await fetch(`${API_BASE}/courses/`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            });
+
+            if (!response.ok) {
+            throw new Error(`Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            setCourses(data);
+        } catch (error) {
+            console.error("Failed to fetch courses:", error);
+        }
     }
-  }
 
   return (
     <div className="adminContainer">

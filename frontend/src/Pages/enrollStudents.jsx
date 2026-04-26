@@ -16,25 +16,47 @@ function EnrollStudents() {
     fetchStudents();
   }, [courseId]);
 
-  async function fetchCourse() {
-    try {
-      const response = await fetch(`${API_BASE}/courses/${courseId}`);
-      const data = await response.json();
-      setCourse(data);
-    } catch (error) {
-      console.error("Failed to fetch course:", error);
-    }
-  }
+    async function fetchCourse() {
+        try {
+            const token = localStorage.getItem("accessToken");
 
-  async function fetchStudents() {
-    try {
-      const response = await fetch(`${API_BASE}/users?role=student`);
-      const data = await response.json();
-      setStudents(data);
-    } catch (error) {
-      console.error("Failed to fetch students:", error);
+            const response = await fetch(`${API_BASE}/courses/${courseId}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            });
+
+            if (!response.ok) {
+            throw new Error(`Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            setCourse(data);
+        } catch (error) {
+            console.error("Failed to fetch course:", error);
+        }
     }
-  }
+
+    async function fetchStudents() {
+        try {
+            const token = localStorage.getItem("accessToken");
+
+            const response = await fetch(`${API_BASE}/users?role=student`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            });
+
+            if (!response.ok) {
+            throw new Error(`Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            setStudents(data);
+        } catch (error) {
+            console.error("Failed to fetch students:", error);
+        }
+    }
 
   function toggleStudent(studentId) {
     setSelectedStudents((prev) =>
@@ -44,35 +66,38 @@ function EnrollStudents() {
     );
   }
 
-  async function handleEnroll() {
-    if (selectedStudents.length === 0) {
-      alert("Please select at least one student.");
-      return;
+    async function handleEnroll() {
+        if (selectedStudents.length === 0) {
+            alert("Please select at least one student.");
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem("accessToken");
+
+            const response = await fetch(`${API_BASE}/enrollments/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+                course_id: courseId,
+                student_ids: selectedStudents,
+            }),
+            });
+
+            if (!response.ok) {
+            throw new Error(`Error: ${response.status}`);
+            }
+
+            alert("Students enrolled successfully.");
+            setSelectedStudents([]);
+        } catch (error) {
+            console.error("Enrollment failed:", error);
+            alert("Failed to enroll students.");
+        }
     }
-
-    try {
-      const response = await fetch(`${API_BASE}/enrollments/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          course_id: courseId,
-          student_ids: selectedStudents,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Enrollment failed");
-      }
-
-      alert("Students enrolled successfully.");
-      setSelectedStudents([]);
-    } catch (error) {
-      console.error(error);
-      alert("Failed to enroll students.");
-    }
-  }
 
   return (
     <div className="adminContainer">
