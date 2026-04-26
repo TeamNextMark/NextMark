@@ -4,7 +4,7 @@ from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
-from backend.database import get_db  # adjust if needed
+from backend.database.session import get_db
 
 router = APIRouter(prefix="/enrollments", tags=["enrollments"])
 
