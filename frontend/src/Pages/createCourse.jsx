@@ -20,7 +20,7 @@ function CreateCourse() {
     try {
       const token = localStorage.getItem("accessToken");
 
-      const response = await fetch(`${API_BASE}/courses`, {
+      const response = await fetch(`${API_BASE}/courses/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
