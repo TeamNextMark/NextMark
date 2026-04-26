@@ -47,49 +47,70 @@ function CreateUser() {
   }
 
   return (
-    <div className="mainContent">
-      <h1 className="pageTitle">Create User</h1>
+    <div className="adminPage">
+      <div className="adminHeader">
+        <div className="adminHeaderText">
+          <h1 className="adminTitle">Create User</h1>
+          <p className="adminSubtitle">Add a new user and assign their system role.</p>
+        </div>
 
-      {error && <p>{error}</p>}
+        <button className="secondaryBtn" onClick={() => navigate("/admin/users")}>
+          Back to Users
+        </button>
+      </div>
 
-      <form onSubmit={handleSubmit} className="formCard">
-        <input
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Email"
-          required
-        />
+      {error && <p className="errorText">{error}</p>}
 
-        <input
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Temporary Password"
-          type="password"
-          required
-        />
+      <div className="adminCard adminFormCard">
+        <form onSubmit={handleSubmit} className="adminForm">
+          <div className="adminField">
+            <label>Email</label>
+            <input
+              className="adminInput"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="student@atu.edu"
+              type="email"
+              required
+            />
+          </div>
 
-        <label>
-          <input type="checkbox" checked={roles.includes("student")} onChange={() => toggleRole("student")} />
-          Student
-        </label>
+          <div className="adminField">
+            <label>Temporary Password</label>
+            <input
+              className="adminInput"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Temporary Password"
+              type="password"
+              required
+            />
+          </div>
 
-        <label>
-          <input type="checkbox" checked={roles.includes("ta")} onChange={() => toggleRole("ta")} />
-          TA
-        </label>
+          <div className="adminField">
+            <span className="adminFieldTitle">Roles</span>
+            <div className="adminRoleGroup">
+              {["student", "ta", "faculty", "admin"].map((role) => (
+                <label className="adminCheckboxLabel" key={role}>
+                  <input
+                    type="checkbox"
+                    checked={roles.includes(role)}
+                    onChange={() => toggleRole(role)}
+                  />
+                  {role.charAt(0).toUpperCase() + role.slice(1)}
+                </label>
+              ))}
+            </div>
+          </div>
 
-        <label>
-          <input type="checkbox" checked={roles.includes("faculty")} onChange={() => toggleRole("faculty")} />
-          Faculty
-        </label>
-
-        <label>
-          <input type="checkbox" checked={roles.includes("admin")} onChange={() => toggleRole("admin")} />
-          Admin
-        </label>
-
-        <button type="submit">Create User</button>
-      </form>
+          <div className="adminActions">
+            <button className="primaryBtn" type="submit">Create User</button>
+            <button className="secondaryBtn" type="button" onClick={() => navigate("/admin/users")}>
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

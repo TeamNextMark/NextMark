@@ -68,27 +68,57 @@ function EditUser() {
   }
 
   return (
-    <div className="mainContent">
-      <h1 className="pageTitle">Edit User</h1>
+    <div className="adminPage">
+      <div className="adminHeader">
+        <div className="adminHeaderText">
+          <h1 className="adminTitle">Edit User</h1>
+          <p className="adminSubtitle">Update this user's email and assigned roles.</p>
+        </div>
 
-      {error && <p>{error}</p>}
+        <button className="secondaryBtn" onClick={() => navigate("/admin/users")}>
+          Back to Users
+        </button>
+      </div>
 
-      <form onSubmit={handleSubmit} className="formCard">
-        <input value={email} onChange={(e) => setEmail(e.target.value)} required />
+      {error && <p className="errorText">{error}</p>}
 
-        {["student", "ta", "faculty", "admin"].map((role) => (
-          <label key={role}>
+      <div className="adminCard adminFormCard">
+        <form onSubmit={handleSubmit} className="adminForm">
+          <div className="adminField">
+            <label>Email</label>
             <input
-              type="checkbox"
-              checked={roles.includes(role)}
-              onChange={() => toggleRole(role)}
+              className="adminInput"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+              required
             />
-            {role}
-          </label>
-        ))}
+          </div>
 
-        <button type="submit">Save Changes</button>
-      </form>
+          <div className="adminField">
+            <span className="adminFieldTitle">Roles</span>
+            <div className="adminRoleGroup">
+              {["student", "ta", "faculty", "admin"].map((role) => (
+                <label className="adminCheckboxLabel" key={role}>
+                  <input
+                    type="checkbox"
+                    checked={roles.includes(role)}
+                    onChange={() => toggleRole(role)}
+                  />
+                  {role.charAt(0).toUpperCase() + role.slice(1)}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="adminActions">
+            <button className="primaryBtn" type="submit">Save Changes</button>
+            <button className="secondaryBtn" type="button" onClick={() => navigate("/admin/users")}>
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

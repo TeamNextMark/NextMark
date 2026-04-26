@@ -3,78 +3,94 @@ import "../CSS/Admin.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+const API_BASE = import.meta?.env?.VITE_API_URL || "/api";
+
 function CourseEnrollment() {
   const [courses, setCourses] = useState([]);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
-
-  const API_BASE = "/api";
 
   useEffect(() => {
     fetchCourses();
   }, []);
 
-    async function fetchCourses() {
-        try {
-            const token = localStorage.getItem("accessToken");
+  async function fetchCourses() {
+    try {
+      const token = localStorage.getItem("accessToken");
 
-            const response = await fetch(`${API_BASE}/courses/`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-            });
+      const response = await fetch(`${API_BASE}/courses/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-            if (!response.ok) {
-            throw new Error(`Error: ${response.status}`);
-            }
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
 
-            const data = await response.json();
-            setCourses(data);
-        } catch (error) {
-            console.error("Failed to fetch courses:", error);
-        }
+      const data = await response.json();
+      setCourses(Array.isArray(data) ? data : []);
+    } catch (error) {
+      setError("Failed to fetch courses.");
+      console.error("Failed to fetch courses:", error);
     }
+  }
 
   return (
-    <div className="adminContainer">
+    <div className="adminPage">
       <div className="adminHeader">
-        <h2>Course Enrollment</h2>
-        <p>Select a course to enroll students.</p>
+        <div className="adminHeaderText">
+          <h1 className="adminTitle">Class Enrollment</h1>
+          <p className="adminSubtitle">Select a class, then enroll students into that class.</p>
+        </div>
+
+        <button className="secondaryBtn" onClick={() => navigate("/home/admin")}>
+          Back to Dashboard
+        </button>
       </div>
 
-      <div className="adminTableWrapper">
-        <table className="adminTable">
-          <thead>
-            <tr>
-              <th>Course ID</th>
-              <th>Subject</th>
-              <th>Course Name</th>
-              <th>Term</th>
-              <th>Action</th>
-            </tr>
-          </thead>
+      {error && <p className="errorText">{error}</p>}
 
-          <tbody>
-            {courses.map((course) => (
-              <tr key={course.id}>
-                <td>{course.id}</td>
-                <td>{course.subject}</td>
-                <td>{course.course_name || course.name}</td>
-                <td>{course.term}</td>
-                <td>
-                  <button
-                    className="primaryButton"
-                    onClick={() =>
-                      navigate(`/admin/courses/${course.id}/enrollment`)
-                    }
-                  >
-                    Enroll Students
-                  </button>
-                </td>
+      {courses.length === 0 && !error ? (
+        <div className="emptyState">No classes found.</div>
+      ) : (
+        <div className="adminTableWrapper">
+          <table className="adminTable">
+            <thead>
+              <tr>
+                <th>Course ID</th>
+                <th>Course Code</th>
+                <th>Course Name</th>
+                <th>Term</th>
+                <th>Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+
+            <tbody>
+              {courses.map((course) => {
+                const courseId = course.id || course.course_id;
+
+                return (
+                  <tr key={courseId}>
+                    <td>{courseId}</td>
+                    <td>{course.course_code || course.subject || "N/A"}</td>
+                    <td>{course.course_name || course.name || "Untitled class"}</td>
+                    <td>{course.term || course.semester || "N/A"}</td>
+                    <td>
+                      <button
+                        className="primaryBtn"
+                        onClick={() => navigate(`/admin/courses/${courseId}/enrollment`)}
+                      >
+                        Enroll Students
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

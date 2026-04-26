@@ -1,5 +1,4 @@
 import "../CSS/Template.css";
-import "../CSS/Home.css";
 import "../CSS/Admin.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -50,33 +49,68 @@ function AdminUsers() {
   }, []);
 
   return (
-    <div className="mainContent">
-      <h1 className="pageTitle">Manage Users</h1>
+    <div className="adminPage">
+      <div className="adminHeader">
+        <div className="adminHeaderText">
+          <h1 className="adminTitle">Manage Users</h1>
+          <p className="adminSubtitle">Create, update, and remove NextMark user accounts.</p>
+        </div>
 
-      <button className="primaryBtn" onClick={() => navigate("/admin/users/create")}>
-        Create User
-      </button>
-
-      {error && <p>{error}</p>}
-
-      <div className="coursesGrid">
-        {users.map((u) => (
-          <div className="courseCard" key={u.id || u.id_users}>
-            <div className="courseInfo">
-              <h2>{u.email}</h2>
-              <p>{Array.isArray(u.roles) ? u.roles.join(", ") : u.position?.join(", ")}</p>
-
-              <button onClick={() => navigate(`/admin/users/${u.id || u.id_users}/edit`)}>
-                Edit
-              </button>
-
-              <button onClick={() => removeUser(u.id || u.id_users)}>
-                Remove
-              </button>
-            </div>
-          </div>
-        ))}
+        <button className="primaryBtn" onClick={() => navigate("/admin/users/create")}>
+          Create User
+        </button>
       </div>
+
+      {error && <p className="errorText">{error}</p>}
+
+      {users.length === 0 && !error ? (
+        <div className="emptyState">No users found.</div>
+      ) : (
+        <div className="adminGrid">
+          {users.map((u) => {
+            const userId = u.id || u.id_users;
+            const userRoles = Array.isArray(u.roles)
+              ? u.roles
+              : Array.isArray(u.position)
+              ? u.position
+              : u.role
+              ? [u.role]
+              : [];
+
+            return (
+              <div className="adminListCard" key={userId}>
+                <div>
+                  <h2>{u.email}</h2>
+                  <p>{u.name || u.full_name || "User account"}</p>
+
+                  <div className="adminBadgeRow">
+                    {userRoles.length > 0 ? (
+                      userRoles.map((role) => (
+                        <span className="adminBadge" key={role}>{role}</span>
+                      ))
+                    ) : (
+                      <span className="adminBadge">No role</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="adminActions">
+                  <button
+                    className="secondaryBtn"
+                    onClick={() => navigate(`/admin/users/${userId}/edit`)}
+                  >
+                    Edit
+                  </button>
+
+                  <button className="dangerBtn" onClick={() => removeUser(userId)}>
+                    Remove
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import "../CSS/Template.css";
+import "../CSS/Admin.css";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -30,7 +31,7 @@ function EditCourse() {
         setCourseCode(data.course_code || "");
         setCourseName(data.course_name || "");
         setCourseDescription(data.course_description || "");
-        setSemester(data.semester || "");
+        setSemester(data.semester || data.term || "");
       } catch (err) {
         setError(err.message);
       }
@@ -68,19 +69,69 @@ function EditCourse() {
   }
 
   return (
-    <div className="mainContent">
-      <h1 className="pageTitle">Edit Class</h1>
+    <div className="adminPage">
+      <div className="adminHeader">
+        <div className="adminHeaderText">
+          <h1 className="adminTitle">Edit Class</h1>
+          <p className="adminSubtitle">Update the class details shown to instructors and students.</p>
+        </div>
 
-      {error && <p>{error}</p>}
+        <button className="secondaryBtn" onClick={() => navigate("/admin/courses")}>
+          Back to Classes
+        </button>
+      </div>
 
-      <form onSubmit={handleSubmit} className="formCard">
-        <input value={courseCode} onChange={(e) => setCourseCode(e.target.value)} required />
-        <input value={courseName} onChange={(e) => setCourseName(e.target.value)} required />
-        <textarea value={courseDescription} onChange={(e) => setCourseDescription(e.target.value)} />
-        <input value={semester} onChange={(e) => setSemester(e.target.value)} required />
+      {error && <p className="errorText">{error}</p>}
 
-        <button type="submit">Save Changes</button>
-      </form>
+      <div className="adminCard adminFormCard">
+        <form onSubmit={handleSubmit} className="adminForm">
+          <div className="adminField">
+            <label>Course Code</label>
+            <input
+              className="adminInput"
+              value={courseCode}
+              onChange={(e) => setCourseCode(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="adminField">
+            <label>Course Name</label>
+            <input
+              className="adminInput"
+              value={courseName}
+              onChange={(e) => setCourseName(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="adminField">
+            <label>Course Description</label>
+            <textarea
+              className="adminTextarea"
+              value={courseDescription}
+              onChange={(e) => setCourseDescription(e.target.value)}
+            />
+          </div>
+
+          <div className="adminField">
+            <label>Semester</label>
+            <input
+              className="adminInput"
+              value={semester}
+              onChange={(e) => setSemester(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="adminActions">
+            <button className="primaryBtn" type="submit">Save Changes</button>
+            <button className="secondaryBtn" type="button" onClick={() => navigate("/admin/courses")}>
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

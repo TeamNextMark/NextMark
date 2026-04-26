@@ -1,4 +1,5 @@
 import "../CSS/Template.css";
+import "../CSS/Admin.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -44,20 +45,84 @@ function CreateCourse() {
   }
 
   return (
-    <div className="mainContent">
-      <h1 className="pageTitle">Create Class</h1>
+    <div className="adminPage">
+      <div className="adminHeader">
+        <div className="adminHeaderText">
+          <h1 className="adminTitle">Create Class</h1>
+          <p className="adminSubtitle">Add a new class section and assign it to an instructor.</p>
+        </div>
 
-      {error && <p>{error}</p>}
+        <button className="secondaryBtn" onClick={() => navigate("/admin/courses")}>
+          Back to Classes
+        </button>
+      </div>
 
-      <form onSubmit={handleSubmit} className="formCard">
-        <input value={courseCode} onChange={(e) => setCourseCode(e.target.value)} placeholder="Course Code" required />
-        <input value={courseName} onChange={(e) => setCourseName(e.target.value)} placeholder="Course Name" required />
-        <textarea value={courseDescription} onChange={(e) => setCourseDescription(e.target.value)} placeholder="Course Description" />
-        <input value={semester} onChange={(e) => setSemester(e.target.value)} placeholder="Semester" required />
-        <input value={facultyId} onChange={(e) => setFacultyId(e.target.value)} placeholder="Faculty ID" required />
+      {error && <p className="errorText">{error}</p>}
 
-        <button type="submit">Create Class</button>
-      </form>
+      <div className="adminCard adminFormCard">
+        <form onSubmit={handleSubmit} className="adminForm">
+          <div className="adminField">
+            <label>Course Code</label>
+            <input
+              className="adminInput"
+              value={courseCode}
+              onChange={(e) => setCourseCode(e.target.value)}
+              placeholder="COMS"
+              required
+            />
+          </div>
+
+          <div className="adminField">
+            <label>Course Name</label>
+            <input
+              className="adminInput"
+              value={courseName}
+              onChange={(e) => setCourseName(e.target.value)}
+              placeholder="Programming Foundations II"
+              required
+            />
+          </div>
+
+          <div className="adminField">
+            <label>Course Description</label>
+            <textarea
+              className="adminTextarea"
+              value={courseDescription}
+              onChange={(e) => setCourseDescription(e.target.value)}
+              placeholder="Brief class description"
+            />
+          </div>
+
+          <div className="adminField">
+            <label>Semester</label>
+            <input
+              className="adminInput"
+              value={semester}
+              onChange={(e) => setSemester(e.target.value)}
+              placeholder="Fall 2026"
+              required
+            />
+          </div>
+
+          <div className="adminField">
+            <label>Faculty ID</label>
+            <input
+              className="adminInput"
+              value={facultyId}
+              onChange={(e) => setFacultyId(e.target.value)}
+              placeholder="Faculty UUID"
+              required
+            />
+          </div>
+
+          <div className="adminActions">
+            <button className="primaryBtn" type="submit">Create Class</button>
+            <button className="secondaryBtn" type="button" onClick={() => navigate("/admin/courses")}>
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

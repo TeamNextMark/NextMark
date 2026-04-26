@@ -1,5 +1,4 @@
 import "../CSS/Template.css";
-import "../CSS/Home.css";
 import "../CSS/Admin.css";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -50,33 +49,58 @@ function AdminCourses() {
   }, []);
 
   return (
-    <div className="mainContent">
-      <h1 className="pageTitle">Manage Classes</h1>
+    <div className="adminPage">
+      <div className="adminHeader">
+        <div className="adminHeaderText">
+          <h1 className="adminTitle">Manage Classes</h1>
+          <p className="adminSubtitle">Create, edit, and remove course sections.</p>
+        </div>
 
-      <button className="primaryBtn" onClick={() => navigate("/admin/courses/create")}>
-        Create Class
-      </button>
-
-      {error && <p>{error}</p>}
-
-      <div className="coursesGrid">
-        {courses.map((course) => (
-          <div className="courseCard" key={course.id}>
-            <div className="courseInfo">
-              <h2>{course.course_code} - {course.courseId} {course.course_name}</h2>
-              <p>{course.semester}</p>
-
-              <button onClick={() => navigate(`/admin/courses/${course.id}/edit`)}>
-                Edit
-              </button>
-
-              <button onClick={() => removeCourse(course.id)}>
-                Remove
-              </button>
-            </div>
-          </div>
-        ))}
+        <button className="primaryBtn" onClick={() => navigate("/admin/courses/create")}>
+          Create Class
+        </button>
       </div>
+
+      {error && <p className="errorText">{error}</p>}
+
+      {courses.length === 0 && !error ? (
+        <div className="emptyState">No classes found.</div>
+      ) : (
+        <div className="adminGrid">
+          {courses.map((course) => {
+            const courseId = course.id || course.course_id;
+
+            return (
+              <div className="adminListCard" key={courseId}>
+                <div>
+                  <h2>
+                    {course.course_code || course.subject || "Course"} {course.courseId || courseId}
+                  </h2>
+                  <p>{course.course_name || course.name || "Untitled class"}</p>
+
+                  <div className="adminBadgeRow">
+                    {course.semester && <span className="adminBadge">{course.semester}</span>}
+                    {course.term && <span className="adminBadge">{course.term}</span>}
+                  </div>
+                </div>
+
+                <div className="adminActions">
+                  <button
+                    className="secondaryBtn"
+                    onClick={() => navigate(`/admin/courses/${courseId}/edit`)}
+                  >
+                    Edit
+                  </button>
+
+                  <button className="dangerBtn" onClick={() => removeCourse(courseId)}>
+                    Remove
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
