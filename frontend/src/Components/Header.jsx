@@ -128,26 +128,6 @@ function Header({ user, setUser }) {
                   </button>
                 )}
 
-                {canGoAdmin && !location.pathname.startsWith("/admin/users") && (
-                  <button
-                    className="dropdownItem"
-                    onClick={() => goTo("/admin/users")}
-                    type="button"
-                  >
-                    Manage Users
-                  </button>
-                )}
-
-                {canGoAdmin && !location.pathname.startsWith("/admin/courses") && (
-                  <button
-                    className="dropdownItem"
-                    onClick={() => goTo("/admin/courses")}
-                    type="button"
-                  >
-                    Manage Classes
-                  </button>
-                )}
-
                 {canGoFaculty && !location.pathname.startsWith("/home/faculty") && (
                   <button
                     className="dropdownItem"

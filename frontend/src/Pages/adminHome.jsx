@@ -23,6 +23,13 @@ function AdminHome() {
             <p>Create, edit, and remove classes.</p>
           </div>
         </button>
+
+        <button className="courseCard" onClick={() => navigate("/admin/courses/enrollment")}>
+          <div className="courseInfo">
+            <h2>Class Enrollment</h2>
+            <p>Enroll or remove students from classes.</p>
+          </div>
+        </button>
       </div>
     </div>
   );
