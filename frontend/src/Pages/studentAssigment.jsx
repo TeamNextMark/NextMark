@@ -137,6 +137,13 @@ function StudentAssignment() {
     }
   }
 
+  const getSubmissionStatus = (submission) => {
+    if (submission.faculty_reviewed) return "Graded";
+    if (submission.grading_result || submission.ai_feedback) return "Pending Faculty Review";
+    if (submission.status === "running") return "Processing";
+    return "Queued";
+  };
+
   if (loading) return <div className="assignment-page"><main className="page-content"><p>Loading assignment...</p></main></div>;
   if (error && !assignment) return <div className="assignment-page"><main className="page-content"><p>{error}</p></main></div>;
   if (!assignment) return <div className="assignment-page"><main className="page-content"><p>Assignment not found.</p></main></div>;
@@ -243,7 +250,7 @@ function StudentAssignment() {
               >
                 <div>
                   <p><strong>Submitted:</strong> {formatDate(submission.submitted_at)}</p>
-                  <p><strong>Status:</strong> {submission.status || "queued"}</p>
+                  <p><strong>Status:</strong> {getSubmissionStatus(submission)}</p>
                   <p><strong>Final Grade:</strong> {submission.faculty_reviewed ? submission.score ?? "Pending" : "Waiting for faculty review"}</p>
                 </div>
                 <button

@@ -63,12 +63,17 @@ function StudentSubmissionPage() {
     return date.toLocaleString();
   }
 
-  function getStatusClass(status) {
+  function getStatusClass(status) { 
     const normalized = (status || "").toLowerCase();
+
+    if (normalized === "graded") return "status-graded";
+    if (normalized === "pending_review") return "status-pending";
+
     if (normalized === "completed") return "status-completed";
     if (normalized === "queued") return "status-queued";
     if (normalized === "running") return "status-running";
     if (normalized === "failed") return "status-failed";
+
     return "status-default";
   }
 
@@ -130,6 +135,23 @@ function StudentSubmissionPage() {
     );
   }
 
+  const getDisplayStatus = (submission) => {
+    if (submission.faculty_reviewed) return "graded";
+    if (submission.grading_result || submission.ai_feedback) return "pending_review";
+    if (submission.status === "running") return "running";
+    return submission.status || "queued";
+  };
+
+  const displayStatus = getDisplayStatus(submission);
+
+  <div className={`status-pill ${getStatusClass(displayStatus)}`}>
+    {displayStatus === "graded"
+      ? "Graded"
+      : displayStatus === "pending_review"
+      ? "Pending Faculty Review"
+      : displayStatus}
+  </div>
+
   return (
     <div className="submission-page">
       <div className="submission-shell">
@@ -141,7 +163,13 @@ function StudentSubmissionPage() {
               <p className="eyebrow">Submission received</p>
               <h1>Assignment submitted successfully</h1>
               <p className="hero-subtext">
-                Your work has been uploaded and queued for processing.
+                {displayStatus === "graded"
+                  ? "Your submission has been graded and reviewed by your instructor."
+                  : displayStatus === "pending_review"
+                  ? "Your submission has been processed and is awaiting instructor review."
+                  : displayStatus === "running"
+                  ? "Your submission is currently being processed."
+                  : "Your work has been uploaded and queued for processing."}
               </p>
             </div>
 
