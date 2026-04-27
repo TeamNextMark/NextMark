@@ -138,9 +138,17 @@ function StudentAssignment() {
   }
 
   const getSubmissionStatus = (submission) => {
+    const hasAiResult =
+      submission.grading_result ||
+      submission.ai_feedback ||
+      submission.ai_recommended_score !== undefined ||
+      submission.score !== undefined;
+
     if (submission.faculty_reviewed) return "Graded";
-    if (submission.grading_result || submission.ai_feedback) return "Pending Faculty Review";
+    if (hasAiResult) return "Pending Faculty Review";
     if (submission.status === "running") return "Processing";
+    if (submission.status === "failed") return "Failed";
+
     return "Queued";
   };
 
