@@ -134,7 +134,7 @@ function FacultyAssignment() {
     );
 
     setFacultyComments(
-      selectedSubmissionDetails?.faculty_comments || ""
+      selectedSubmissionDetails?.instructor_comments || ""
     );
   }, [selectedSubmissionDetails]);
 
@@ -160,7 +160,7 @@ function FacultyAssignment() {
           body: JSON.stringify({
             accept_ai_grade: acceptAiGrade,
             manual_score: acceptAiGrade ? null : Number(manualScore),
-            faculty_comments: facultyComments,
+            instructor_comments: facultyComments,
           }),
         }
       );
@@ -521,11 +521,11 @@ function FacultyAssignment() {
                   : "This submission is still queued or has limited execution details available.")}
             </p>
 
-            {selectedSubmissionDetails?.faculty_comments && (
+            {selectedSubmissionDetails?.instructor_comments && (
               <div style={{ marginTop: "16px" }}>
                 <strong>Instructor Comments:</strong>
                 <p style={{ marginTop: "6px" }}>
-                  {selectedSubmissionDetails.faculty_comments}
+                  {selectedSubmissionDetails.instructor_comments}
                 </p>
               </div>
             )}

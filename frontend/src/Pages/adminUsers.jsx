@@ -82,6 +82,7 @@ function AdminUsers() {
                 <div>
                   <h2>{u.email}</h2>
                   <p>{u.name || u.full_name || "User account"}</p>
+                  <p style={{ marginTop: "4px", color: "#667085", fontSize: "0.9rem" }}>ID: {userId}</p>
 
                   <div className="adminBadgeRow">
                     {userRoles.length > 0 ? (

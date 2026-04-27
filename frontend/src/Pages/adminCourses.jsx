@@ -81,6 +81,9 @@ function AdminCourses() {
                   <div className="adminBadgeRow">
                     {course.semester && <span className="adminBadge">{course.semester}</span>}
                     {course.term && <span className="adminBadge">{course.term}</span>}
+                    {Array.isArray(course.faculty_ids) && course.faculty_ids.length > 0 && (
+                      <span className="adminBadge">Faculty: {course.faculty_ids.join(", ")}</span>
+                    )}
                   </div>
                 </div>
 

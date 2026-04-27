@@ -9,6 +9,7 @@ function EditUser() {
   const { userId } = useParams();
   const navigate = useNavigate();
 
+  const [tNumber, setTNumber] = useState("");
   const [email, setEmail] = useState("");
   const [roles, setRoles] = useState([]);
   const [error, setError] = useState("");
@@ -31,6 +32,7 @@ function EditUser() {
         if (!response.ok) throw new Error("Failed to load user");
 
         const data = await response.json();
+        setTNumber(data.id || data.id_users || "");
         setEmail(data.email || "");
         setRoles(data.roles || data.position || []);
       } catch (err) {
@@ -54,12 +56,16 @@ function EditUser() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
+          id: tNumber.trim() || null,
           email,
           roles,
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to update user");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.detail || "Failed to update user");
+      }
 
       navigate("/admin/users");
     } catch (err) {
@@ -84,6 +90,16 @@ function EditUser() {
 
       <div className="adminCard adminFormCard">
         <form onSubmit={handleSubmit} className="adminForm">
+          <div className="adminField">
+            <label>T-Number / User ID</label>
+            <input
+              className="adminInput"
+              value={tNumber}
+              onChange={(e) => setTNumber(e.target.value)}
+              placeholder="T01234567"
+            />
+          </div>
+
           <div className="adminField">
             <label>Email</label>
             <input

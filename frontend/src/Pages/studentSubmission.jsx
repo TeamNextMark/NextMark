@@ -170,9 +170,9 @@ function StudentSubmissionPage() {
               </div>
 
               <div className="info-row">
-                <span className="info-label">Score</span>
+                <span className="info-label">Final Grade</span>
                 <span className="info-value">
-                  {submission.score ?? "Pending"}
+                  {submission.faculty_reviewed ? submission.score ?? "Pending" : "Waiting for faculty review"}
                 </span>
               </div>
 
@@ -185,38 +185,56 @@ function StudentSubmissionPage() {
             </div>
 
             <div className="info-panel">
-              <h2>What happens next?</h2>
+              <h2>{submission.faculty_reviewed ? "Final Feedback" : "AI Feedback"}</h2>
 
               <div className="timeline">
                 <div className="timeline-item active">
                   <div className="timeline-dot" />
                   <div>
-                    <p className="timeline-title">Uploaded</p>
+                    <p className="timeline-title">AI / System Feedback</p>
                     <p className="timeline-text">
-                      Your file submission was received by the system.
+                      {submission.ai_feedback || "AI feedback is not available yet. Please check again after processing completes."}
                     </p>
                   </div>
                 </div>
 
-                <div className="timeline-item">
-                  <div className="timeline-dot" />
-                  <div>
-                    <p className="timeline-title">Queued for processing</p>
-                    <p className="timeline-text">
-                      The system will prepare and run your submission.
-                    </p>
-                  </div>
-                </div>
+                {submission.faculty_reviewed ? (
+                  <>
+                    <div className="timeline-item active">
+                      <div className="timeline-dot" />
+                      <div>
+                        <p className="timeline-title">Instructor Comments</p>
+                        <p className="timeline-text">
+                          {submission.instructor_comments || "No instructor comments were provided."}
+                        </p>
+                      </div>
+                    </div>
 
-                <div className="timeline-item">
-                  <div className="timeline-dot" />
-                  <div>
-                    <p className="timeline-title">Results available</p>
-                    <p className="timeline-text">
-                      You can return later to review status and feedback.
-                    </p>
+                    {Array.isArray(submission.rubric_breakdown) && submission.rubric_breakdown.length > 0 && (
+                      <div className="timeline-item active">
+                        <div className="timeline-dot" />
+                        <div>
+                          <p className="timeline-title">Rubric Breakdown</p>
+                          {submission.rubric_breakdown.map((item, index) => (
+                            <p className="timeline-text" key={`${item?.criterion || "criterion"}-${index}`}>
+                              {item?.criterion || `Criterion ${index + 1}`}: {item?.earned ?? "N/A"}/{item?.max ?? "N/A"} {item?.comment ? `- ${item.comment}` : ""}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="timeline-item">
+                    <div className="timeline-dot" />
+                    <div>
+                      <p className="timeline-title">Grade pending faculty review</p>
+                      <p className="timeline-text">
+                        Your AI feedback is visible now. Your grade will appear only after faculty review is finalized.
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

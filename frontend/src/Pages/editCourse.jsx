@@ -13,6 +13,7 @@ function EditCourse() {
   const [courseName, setCourseName] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
   const [semester, setSemester] = useState("");
+  const [facultyIds, setFacultyIds] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -32,6 +33,7 @@ function EditCourse() {
         setCourseName(data.course_name || "");
         setCourseDescription(data.course_description || "");
         setSemester(data.semester || data.term || "");
+        setFacultyIds(Array.isArray(data.faculty_ids) ? data.faculty_ids.join(", ") : "");
       } catch (err) {
         setError(err.message);
       }
@@ -57,10 +59,17 @@ function EditCourse() {
           course_name: courseName,
           course_description: courseDescription,
           semester,
+          faculty_ids: facultyIds
+            .split(",")
+            .map((id) => id.trim())
+            .filter(Boolean),
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to update class");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.detail || "Failed to update class");
+      }
 
       navigate("/admin/courses");
     } catch (err) {
@@ -120,6 +129,17 @@ function EditCourse() {
               className="adminInput"
               value={semester}
               onChange={(e) => setSemester(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="adminField">
+            <label>Faculty ID(s)</label>
+            <input
+              className="adminInput"
+              value={facultyIds}
+              onChange={(e) => setFacultyIds(e.target.value)}
+              placeholder="Faculty UUID or T-number, comma separated"
               required
             />
           </div>

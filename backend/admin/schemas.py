@@ -3,6 +3,7 @@ from typing import Optional
 
 
 class AdminUserCreate(BaseModel):
+    id: Optional[str] = None
     email: EmailStr
     password: str
     roles: list[str] = ["student"]
@@ -10,6 +11,7 @@ class AdminUserCreate(BaseModel):
 
 
 class AdminUserUpdate(BaseModel):
+    id: Optional[str] = None
     email: Optional[EmailStr] = None
     roles: Optional[list[str]] = None
     ferpa_consent: Optional[bool] = None
@@ -30,3 +32,4 @@ class AdminCourseUpdate(BaseModel):
     course_name: Optional[str] = None
     course_description: Optional[str] = None
     semester: Optional[str] = None
+    faculty_ids: Optional[list[str]] = None

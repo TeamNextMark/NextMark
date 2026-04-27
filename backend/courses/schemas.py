@@ -10,11 +10,13 @@ class CourseBase(BaseModel):
 
 
 class CourseCreate(CourseBase):
+    id: Optional[str] = None
     faculty_id: str
 
 
 class Course(CourseBase):
     id: str
+    faculty_ids: list[str] = []
 
     class Config:
         from_attributes = True

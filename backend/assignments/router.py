@@ -205,7 +205,7 @@ def list_my_submissions_for_assignment(
                 submission_id=submission.id,
                 student_id=submission.student_id,
                 submitted_at=submission.submitted_at.isoformat(),
-                score=float(grading.total_points_earned) if grading else None,
+                score=float(grading.total_points_earned) if grading and grading.faculty_reviewed else None,
                 faculty_reviewed=grading.faculty_reviewed if grading else None,
             )
         )

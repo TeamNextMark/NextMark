@@ -8,6 +8,7 @@ const API_BASE = import.meta?.env?.VITE_API_URL || "/api";
 function CreateCourse() {
   const navigate = useNavigate();
 
+  const [courseId, setCourseId] = useState("");
   const [courseCode, setCourseCode] = useState("");
   const [courseName, setCourseName] = useState("");
   const [courseDescription, setCourseDescription] = useState("");
@@ -28,6 +29,7 @@ function CreateCourse() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
+          id: courseId.trim() || null,
           course_code: courseCode,
           course_name: courseName,
           course_description: courseDescription,
@@ -36,7 +38,10 @@ function CreateCourse() {
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to create class");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.detail || "Failed to create class");
+      }
 
       navigate("/admin/courses");
     } catch (err) {
@@ -61,6 +66,17 @@ function CreateCourse() {
 
       <div className="adminCard adminFormCard">
         <form onSubmit={handleSubmit} className="adminForm">
+          <div className="adminField">
+            <label>Course ID</label>
+            <input
+              className="adminInput"
+              value={courseId}
+              onChange={(e) => setCourseId(e.target.value)}
+              placeholder="2203"
+              required
+            />
+          </div>
+
           <div className="adminField">
             <label>Course Code</label>
             <input

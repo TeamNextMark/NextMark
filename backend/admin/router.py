@@ -68,7 +68,14 @@ def create_user(
     if existing:
         raise HTTPException(status_code=400, detail="Email already exists")
 
+    clean_user_id = (payload.id or "").strip() or None
+    if clean_user_id:
+        existing_id = db.query(UsersAccount).filter(UsersAccount.id == clean_user_id).first()
+        if existing_id:
+            raise HTTPException(status_code=400, detail="T-number/User ID already exists")
+
     user = UsersAccount(
+        id=clean_user_id,
         email=payload.email,
         hashed_password=hash_password(payload.password),
         position=payload.roles,
@@ -99,7 +106,21 @@ def update_user(
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    if payload.id is not None and payload.id.strip() and payload.id.strip() != user.id:
+        new_id = payload.id.strip()
+        existing_id = db.query(UsersAccount).filter(UsersAccount.id == new_id).first()
+        if existing_id:
+            raise HTTPException(status_code=400, detail="T-number/User ID already exists")
+        user.id = new_id
+
     if payload.email is not None:
+        duplicate_email = (
+            db.query(UsersAccount)
+            .filter(UsersAccount.email == payload.email, UsersAccount.id != user.id)
+            .first()
+        )
+        if duplicate_email:
+            raise HTTPException(status_code=400, detail="Email already exists")
         user.email = payload.email
 
     if payload.roles is not None:
@@ -160,8 +181,28 @@ def update_course(
     if payload.semester is not None:
         course.semester = payload.semester
 
+    if payload.faculty_ids is not None:
+        clean_faculty_ids = [faculty_id.strip() for faculty_id in payload.faculty_ids if faculty_id and faculty_id.strip()]
+        if not clean_faculty_ids:
+            raise HTTPException(status_code=400, detail="At least one faculty ID is required")
+
+        faculty_users = (
+            db.query(UsersAccount)
+            .filter(UsersAccount.id.in_(clean_faculty_ids))
+            .all()
+        )
+        found_ids = {user.id for user in faculty_users}
+        missing_ids = [faculty_id for faculty_id in clean_faculty_ids if faculty_id not in found_ids]
+        if missing_ids:
+            raise HTTPException(status_code=404, detail=f"Faculty user(s) not found: {', '.join(missing_ids)}")
+
+        db.query(CourseFaculty).filter(CourseFaculty.course_id == course_id).delete()
+        for faculty_id in clean_faculty_ids:
+            db.add(CourseFaculty(course_id=course_id, faculty_id=faculty_id))
+
     db.commit()
     db.refresh(course)
+    course.faculty_ids = [link.faculty_id for link in course.faculty_links]
 
     return course
 
