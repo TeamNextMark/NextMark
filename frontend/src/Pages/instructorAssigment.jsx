@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 
 const API_BASE = import.meta?.env?.VITE_API_URL || "/api";
 
-function InstructorAssignment() {
+function FacultyAssignment() {
   const { assignmentId } = useParams();
 
   const [assignment, setAssignment] = useState(null);
@@ -17,7 +17,7 @@ function InstructorAssignment() {
 
   const [acceptAiGrade, setAcceptAiGrade] = useState(true);
   const [manualScore, setManualScore] = useState("");
-  const [instructorComments, setInstructorComments] = useState("");
+  const [facultyComments, setFacultyComments] = useState("");
   const [savingGrade, setSavingGrade] = useState(false);
 
   useEffect(() => {
@@ -133,7 +133,7 @@ function InstructorAssignment() {
         : ""
     );
 
-    setInstructorComments(
+    setFacultyComments(
       selectedSubmissionDetails?.instructor_comments || ""
     );
   }, [selectedSubmissionDetails]);
@@ -160,7 +160,7 @@ function InstructorAssignment() {
           body: JSON.stringify({
             accept_ai_grade: acceptAiGrade,
             manual_score: acceptAiGrade ? null : Number(manualScore),
-            instructor_comments: instructorComments,
+            instructor_comments: facultyComments,
           }),
         }
       );
@@ -618,8 +618,8 @@ function InstructorAssignment() {
                   Instructor Comments
                 </label>
                 <textarea
-                  value={instructorComments}
-                  onChange={(e) => setInstructorComments(e.target.value)}
+                  value={facultyComments}
+                  onChange={(e) => setFacultyComments(e.target.value)}
                   placeholder="Add comments for the student..."
                   style={{
                     width: "100%",
@@ -656,4 +656,4 @@ function InstructorAssignment() {
   );
 }
 
-export default InstructorAssignment;
+export default FacultyAssignment;

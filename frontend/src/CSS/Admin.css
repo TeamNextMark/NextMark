@@ -1,0 +1,332 @@
+.adminPage {
+  margin: 24px;
+  max-width: 1440px;
+}
+
+.adminHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 18px;
+  border-bottom: 3px solid #115740;
+  padding-bottom: 14px;
+  margin-bottom: 24px;
+}
+
+.adminHeaderText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.adminTitle {
+  font-size: 50px;
+  line-height: 1;
+  color: #115740;
+  margin: 0;
+}
+
+.adminSubtitle {
+  color: #6b7280;
+  font-size: 15px;
+  margin: 0;
+}
+
+.adminCard {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+  padding: 28px;
+}
+
+.adminFormCard {
+  max-width: 760px;
+}
+
+.adminForm {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.adminField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.adminField label,
+.adminFieldTitle {
+  font-weight: 800;
+  color: #115740;
+  font-size: 14px;
+}
+
+.adminInput,
+.adminTextarea,
+.adminSelect {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 15px;
+  background: #ffffff;
+  color: #111827;
+}
+
+.adminTextarea {
+  min-height: 120px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.adminInput:focus,
+.adminTextarea:focus,
+.adminSelect:focus {
+  outline: none;
+  border-color: #115740;
+  box-shadow: 0 0 0 3px rgba(17, 87, 64, 0.15);
+}
+
+.adminRoleGroup,
+.adminCheckboxGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.adminCheckboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-weight: 800;
+  color: #115740;
+  cursor: pointer;
+}
+
+.adminCheckboxLabel:hover {
+  background: #eef7f1;
+  border-color: #b7d8c6;
+}
+
+.adminCheckboxLabel input {
+  width: 16px;
+  height: 16px;
+  accent-color: #115740;
+}
+
+.adminActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.primaryBtn,
+.secondaryBtn,
+.dangerBtn,
+.primaryButton,
+.secondaryButton {
+  border-radius: 10px;
+  padding: 11px 16px;
+  font-weight: 800;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.primaryBtn,
+.primaryButton {
+  background: #115740;
+  color: #ffffff;
+  border-color: #115740;
+}
+
+.primaryBtn:hover,
+.primaryButton:hover {
+  background: #39934d;
+  border-color: #39934d;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(17, 87, 64, 0.2);
+}
+
+.secondaryBtn,
+.secondaryButton {
+  background: #f3f4f6;
+  color: #115740;
+  border-color: #d1d5db;
+}
+
+.secondaryBtn:hover,
+.secondaryButton:hover {
+  background: #e5e7eb;
+  transform: translateY(-2px);
+}
+
+.dangerBtn {
+  background: #b91c1c;
+  color: #ffffff;
+  border-color: #b91c1c;
+}
+
+.dangerBtn:hover {
+  background: #991b1b;
+  border-color: #991b1b;
+  transform: translateY(-2px);
+}
+
+.adminGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.adminListCard {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.07);
+  padding: 20px;
+  min-height: 170px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.adminListCard:hover {
+  transform: translateY(-4px);
+  transition: 0.25s ease;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+.adminListCard h2 {
+  color: #111827;
+  margin: 0 0 8px;
+  font-size: 22px;
+  overflow-wrap: anywhere;
+}
+
+.adminListCard p {
+  color: #6b7280;
+  margin: 0;
+  font-size: 14px;
+}
+
+.adminBadgeRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.adminBadge {
+  background: #eef7f1;
+  color: #115740;
+  border: 1px solid #b7d8c6;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.adminTableWrapper {
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+.adminTable {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.adminTable th {
+  background: #115740;
+  color: #ffffff;
+  text-align: left;
+  padding: 14px;
+  font-size: 14px;
+}
+
+.adminTable td {
+  padding: 14px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #111827;
+  vertical-align: middle;
+}
+
+.adminTable tr:hover {
+  background: #f9fafb;
+}
+
+.adminTable input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: #115740;
+}
+
+.errorText {
+  color: #b91c1c !important;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin: 0 0 16px;
+}
+
+.successText {
+  color: #065f46 !important;
+  background: #d1fae5;
+  border: 1px solid #a7f3d0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  margin: 0 0 16px;
+}
+
+.emptyState {
+  background: #ffffff;
+  border: 1px dashed #d1d5db;
+  border-radius: 18px;
+  padding: 28px;
+  color: #6b7280;
+  margin-top: 20px;
+}
+
+@media (max-width: 800px) {
+  .adminPage {
+    margin: 18px;
+  }
+
+  .adminHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .adminTitle {
+    font-size: 38px;
+  }
+
+  .adminActions {
+    width: 100%;
+  }
+
+  .primaryBtn,
+  .secondaryBtn,
+  .dangerBtn,
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+  }
+}

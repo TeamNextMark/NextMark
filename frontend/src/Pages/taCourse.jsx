@@ -7,7 +7,7 @@ import { getCourseImage } from "../utils/courseImages";
 
 const API_BASE = import.meta?.env?.VITE_API_URL || "/api";
 
-function FacultyCourse() {
+function TACourse() {
   const navigate = useNavigate();
   const { courseSlug } = useParams();
 
@@ -118,9 +118,6 @@ function FacultyCourse() {
 
         <div className="assignment-header">
           <h2>Assignments</h2>
-          <button className="primary-btn" onClick={goToCreateAssignment}>
-            + Create Assignment
-          </button>
         </div>
 
         <div className="assignGrid">
@@ -145,4 +142,4 @@ function FacultyCourse() {
   );
 }
 
-export default FacultyCourse;
+export default TACourse;

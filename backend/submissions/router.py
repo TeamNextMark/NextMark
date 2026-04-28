@@ -266,13 +266,18 @@ def get_submission_status(
         else {}
     )
 
-    ai_feedback = rubric_scores.get("ai_feedback")
-    ai_confidence = rubric_scores.get("ai_confidence")
-    test_results = rubric_scores.get("test_results")
-    rubric_breakdown = rubric_scores.get("rubric_breakdown")
-    instructor_comments = rubric_scores.get("instructor_comments")
-    accepted_ai_grade = rubric_scores.get("accepted_ai_grade")
-    ai_recommended_score = rubric_scores.get("ai_recommended_score")
+    show_finalized_results = is_staff or bool(grading and grading.faculty_reviewed)
+
+    # Students can see AI feedback as soon as grading completes, but scores and
+    # score-related details stay hidden until faculty finalize the review.
+    ai_feedback = rubric_scores.get("ai_feedback") if grading else None
+    ai_confidence = rubric_scores.get("ai_confidence") if is_staff else None
+    test_results = rubric_scores.get("test_results") if show_finalized_results else None
+    rubric_breakdown = rubric_scores.get("rubric_breakdown") if show_finalized_results else None
+    instructor_comments = rubric_scores.get("instructor_comments") if show_finalized_results else None
+    accepted_ai_grade = rubric_scores.get("accepted_ai_grade") if show_finalized_results else None
+    ai_recommended_score = rubric_scores.get("ai_recommended_score") if show_finalized_results else None
+    visible_score = float(grading.total_points_earned) if grading and show_finalized_results else None
 
     return SubmissionStatusResponse(
         submission_id=submission.id,
@@ -280,7 +285,7 @@ def get_submission_status(
         student_id=submission.student_id,
         submitted_at=submission.submitted_at.isoformat(),
         status=status_value,
-        score=float(grading.total_points_earned) if grading else None,
+        score=visible_score,
         faculty_reviewed=grading.faculty_reviewed if grading else None,
         exit_code=details.get("exit_code") if details else None,
         timed_out=details.get("timed_out") if details else None,

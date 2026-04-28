@@ -63,12 +63,17 @@ function StudentSubmissionPage() {
     return date.toLocaleString();
   }
 
-  function getStatusClass(status) {
+  function getStatusClass(status) { 
     const normalized = (status || "").toLowerCase();
+
+    if (normalized === "graded") return "status-graded";
+    if (normalized === "pending_review") return "status-pending";
+
     if (normalized === "completed") return "status-completed";
     if (normalized === "queued") return "status-queued";
     if (normalized === "running") return "status-running";
     if (normalized === "failed") return "status-failed";
+
     return "status-default";
   }
 
@@ -130,6 +135,23 @@ function StudentSubmissionPage() {
     );
   }
 
+  const getDisplayStatus = (submission) => {
+    if (submission.faculty_reviewed) return "graded";
+    if (submission.grading_result || submission.ai_feedback) return "pending_review";
+    if (submission.status === "running") return "running";
+    return submission.status || "queued";
+  };
+
+  const displayStatus = getDisplayStatus(submission);
+
+  <div className={`status-pill ${getStatusClass(displayStatus)}`}>
+    {displayStatus === "graded"
+      ? "Graded"
+      : displayStatus === "pending_review"
+      ? "Pending Faculty Review"
+      : displayStatus}
+  </div>
+
   return (
     <div className="submission-page">
       <div className="submission-shell">
@@ -141,7 +163,13 @@ function StudentSubmissionPage() {
               <p className="eyebrow">Submission received</p>
               <h1>Assignment submitted successfully</h1>
               <p className="hero-subtext">
-                Your work has been uploaded and queued for processing.
+                {displayStatus === "graded"
+                  ? "Your submission has been graded and reviewed by your instructor."
+                  : displayStatus === "pending_review"
+                  ? "Your submission has been processed and is awaiting instructor review."
+                  : displayStatus === "running"
+                  ? "Your submission is currently being processed."
+                  : "Your work has been uploaded and queued for processing."}
               </p>
             </div>
 
@@ -170,9 +198,9 @@ function StudentSubmissionPage() {
               </div>
 
               <div className="info-row">
-                <span className="info-label">Score</span>
+                <span className="info-label">Final Grade</span>
                 <span className="info-value">
-                  {submission.score ?? "Pending"}
+                  {submission.faculty_reviewed ? submission.score ?? "Pending" : "Waiting for faculty review"}
                 </span>
               </div>
 
@@ -185,38 +213,56 @@ function StudentSubmissionPage() {
             </div>
 
             <div className="info-panel">
-              <h2>What happens next?</h2>
+              <h2>{submission.faculty_reviewed ? "Final Feedback" : "AI Feedback"}</h2>
 
               <div className="timeline">
                 <div className="timeline-item active">
                   <div className="timeline-dot" />
                   <div>
-                    <p className="timeline-title">Uploaded</p>
+                    <p className="timeline-title">AI / System Feedback</p>
                     <p className="timeline-text">
-                      Your file submission was received by the system.
+                      {submission.ai_feedback || "AI feedback is not available yet. Please check again after processing completes."}
                     </p>
                   </div>
                 </div>
 
-                <div className="timeline-item">
-                  <div className="timeline-dot" />
-                  <div>
-                    <p className="timeline-title">Queued for processing</p>
-                    <p className="timeline-text">
-                      The system will prepare and run your submission.
-                    </p>
-                  </div>
-                </div>
+                {submission.faculty_reviewed ? (
+                  <>
+                    <div className="timeline-item active">
+                      <div className="timeline-dot" />
+                      <div>
+                        <p className="timeline-title">Instructor Comments</p>
+                        <p className="timeline-text">
+                          {submission.instructor_comments || "No instructor comments were provided."}
+                        </p>
+                      </div>
+                    </div>
 
-                <div className="timeline-item">
-                  <div className="timeline-dot" />
-                  <div>
-                    <p className="timeline-title">Results available</p>
-                    <p className="timeline-text">
-                      You can return later to review status and feedback.
-                    </p>
+                    {Array.isArray(submission.rubric_breakdown) && submission.rubric_breakdown.length > 0 && (
+                      <div className="timeline-item active">
+                        <div className="timeline-dot" />
+                        <div>
+                          <p className="timeline-title">Rubric Breakdown</p>
+                          {submission.rubric_breakdown.map((item, index) => (
+                            <p className="timeline-text" key={`${item?.criterion || "criterion"}-${index}`}>
+                              {item?.criterion || `Criterion ${index + 1}`}: {item?.earned ?? "N/A"}/{item?.max ?? "N/A"} {item?.comment ? `- ${item.comment}` : ""}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="timeline-item">
+                    <div className="timeline-dot" />
+                    <div>
+                      <p className="timeline-title">Grade pending faculty review</p>
+                      <p className="timeline-text">
+                        Your AI feedback is visible now. Your grade will appear only after faculty review is finalized.
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
           </div>

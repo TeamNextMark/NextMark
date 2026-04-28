@@ -10,10 +10,20 @@ CREATE TABLE users_account (
 
 CREATE TABLE course (
     course_id TEXT PRIMARY KEY,
-    faculty_id TEXT NOT NULL,
     course_code TEXT NOT NULL,
     semester TEXT NOT NULL,
-    CONSTRAINT fk_course_faculty
+    course_name TEXT NOT NULL,
+    course_description TEXT 
+);
+
+CREATE TABLE course_faculty (
+    course_id TEXT NOT NULL,
+    faculty_id TEXT NOT NULL,
+    PRIMARY KEY (course_id, faculty_id),
+    CONSTRAINT fk_course_faculty_course
+        FOREIGN KEY (course_id)
+        REFERENCES course(course_id),
+    CONSTRAINT fk_course_faculty_faculty
         FOREIGN KEY (faculty_id)
         REFERENCES users_account(id_users)
 );

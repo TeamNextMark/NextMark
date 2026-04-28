@@ -137,6 +137,21 @@ function StudentAssignment() {
     }
   }
 
+  const getSubmissionStatus = (submission) => {
+    const hasAiResult =
+      submission.grading_result ||
+      submission.ai_feedback ||
+      submission.ai_recommended_score !== undefined ||
+      submission.score !== undefined;
+
+    if (submission.faculty_reviewed) return "Graded";
+    if (hasAiResult) return "Pending Faculty Review";
+    if (submission.status === "running") return "Processing";
+    if (submission.status === "failed") return "Failed";
+
+    return "Queued";
+  };
+
   if (loading) return <div className="assignment-page"><main className="page-content"><p>Loading assignment...</p></main></div>;
   if (error && !assignment) return <div className="assignment-page"><main className="page-content"><p>{error}</p></main></div>;
   if (!assignment) return <div className="assignment-page"><main className="page-content"><p>Assignment not found.</p></main></div>;
@@ -226,13 +241,37 @@ function StudentAssignment() {
           </div>
         </section>
 
-        {latestSubmission && (
+        {mySubmissions.length > 0 && (
           <section className="card">
-            <h2 style={{ marginBottom: "12px" }}>Latest Submission</h2>
-            <p><strong>Submitted:</strong> {formatDate(latestSubmission.submitted_at)}</p>
-            <p><strong>Status:</strong> {latestSubmission.status || "queued"}</p>
-            <p><strong>Score:</strong> {latestSubmission.score ?? "Pending"}</p>
-            <p><strong>Faculty Reviewed:</strong> {latestSubmission.faculty_reviewed ? "Yes" : "No"}</p>
+            <h2 style={{ marginBottom: "12px" }}>Your Submissions</h2>
+            {mySubmissions.map((submission) => (
+              <div
+                key={submission.submission_id}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: "16px",
+                  alignItems: "center",
+                  padding: "12px 0",
+                  borderBottom: "1px solid #e5e7eb",
+                }}
+              >
+                <div>
+                  <p><strong>Submitted:</strong> {formatDate(submission.submitted_at)}</p>
+                  <p><strong>Status:</strong> {getSubmissionStatus(submission)}</p>
+                  <p><strong>Final Grade:</strong> {submission.faculty_reviewed ? submission.score ?? "Pending" : "Waiting for faculty review"}</p>
+                </div>
+                <button
+                  className="submit-btn"
+                  type="button"
+                  onClick={() =>
+                    navigate(`/student/course/${courseSlug}/assignment/${assignmentId}/submission/${submission.submission_id}`)
+                  }
+                >
+                  View Submission
+                </button>
+              </div>
+            ))}
           </section>
         )}
 

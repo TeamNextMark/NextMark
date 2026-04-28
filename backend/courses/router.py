@@ -16,11 +16,18 @@ def create_course(payload: schemas.CourseCreate, db: Session = Depends(get_db), 
     faculty = get_user(db, payload.faculty_id)
     if not faculty:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Faculty user not found")
+    existing_course = crud.get_course(db, payload.id) if payload.id else None
+    if existing_course:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Course ID already exists")
+
     return crud.create_course(
         db,
         course_code=payload.course_code,
         semester=payload.semester,
         faculty_id=payload.faculty_id,
+        course_name=payload.course_name,
+        course_description=payload.course_description,
+        course_id=payload.id,
     )
 
 

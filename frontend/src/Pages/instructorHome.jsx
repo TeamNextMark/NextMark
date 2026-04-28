@@ -6,7 +6,7 @@ import { assignImagesToCourses } from "../utils/courseImages";
 
 const API_BASE = import.meta?.env?.VITE_API_URL || "/api";
 
-function Home() {
+function FacultyHome({ user }) {
   const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,12 +52,21 @@ function Home() {
 
   function goToCourses(course) {
     const slug = `${course.course_code}${course.id}`;
-    navigate(`/faculty/course/${slug}`);
+    const roles = user?.roles || [];
+
+    if (roles.includes("faculty")) {
+      navigate(`/faculty/course/${slug}`);
+    } else if (roles.includes("ta")){
+      navigate(`/ta/course/${slug}`);
+    } else {
+      console.warn("Unauthorized role tried to access course:", roles);
+      navigate("/home");
+    }
   }
 
   return (
     <div className="mainContent">
-      <h1 className="pageTitle">Courses</h1>
+      <h1 className="pageTitle">My Courses</h1>
 
       {loading && <p>Loading courses...</p>}
       {!loading && error && <p>{error}</p>}
@@ -91,4 +100,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default FacultyHome;

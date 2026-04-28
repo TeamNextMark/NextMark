@@ -35,13 +35,17 @@ class UsersAccount(Base):
     ferpa_consent: bool = Column("ferpa_consent", Boolean, nullable=False, default=False)
 
     # relationships
-    courses = relationship("Course", back_populates="faculty", lazy="joined")
     enrollments = relationship("CourseEnrollment", back_populates="student")
     enrolled_courses = relationship(
         "Course",
         secondary="course_enrollment",
         back_populates="students",
         viewonly=True,
+    )
+    faculty_courses = relationship(
+        "CourseFaculty",
+        back_populates="faculty",
+        cascade="all, delete-orphan",
     )
     submissions = relationship("Submission", back_populates="student", lazy="joined")
     flags_resolved = relationship("Flag", back_populates="resolved_by_user", lazy="joined")
@@ -55,13 +59,11 @@ class Course(Base):
     __tablename__ = "course"
 
     id: str = Column("course_id", String, primary_key=True, default=gen_uuid)
-    faculty_id: str = Column("faculty_id", String, ForeignKey("users_account.id_users"), nullable=False)
     course_code: str = Column("course_code", String, nullable=False)
     semester: str = Column("semester", String, nullable=False)
     course_name = Column(Text, nullable=False)
     course_description = Column(Text, nullable=True)
 
-    faculty = relationship("UsersAccount", back_populates="courses")
     assignments = relationship("Assignment", back_populates="course")
     enrollments = relationship("CourseEnrollment", back_populates="course")
     students = relationship(
@@ -70,6 +72,21 @@ class Course(Base):
         back_populates="enrolled_courses",
         viewonly=True,
     )
+
+    faculty_links = relationship(
+        "CourseFaculty",
+        back_populates="course",
+        cascade="all, delete-orphan",
+    )
+
+class CourseFaculty(Base):
+    __tablename__ = "course_faculty"
+
+    course_id = Column(String, ForeignKey("course.course_id"), primary_key=True)
+    faculty_id = Column(String, ForeignKey("users_account.id_users"), primary_key=True)
+
+    course = relationship("Course", back_populates="faculty_links")
+    faculty = relationship("UsersAccount", back_populates="faculty_courses")    
 
 
 class CourseEnrollment(Base):
