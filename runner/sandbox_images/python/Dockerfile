@@ -2,6 +2,7 @@ ARG SANDBOX_PYTHON_BASE_IMAGE=python:3.11-alpine
 FROM ${SANDBOX_PYTHON_BASE_IMAGE}
 
 RUN addgroup -S sandbox && adduser -S sandbox -G sandbox
+RUN pip install fastapi uvicorn
 
 WORKDIR /workspace
 USER sandbox

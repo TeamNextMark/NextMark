@@ -19,6 +19,7 @@ p {
   padding: 0 20px;
   position: sticky;
   top: 0;
+  z-index: 10000;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   justify-content: space-between;
 }
@@ -48,6 +49,8 @@ p {
   display: flex;
   align-items: center;
   gap: 12px;
+  position: relative;
+  z-index: 10001;
 }
 
 .userWrapper {
@@ -83,7 +86,7 @@ p {
   box-shadow: 0 10px 24px rgba(0,0,0,0.18);
 
   overflow: hidden;
-  z-index: 2000;
+  z-index: 10002;
 }
 
 .dropdownItem {
@@ -122,19 +125,16 @@ p {
 }
 
 .arrow {
-    height: 15px;
-    width: auto;
+  height: 15px;
+  width: auto;
 }
 
 .ddDirection {
-    display: inline-block;
-    margin-left: 6px;
-    transition: transform 0.3s ease;
+  display: inline-block;
+  margin-left: 6px;
+  transition: transform 0.3s ease;
 }
 
 .ddDirection.open {
-    transform: rotate(180deg);
+  transform: rotate(180deg);
 }
-
-
-

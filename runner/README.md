@@ -11,7 +11,7 @@ The worker reads pending work from existing schema records:
 
 A submission is considered **queued** when it has no row in `grading_result`.
 
-The expected `submission.encrypted_file_paths` JSON currently includes:
+The expected `submission.file_paths` JSON currently includes:
 
 ```json
 {

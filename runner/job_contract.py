@@ -9,7 +9,7 @@ class SandboxJob(BaseModel):
     assignment_id: str
     student_id: str
     language: str = Field(pattern="^(python|cpp)$")
-    encrypted_file_paths: dict
+    file_paths: dict
     queued_at: datetime
 
 

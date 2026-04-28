@@ -1,7 +1,3 @@
-# Name: GitHub Copilot
-# Date: 2026-03-30
-# Description: Student submission endpoint that stores uploaded files and queues DB rows for runner.
-
 from __future__ import annotations
 
 import os
@@ -15,19 +11,24 @@ from sqlalchemy.orm import Session
 from backend.auth.tokens import get_current_user
 from backend.database.session import get_db
 from backend.models import Assignment, GradingResult, Submission, SystemLog, UsersAccount
-from backend.submissions.schemas import SubmissionCreateResponse, SubmissionStatusResponse
+from backend.submissions.schemas import SubmissionCreateResponse, SubmissionStatusResponse, SubmissionGradeUpdateRequest
 
 router = APIRouter(tags=["submissions"], prefix="/submissions")
 
 SUBMISSIONS_BASE_DIR = Path(os.getenv("SUBMISSIONS_BASE_DIR", "/var/lib/nextmark/submissions"))
+HOST_SUBMISSIONS_BASE_DIR = Path(
+    os.getenv("HOST_SUBMISSIONS_BASE_DIR", "/srv/nextmark/submissions")
+)
+
 MAX_FILES = int(os.getenv("SUBMISSIONS_MAX_FILES", "5"))
 MAX_FILE_SIZE_BYTES = int(os.getenv("SUBMISSIONS_MAX_FILE_SIZE_BYTES", str(5 * 1024 * 1024)))
 
 
 def _allowed_extensions(language: str) -> set[str]:
-    if language == "python":
+    lang = (language or "").lower()
+    if "python" in lang:
         return {".py"}
-    if language == "cpp":
+    if "cpp" in lang or "c++" in lang:
         return {".cpp", ".cc", ".cxx", ".hpp", ".h"}
     return set()
 
@@ -42,21 +43,35 @@ def _safe_filename(name: str) -> str:
 
 
 def _ensure_runner_entrypoint(language: str, workspace_path: Path, stored_names: list[str]) -> None:
-    if language == "python":
+    lang = (language or "").lower()
+
+    if "python" in lang:
         if "main.py" in stored_names:
             return
-        first_source = next((n for n in stored_names if Path(n).suffix.lower() == ".py"), None)
+
+        first_source = next(
+            (n for n in stored_names if Path(n).suffix.lower() == ".py"),
+            None,
+        )
+
         if not first_source:
             raise ValueError("at least one .py file is required")
+
         shutil.copyfile(workspace_path / first_source, workspace_path / "main.py")
         return
 
-    if language == "cpp":
+    if "cpp" in lang or "c++" in lang:
         if "main.cpp" in stored_names:
             return
-        first_source = next((n for n in stored_names if Path(n).suffix.lower() in {".cpp", ".cc", ".cxx"}), None)
+
+        first_source = next(
+            (n for n in stored_names if Path(n).suffix.lower() in {".cpp", ".cc", ".cxx"}),
+            None,
+        )
+
         if not first_source:
-            raise ValueError("at least one C++ source file (.cpp/.cc/.cxx) is required")
+            raise ValueError("at least one C++ source file is required")
+
         shutil.copyfile(workspace_path / first_source, workspace_path / "main.cpp")
 
 
@@ -84,11 +99,16 @@ def create_submission(
 
     if not files:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="At least one file is required")
+
     if len(files) > MAX_FILES:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Maximum {MAX_FILES} files allowed")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Maximum {MAX_FILES} files allowed",
+        )
 
     language = (assignment.code_language or "").strip().lower()
     allowed = _allowed_extensions(language)
+
     if not allowed:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -96,11 +116,24 @@ def create_submission(
         )
 
     submission_id = str(uuid.uuid4())
+
     workspace_path = (SUBMISSIONS_BASE_DIR / submission_id).resolve()
+    host_workspace_path = (HOST_SUBMISSIONS_BASE_DIR / submission_id).resolve()
+
     base_dir = SUBMISSIONS_BASE_DIR.resolve()
+    host_base_dir = HOST_SUBMISSIONS_BASE_DIR.resolve()
 
     if not str(workspace_path).startswith(str(base_dir)):
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Invalid workspace path")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Invalid workspace path",
+        )
+
+    if not str(host_workspace_path).startswith(str(host_base_dir)):
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Invalid host workspace path",
+        )
 
     workspace_path.mkdir(parents=True, exist_ok=False)
     stored_names: list[str] = []
@@ -121,6 +154,7 @@ def create_submission(
 
             destination = workspace_path / safe_name
             content = upload.file.read(MAX_FILE_SIZE_BYTES + 1)
+
             if len(content) > MAX_FILE_SIZE_BYTES:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -132,14 +166,20 @@ def create_submission(
 
             stored_names.append(safe_name)
 
+            print("DEBUG language:", language)
+            print("DEBUG stored_names:", stored_names)
+            print("DEBUG workspace_path:", workspace_path)
+            print("DEBUG host_workspace_path:", host_workspace_path)
+
         _ensure_runner_entrypoint(language, workspace_path, stored_names)
 
         submission = Submission(
             id=submission_id,
             assignment_id=assignment_id,
             student_id=student_id,
-            encrypted_file_paths={
+            file_paths={
                 "workspace_path": str(workspace_path),
+                "host_workspace_path": str(host_workspace_path),
                 "files": stored_names,
             },
         )
@@ -153,7 +193,10 @@ def create_submission(
     except Exception as exc:
         db.rollback()
         shutil.rmtree(workspace_path, ignore_errors=True)
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Submission failed: {exc}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Submission failed: {exc}",
+        )
 
     return SubmissionCreateResponse(
         submission_id=submission_id,
@@ -202,17 +245,115 @@ def get_submission_status(
 
     details = exec_log.details if exec_log and isinstance(exec_log.details, dict) else {}
 
+    file_paths = submission.file_paths if isinstance(submission.file_paths, dict) else {}
+    stored_files = file_paths.get("files", [])
+    workspace_path_str = file_paths.get("workspace_path")
+
+    code_filename = None
+    code_preview = None
+
+    if stored_files and workspace_path_str:
+        workspace_path = Path(workspace_path_str)
+        code_filename = stored_files[0]
+        code_path = workspace_path / code_filename
+
+        if code_path.exists() and code_path.is_file():
+            code_preview = code_path.read_text(encoding="utf-8", errors="replace")
+
+    rubric_scores = (
+        grading.rubric_scores
+        if grading and isinstance(grading.rubric_scores, dict)
+        else {}
+    )
+
+    show_finalized_results = is_staff or bool(grading and grading.faculty_reviewed)
+
+    # Students can see AI feedback as soon as grading completes, but scores and
+    # score-related details stay hidden until faculty finalize the review.
+    ai_feedback = rubric_scores.get("ai_feedback") if grading else None
+    ai_confidence = rubric_scores.get("ai_confidence") if is_staff else None
+    test_results = rubric_scores.get("test_results") if show_finalized_results else None
+    rubric_breakdown = rubric_scores.get("rubric_breakdown") if show_finalized_results else None
+    instructor_comments = rubric_scores.get("instructor_comments") if show_finalized_results else None
+    accepted_ai_grade = rubric_scores.get("accepted_ai_grade") if show_finalized_results else None
+    ai_recommended_score = rubric_scores.get("ai_recommended_score") if show_finalized_results else None
+    visible_score = float(grading.total_points_earned) if grading and show_finalized_results else None
+
     return SubmissionStatusResponse(
         submission_id=submission.id,
         assignment_id=submission.assignment_id,
         student_id=submission.student_id,
         submitted_at=submission.submitted_at.isoformat(),
         status=status_value,
-        score=float(grading.total_points_earned) if grading else None,
+        score=visible_score,
         faculty_reviewed=grading.faculty_reviewed if grading else None,
         exit_code=details.get("exit_code") if details else None,
         timed_out=details.get("timed_out") if details else None,
         duration_ms=details.get("duration_ms") if details else None,
         stdout=details.get("stdout") if details else None,
         stderr=details.get("stderr") if details else None,
+        code_filename=code_filename,
+        code_preview=code_preview,
+        ai_feedback=ai_feedback,
+        ai_confidence=ai_confidence,
+        test_results=test_results,
+        rubric_breakdown=rubric_breakdown,
+        instructor_comments=instructor_comments,
+        accepted_ai_grade=accepted_ai_grade,
+        ai_recommended_score=ai_recommended_score,
     )
+
+
+@router.patch("/{submission_id}/grade")
+def finalize_submission_grade(
+    submission_id: str,
+    payload: SubmissionGradeUpdateRequest,
+    db: Session = Depends(get_db),
+    claims: dict = Depends(get_current_user),
+):
+    current_user_id = claims.get("sub")
+    if not current_user_id:
+        raise HTTPException(status_code=401, detail="Missing user subject in token")
+
+    current_user = db.query(UsersAccount).filter(UsersAccount.id == current_user_id).first()
+    if not current_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    roles = set(current_user.position or [])
+    if not bool({"faculty", "admin", "ta"}.intersection(roles)):
+        raise HTTPException(status_code=403, detail="Only faculty/admin/ta can finalize grades")
+
+    grading = db.query(GradingResult).filter(GradingResult.submission_id == submission_id).first()
+    if not grading:
+        raise HTTPException(status_code=404, detail="Grading result not found")
+
+    rubric_scores = grading.rubric_scores if isinstance(grading.rubric_scores, dict) else {}
+
+    ai_recommended_score = rubric_scores.get("ai_recommended_score", float(grading.total_points_earned))
+
+    if payload.accept_ai_grade:
+        final_score = float(ai_recommended_score)
+    else:
+        if payload.manual_score is None:
+            raise HTTPException(status_code=400, detail="Manual score is required when AI score is not accepted")
+        final_score = float(payload.manual_score)
+
+    rubric_scores["ai_recommended_score"] = ai_recommended_score
+    rubric_scores["accepted_ai_grade"] = payload.accept_ai_grade
+    rubric_scores["instructor_comments"] = payload.instructor_comments or ""
+
+    grading.total_points_earned = final_score
+    grading.rubric_scores = rubric_scores
+    grading.faculty_reviewed = True
+
+    db.add(grading)
+    db.commit()
+    db.refresh(grading)
+
+    return {
+        "submission_id": submission_id,
+        "score": float(grading.total_points_earned),
+        "faculty_reviewed": grading.faculty_reviewed,
+        "accepted_ai_grade": rubric_scores.get("accepted_ai_grade"),
+        "instructor_comments": rubric_scores.get("instructor_comments"),
+    }

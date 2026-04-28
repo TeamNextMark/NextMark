@@ -1,63 +1,38 @@
-import "../CSS/Home.css"
+import "../CSS/Template.css";
+import "../CSS/Home.css";
+import { useNavigate } from "react-router-dom";
 
-function Home () {
-    return (
-        <div className="mainContent">
-            <h1 className="pageTitle">Courses - Taking</h1>
+function AdminHome() {
+  const navigate = useNavigate();
 
-            <div className="coursesGrid">
-                <div className="courseCard">
-                    <div className="courseImage">
-                        <img src="/images/course1.jpg" alt="Course 1" />
-                    </div>
+  return (
+    <div className="mainContent">
+      <h1 className="pageTitle">Admin Dashboard</h1>
 
-                    <div className="courseInfo">
-                        <h2>Class 1</h2>
-                    </div>
-                </div>
-        
-                <div className="courseCard">
-                    <div className="courseImage">
-                        <img src="/images/course2.jpg" alt="Course 2" />
-                    </div>
+      <div className="coursesGrid">
+        <button className="courseCard" onClick={() => navigate("/admin/users")}>
+          <div className="courseInfo">
+            <h2>Manage Users</h2>
+            <p>Create, edit, and remove users.</p>
+          </div>
+        </button>
 
-                    <div className="courseInfo">
-                        <h2>Class 2</h2>
-                    </div>
-                </div>
+        <button className="courseCard" onClick={() => navigate("/admin/courses")}>
+          <div className="courseInfo">
+            <h2>Manage Classes</h2>
+            <p>Create, edit, and remove classes.</p>
+          </div>
+        </button>
 
-                <div className="courseCard">
-                    <div className="courseImage">
-                        <img src="/images/course3.jpg" alt="Course 3" />
-                    </div>
-
-                    <div className="courseInfo">
-                        <h2>Class 3</h2>
-                    </div>
-                </div>
-
-                <div className="courseCard">
-                    <div className="courseImage">
-                        <img src="/images/course3.jpg" alt="Course 3" />
-                    </div>
-
-                    <div className="courseInfo">
-                        <h2>Class 4</h2>
-                    </div>
-                </div>
-
-                <div className="courseCard">
-                    <div className="courseImage">
-                        <img src="/images/course3.jpg" alt="Course 3" />
-                    </div>
-
-                    <div className="courseInfo">
-                        <h2>Class 5</h2>
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
+        <button className="courseCard" onClick={() => navigate("/admin/courses/enrollment")}>
+          <div className="courseInfo">
+            <h2>Class Enrollment</h2>
+            <p>Enroll or remove students from classes.</p>
+          </div>
+        </button>
+      </div>
+    </div>
+  );
 }
 
-export default Home
+export default AdminHome;

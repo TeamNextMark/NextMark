@@ -22,6 +22,11 @@ function Header({ user, setUser }) {
     navigate("/", { replace: true });
   }
 
+  function goTo(path) {
+    setOpen(false);
+    navigate(path);
+  }
+
   useEffect(() => {
     function handleClickOutside(e) {
       if (userRef.current && !userRef.current.contains(e.target)) {
@@ -33,18 +38,24 @@ function Header({ user, setUser }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const roles = user?.roles || user?.position || [];
+
+  const isAdmin = roles.includes("admin");
+  const isFaculty = roles.includes("faculty");
+  const isTA = roles.includes("ta");
+  const isStudent = roles.includes("student");
+
   const getHomeRoute = () => {
-    if (!user?.roles) return "/";
-    if (user.roles.includes("faculty")) return "/home/faculty";
-    if (user.roles.includes("admin")) return "/home/admin";
-    if (user.roles.includes("ta")) return "/home/ta";
+    if (!user) return "/";
+    if (isAdmin) return "/home/admin";
+    if (isFaculty) return "/home/faculty";
+    if (isTA) return "/home/student";
     return "/home/student";
   };
 
-  const canGoAdmin = user?.roles?.includes("admin");
-  const canGoInstructor = user?.roles?.includes("faculty");
-  const canGoTA = user?.roles?.includes("ta");
-  const canGoStudent = user?.roles?.includes("student");
+  const canGoAdmin = isAdmin;
+  const canGoFaculty = isFaculty || isTA || isAdmin;
+  const canGoStudent = isStudent || isTA;
 
   const subtitle = useMemo(() => {
     const path = location.pathname;
@@ -57,7 +68,7 @@ function Header({ user, setUser }) {
       return "Arkansas Tech University";
     }
 
-    const courseMatch = path.match(/^\/(student|faculty)\/course\/([^/]+)/);
+    const courseMatch = path.match(/^\/(student|faculty|ta)\/course\/([^/]+)/);
 
     if (courseMatch) {
       const courseSlug = courseMatch[2];
@@ -84,7 +95,7 @@ function Header({ user, setUser }) {
         <img className="headerLogo" src={logo} alt="NM logo" />
 
         <div className="textBlock">
-          <p className="appName">NextMark</p>
+          <p className="appName">NextMark AI</p>
           <p className="courseName">{subtitle}</p>
         </div>
       </div>
@@ -99,7 +110,7 @@ function Header({ user, setUser }) {
               aria-expanded={open}
               type="button"
             >
-              {user.name || user.email}{" "}
+              {user.name || user.email}
               <span className={`ddDirection ${open ? "open" : ""}`}>
                 <img className="arrow" src={arrow} alt="dropdown arrow" />
               </span>
@@ -107,40 +118,30 @@ function Header({ user, setUser }) {
 
             {open && (
               <div className="userDropdown" role="menu">
-                {canGoAdmin && (
+                {canGoAdmin && !location.pathname.startsWith("/home/admin") && (
                   <button
                     className="dropdownItem"
-                    onClick={() => navigate("/home/admin")}
+                    onClick={() => goTo("/home/admin")}
                     type="button"
                   >
                     Admin Homepage
                   </button>
                 )}
 
-                {canGoInstructor && (
+                {canGoFaculty && !location.pathname.startsWith("/home/faculty") && (
                   <button
                     className="dropdownItem"
-                    onClick={() => navigate("/home/faculty")}
+                    onClick={() => goTo("/home/faculty")}
                     type="button"
                   >
                     Instructor Homepage
                   </button>
                 )}
 
-                {canGoTA && (
+                {canGoStudent && !location.pathname.startsWith("/home/student") && (
                   <button
                     className="dropdownItem"
-                    onClick={() => navigate("/home/ta")}
-                    type="button"
-                  >
-                    TA Homepage
-                  </button>
-                )}
-
-                {canGoStudent && (
-                  <button
-                    className="dropdownItem"
-                    onClick={() => navigate("/home/student")}
+                    onClick={() => goTo("/home/student")}
                     type="button"
                   >
                     Student Homepage

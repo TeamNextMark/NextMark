@@ -17,8 +17,15 @@ def signup(payload: UserCreate, db: Session = Depends(get_db)):
     if get_user_by_email(db, payload.email):
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already registered")
     hashed = hash_password(payload.password)
-    user = create_user(db, email=payload.email, hashed_password=hashed, position=payload.position)
-    token = create_access_token({"sub": str(user.id)})
+    user = create_user(db, email=payload.email, hashed_password=hashed, position=["student"])
+    roles = user.position or []
+    if isinstance(roles, str):
+        roles = [roles]
+
+    token = create_access_token({
+        "sub": str(user.id),
+        "roles": roles,
+    })
     return LoginResponse(
         access_token=token,
         token_type="bearer",
@@ -53,8 +60,15 @@ def login(payload: UserLogin, db: Session = Depends(get_db)):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    token = create_access_token({"sub": str(user.id)})
+    roles = user.position or []
+    if isinstance(roles, str):
+        roles = [roles]
 
+    token = create_access_token({
+        "sub": str(user.id),
+        "roles": roles,
+    })
+    
     return LoginResponse(
         access_token=token,
         token_type="bearer",

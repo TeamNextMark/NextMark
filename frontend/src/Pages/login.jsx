@@ -50,28 +50,26 @@ function Login({ setUser }) {
       localStorage.setItem("tokenType", data.token_type || "bearer");
 
       const rawRoles = data?.user?.roles || [];
-      const firstRole = Array.isArray(rawRoles) ? rawRoles[0] : rawRoles;
-
-      let appRole = "student";
-
-      if (firstRole === "faculty") appRole = "faculty";
-      else if (firstRole === "admin") appRole = "admin";
-      else if (firstRole === "ta") appRole = "ta";
-      else if (firstRole === "student") appRole = "student";
+      const roles = Array.isArray(rawRoles) ? rawRoles : [rawRoles];
 
       const userObj = {
         id: data?.user?.id,
         email: data?.user?.email || cleanEmail,
-        roles: [appRole],
+        roles,
       };
 
       localStorage.setItem("user", JSON.stringify(userObj));
       setUser?.(userObj);
 
-      if (appRole === "admin") navigate("/home/admin", { replace: true });
-      else if (appRole === "faculty") navigate("/home/faculty", { replace: true });
-      else if (appRole === "ta") navigate("/home/ta", { replace: true });
-      else navigate("/home/student", { replace: true });
+      if (roles.includes("admin")) {
+        navigate("/home/admin", { replace: true });
+      } else if (roles.includes("faculty")) {
+        navigate("/home/faculty", { replace: true });
+      } else if (roles.includes("ta")) {
+        navigate("/home/student", { replace: true });
+      } else {
+        navigate("/home/student", { replace: true });
+      }
 
     } catch (err) {
       alert(err?.message || "Login failed.");
