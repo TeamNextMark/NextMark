@@ -50,6 +50,7 @@ CREATE TABLE assignment (
     rubric_version_id TEXT NOT NULL,
     code_language TEXT NOT NULL,
     due_date DATE NOT NULL,
+    due_time TIME NOT NULL,
     assignment_name TEXT NOT NULL DEFAULT 'Untitled Assignment',
     assignment_description TEXT NULL,
     max_files INTEGER NOT NULL DEFAULT 1,

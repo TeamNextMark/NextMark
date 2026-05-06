@@ -7,6 +7,7 @@ from sqlalchemy import (
     Integer,
     Boolean,
     Date,
+    Time,
     ForeignKey,
     ARRAY,
     Numeric,
@@ -146,6 +147,7 @@ class Assignment(Base):
     rubric_version_id: str = Column("rubric_version_id", String, ForeignKey("assignment_rubric.rubric_version_id"), nullable=False)
     code_language: str = Column("code_language", String, nullable=False)
     due_date: Date = Column("due_date", Date, nullable=False)
+    due_time = Column("due_time", Time, nullable=False)
     assignment_name = Column(Text, nullable=False)
     assignment_description = Column(Text, nullable=True)
     max_files = Column(Integer, nullable=False, default=1)

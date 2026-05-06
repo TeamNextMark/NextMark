@@ -205,7 +205,7 @@ export default function App() {
         <Route
           path="/faculty/course/:courseSlug/create-assignment"
           element={
-            <ProtectedRoute user={user} allowedRoles={["faculty"]}>
+            <ProtectedRoute user={user} allowedRoles={["faculty", "admin"]}>
               <CreateAssignment user={user} />
             </ProtectedRoute>
           }

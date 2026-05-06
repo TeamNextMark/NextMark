@@ -18,6 +18,12 @@ function StudentCourse() {
 
   const courseId = courseSlug.replace(/^[a-zA-Z]+/, "");
 
+  function formatDueDisplay(assignment) {
+    const dueDate = assignment?.due_date || "";
+    const dueTime = assignment?.due_time || "";
+    return dueDate && dueTime ? `${dueDate} ${dueTime}` : dueDate || dueTime || "N/A";
+  }
+
   useEffect(() => {
     async function fetchData() {
       try {
@@ -121,7 +127,7 @@ function StudentCourse() {
                 onClick={() => goToAssignment(assignment.id)}
               >
                 <strong>{assignment.assignment_name}</strong>
-                <div>Due: {assignment.due_date}</div>
+                <div>Due: {formatDueDisplay(assignment)}</div>
                 <div>Language: {assignment.code_language}</div>
               </button>
             ))

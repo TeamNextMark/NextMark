@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional
-from datetime import date
+from datetime import date, time
 
 
 class RubricCriterionCreate(BaseModel):
@@ -15,6 +15,7 @@ class AssignmentCreate(BaseModel):
     assignment_description: Optional[str] = None
     code_language: str
     due_date: date
+    due_time: time
     max_files: int = Field(default=1, ge=1)
     rubric_items: list[RubricCriterionCreate]
 
@@ -40,6 +41,7 @@ class AssignmentBase(BaseModel):
     rubric_version_id: str
     code_language: str
     due_date: date
+    due_time: time
     assignment_name: str
     assignment_description: Optional[str] = None
     max_files: int
@@ -63,6 +65,7 @@ class AssignmentListItem(BaseModel):
     assignment_description: Optional[str] = None
     code_language: str
     due_date: date
+    due_time: time
     max_files: int
     max_score: Optional[int] = None
 

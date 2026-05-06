@@ -97,6 +97,7 @@ function CreateAssignment() {
       assignment_description: form.assignment_description.trim(),
       code_language: form.code_language,
       due_date: form.due_date,
+      due_time: form.due_time,
       max_files: Number(form.max_files),
       rubric_items: cleanedRubric,
     };

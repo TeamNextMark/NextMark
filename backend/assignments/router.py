@@ -18,6 +18,32 @@ from backend.assignments import schemas
 router = APIRouter(prefix="/assignments", tags=["assignments"])
 
 
+def _user_can_access_course(db: Session, course_id: str, current_user: dict) -> bool:
+    roles = current_user.get("roles", []) or current_user.get("position", []) or []
+    if "admin" in roles:
+        return True
+
+    user_id = current_user.get("sub")
+    if not user_id:
+        return False
+
+    if db.query(CourseFaculty).filter(
+        CourseFaculty.course_id == course_id,
+        CourseFaculty.faculty_id == user_id,
+    ).first():
+        return True
+
+    if "student" in roles:
+        return bool(
+            db.query(CourseEnrollment).filter(
+                CourseEnrollment.course_id == course_id,
+                CourseEnrollment.student_id == user_id,
+            ).first()
+        )
+
+    return False
+
+
 @router.post("", response_model=schemas.AssignmentBase, status_code=status.HTTP_201_CREATED)
 def create_assignment(
     payload: schemas.AssignmentCreate,
@@ -34,8 +60,17 @@ def create_assignment(
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
-    if "admin" not in roles and CourseFaculty.faculty_id != user_id:
-        raise HTTPException(status_code=403, detail="You can only create assignments for your own courses")
+    if "admin" not in roles:
+        course_faculty = (
+            db.query(CourseFaculty)
+            .filter(
+                CourseFaculty.course_id == payload.course_id,
+                CourseFaculty.faculty_id == user_id,
+            )
+            .first()
+        )
+        if not course_faculty:
+            raise HTTPException(status_code=403, detail="You can only create assignments for your own courses")
 
     rubric_items = [
         {
@@ -71,6 +106,7 @@ def create_assignment(
             rubric_version_id=assignment_rubric.id,
             code_language=payload.code_language,
             due_date=payload.due_date,
+            due_time=payload.due_time,
             assignment_name=payload.assignment_name.strip(),
             assignment_description=(payload.assignment_description or "").strip() or None,
             max_files=payload.max_files,
@@ -90,11 +126,14 @@ def create_assignment(
 def list_assignments_for_course(
     course_id: str,
     db: Session = Depends(get_db),
-    _: dict = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
 ):
     course = db.query(Course).filter(Course.id == course_id).first()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
+
+    if not _user_can_access_course(db, course_id, current_user):
+        raise HTTPException(status_code=403, detail="Not allowed to view this course")
 
     assignments = (
         db.query(Assignment)
@@ -109,7 +148,7 @@ def list_assignments_for_course(
 def get_assignment(
     assignment_id: str,
     db: Session = Depends(get_db),
-    _: dict = Depends(get_current_user),
+    current_user: dict = Depends(get_current_user),
 ):
     assignment = (
         db.query(Assignment)
@@ -118,6 +157,9 @@ def get_assignment(
     )
     if not assignment:
         raise HTTPException(status_code=404, detail="Assignment not found")
+
+    if not _user_can_access_course(db, assignment.course_id, current_user):
+        raise HTTPException(status_code=403, detail="Not allowed to view this assignment")
 
     rubric_items = []
     if assignment.rubric and assignment.rubric.template:
@@ -132,7 +174,8 @@ def get_assignment(
         course_id=assignment.course_id,
         rubric_version_id=assignment.rubric_version_id,
         code_language=assignment.code_language,
-        due_date=assignment.due_date.isoformat(),
+        due_date=assignment.due_date,
+        due_time=assignment.due_time,
         assignment_name=assignment.assignment_name,
         assignment_description=assignment.assignment_description,
         max_files=assignment.max_files,

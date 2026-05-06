@@ -60,6 +60,12 @@ function StudentAssignment() {
     return date.toLocaleString();
   }
 
+  function formatDueDisplay(dateValue, timeValue) {
+    const dueDate = dateValue || "";
+    const dueTime = timeValue || "";
+    return dueDate && dueTime ? `${dueDate} ${dueTime}` : dueDate || dueTime || "N/A";
+  }
+
   function getAcceptedTypes(language) {
     const lang = (language || "").toLowerCase();
     if (lang.includes("python")) return ".py";
@@ -166,7 +172,7 @@ function StudentAssignment() {
 
               <div className="assignment-meta">
                 <span className="due-label">Due:</span>
-                <span className="due-date">{formatDate(assignment.due_date)}</span>
+                <span className="due-date">{formatDueDisplay(assignment.due_date, assignment.due_time)}</span>
                 <span className="meta-divider">|</span>
                 <span>Language: {assignment.code_language}</span>
                 <span className="meta-divider">|</span>
